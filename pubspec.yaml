@@ -1,0 +1,39 @@
+name: lockleaf
+description: "A zero-knowledge password manager engineered for privacy, security, and simplicity."
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.19.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Cryptographic primitives (Argon2id, XChaCha20-Poly1305, AES-GCM, HKDF)
+  cryptography: ^2.7.0
+
+  # Hardware-backed key storage (Android Keystore / iOS Keychain)
+  flutter_secure_storage: ^9.0.0
+
+  # Local relational database
+  sqflite: ^2.3.3+1
+  path: ^1.9.0
+
+  # Biometric authentication
+  local_auth: ^2.2.0
+
+  # Cryptographically unique entity IDs
+  uuid: ^4.3.3
+
+  # Value equality
+  equatable: ^2.0.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.2
+
+flutter:
+  uses-material-design: true
