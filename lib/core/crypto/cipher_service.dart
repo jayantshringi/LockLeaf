@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:cryptography/cryptography.dart';
 import 'package:lockleaf/core/constants/security_constants.dart';
 import 'package:lockleaf/core/crypto/cipher_algorithm.dart';
 import 'package:lockleaf/core/crypto/encrypted_payload.dart';
@@ -44,6 +47,37 @@ class CipherService {
     } catch (error) {
       throw CryptoException(
         'AEAD encryption failed.',
+        error.runtimeType.toString(),
+      );
+    }
+  }
+
+  /// Decrypts and authenticates an [EncryptedPayload] using [key].
+  ///
+  /// Throws a [CryptoException] if the MAC tag fails verification, the wrong
+  /// key is provided, or [associatedData] does not match encryption time.
+  Future<Uint8List> decryptBytes({
+    required EncryptedPayload payload,
+    required ManagedSecretKey key,
+    List<int>? associatedData,
+  }) async {
+    _validateKey(key);
+
+    final cipher = payload.algorithm.createCipher();
+    try {
+      final clearBytes = await cipher.decrypt(
+        payload.toSecretBox(),
+        secretKey: key.secretKey,
+        aad: associatedData ?? const <int>[],
+      );
+      return Uint8List.fromList(clearBytes);
+    } on SecretBoxAuthenticationError {
+      throw const CryptoException(
+        'Authentication failed: ciphertext, key, or AAD is invalid.',
+      );
+    } catch (error) {
+      throw CryptoException(
+        'AEAD decryption failed.',
         error.runtimeType.toString(),
       );
     }
