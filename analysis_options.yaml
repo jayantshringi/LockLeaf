@@ -1,0 +1,29 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+  errors:
+    avoid_print: error
+    missing_required_param: error
+    missing_return: error
+
+linter:
+  rules:
+    - avoid_print
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    - unawaited_futures
+    - close_sinks
+    - cancel_subscriptions
+    - use_build_context_synchronously
+    - avoid_empty_else
+    - avoid_relative_lib_imports
+    - avoid_types_as_parameter_names
+    - always_declare_return_types
+    - prefer_final_locals
+    - prefer_final_in_for_each
+    - unreferenced_package_entry_points
