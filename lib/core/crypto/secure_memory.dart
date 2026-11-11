@@ -10,4 +10,16 @@ abstract class SecureMemory {
     }
     buffer.fillRange(0, buffer.length, 0);
   }
+
+  /// Compares two equal-length byte lists in constant time to avoid timing leaks.
+  static bool constantTimeEquals(List<int> a, List<int> b) {
+    if (a.length != b.length) {
+      return false;
+    }
+    var diff = 0;
+    for (var i = 0; i < a.length; i++) {
+      diff |= (a[i] ^ b[i]) & 0xff;
+    }
+    return diff == 0;
+  }
 }
