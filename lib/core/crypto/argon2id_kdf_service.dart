@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:lockleaf/core/constants/security_constants.dart';
 import 'package:lockleaf/core/crypto/kdf_params.dart';
 import 'package:lockleaf/core/crypto/managed_secret_key.dart';
 import 'package:lockleaf/core/crypto/secure_memory.dart';
 import 'package:lockleaf/core/errors/app_exception.dart';
 
-/// Derives cryptographic master keys from user passphrases using Argon2id.
+/// Derives cryptographic master keys and domain-separated subkeys.
 class Argon2idKdfService {
   static const int _minimumSaltBytes = 16;
 
@@ -65,16 +66,7 @@ class Argon2idKdfService {
         secretKey: inputKey,
         nonce: salt,
       );
-
-      final extracted = Uint8List.fromList(await derivedKey.extractBytes());
-      try {
-        if (derivedKey is SecretKeyData) {
-          derivedKey.destroy();
-        }
-        return ManagedSecretKey.fromBytes(extracted);
-      } finally {
-        SecureMemory.wipeBytes(extracted);
-      }
+      return await _wrapAndWipeDerivedKey(derivedKey);
     } on CryptoException {
       rethrow;
     } catch (error) {
@@ -85,6 +77,61 @@ class Argon2idKdfService {
     } finally {
       SecureMemory.wipeBytes(inputBuffer);
       inputKey.destroy();
+    }
+  }
+
+  /// Derives a domain-separated subkey from [masterKey] via HKDF-SHA256.
+  ///
+  /// [context] binds the subkey to a single purpose (e.g., vault encryption
+  /// vs backup wrapping) so compromising one domain never exposes another.
+  Future<ManagedSecretKey> deriveSubkey({
+    required ManagedSecretKey masterKey,
+    required String context,
+    List<int> salt = const <int>[],
+    int outputLength = SecurityConstants.derivedKeyLengthBytes,
+  }) async {
+    if (masterKey.isDestroyed) {
+      throw const CryptoException('Cannot derive subkey from destroyed key.');
+    }
+    if (context.isEmpty) {
+      throw const CryptoException('HKDF context label cannot be empty.');
+    }
+    if (outputLength < 16 || outputLength > 64) {
+      throw const CryptoException(
+        'Subkey length must be between 16 and 64 bytes.',
+      );
+    }
+
+    try {
+      final hkdf = Hkdf(
+        hmac: Hmac.sha256(),
+        outputLength: outputLength,
+      );
+      final derivedKey = await hkdf.deriveKey(
+        secretKey: masterKey.secretKey,
+        nonce: salt,
+        info: utf8.encode(context),
+      );
+      return await _wrapAndWipeDerivedKey(derivedKey);
+    } on CryptoException {
+      rethrow;
+    } catch (error) {
+      throw CryptoException(
+        'HKDF subkey derivation failed.',
+        error.runtimeType.toString(),
+      );
+    }
+  }
+
+  Future<ManagedSecretKey> _wrapAndWipeDerivedKey(SecretKey derivedKey) async {
+    final extracted = Uint8List.fromList(await derivedKey.extractBytes());
+    try {
+      if (derivedKey is SecretKeyData) {
+        derivedKey.destroy();
+      }
+      return ManagedSecretKey.fromBytes(extracted);
+    } finally {
+      SecureMemory.wipeBytes(extracted);
     }
   }
 }
