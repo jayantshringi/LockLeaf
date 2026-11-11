@@ -129,17 +129,95 @@ class VaultService {
       throw const StorageException('No initialized vault found.');
     }
 
+    final dekBytes = await _unwrapDek(
+      metadata: metadata,
+      password: masterPassword,
+    );
+    try {
+      lockVault();
+      _session = VaultSession(
+        vaultId: metadata.vaultId,
+        dek: ManagedSecretKey.fromBytes(dekBytes),
+        cipherAlgorithm: metadata.cipherAlgorithm,
+      );
+    } finally {
+      SecureMemory.wipeBytes(dekBytes);
+    }
+  }
+
+  /// Re-wraps the vault DEK under a new [newPassword] and fresh salt.
+  ///
+  /// Existing encrypted vault entries remain untouched because only the DEK
+  /// wrapper changes. Verifies [currentPassword] before rotating.
+  Future<void> changeMasterPassword({
+    required String currentPassword,
+    required String newPassword,
+    KdfParams? newKdfParams,
+  }) async {
+    if (currentPassword.isEmpty) {
+      throw const AuthenticationException('Current password cannot be empty.');
+    }
+    _validateNewPassword(newPassword);
+
+    final metadata = await _storage.getMetadata();
+    if (metadata == null) {
+      throw const StorageException('No initialized vault found.');
+    }
+
+    final dekBytes = await _unwrapDek(
+      metadata: metadata,
+      password: currentPassword,
+    );
+
+    ManagedSecretKey? newWrappingKey;
+    try {
+      final newSalt = _randomService.generateSalt();
+      final effectiveParams = newKdfParams ?? metadata.kdfParams;
+      newWrappingKey = await _deriveWrappingKey(
+        password: newPassword,
+        salt: newSalt,
+        params: effectiveParams,
+      );
+
+      final rewrappedDek = await _cipherService.encryptBytes(
+        plaintext: dekBytes,
+        key: newWrappingKey,
+        algorithm: metadata.cipherAlgorithm,
+        associatedData: utf8.encode(VaultSession.dekWrapAad(metadata.vaultId)),
+      );
+
+      final updatedMetadata = metadata.copyWith(
+        salt: newSalt,
+        kdfParams: effectiveParams,
+        wrappedDek: rewrappedDek,
+        updatedAt: DateTime.now().toUtc(),
+      );
+      await _storage.saveMetadata(updatedMetadata);
+    } finally {
+      newWrappingKey?.destroy();
+      SecureMemory.wipeBytes(dekBytes);
+    }
+  }
+
+  /// Locks the vault and immediately zeroes the in-memory DEK.
+  void lockVault() {
+    _session?.lock();
+    _session = null;
+  }
+
+  Future<Uint8List> _unwrapDek({
+    required VaultMetadata metadata,
+    required String password,
+  }) async {
     ManagedSecretKey? wrappingKey;
-    Uint8List? dekBytes;
     try {
       wrappingKey = await _deriveWrappingKey(
-        password: masterPassword,
+        password: password,
         salt: metadata.salt,
         params: metadata.kdfParams,
       );
-
       try {
-        dekBytes = await _cipherService.decryptBytes(
+        return await _cipherService.decryptBytes(
           payload: metadata.wrappedDek,
           key: wrappingKey,
           associatedData:
@@ -148,25 +226,9 @@ class VaultService {
       } on CryptoException {
         throw const AuthenticationException('Invalid master password.');
       }
-
-      lockVault();
-      _session = VaultSession(
-        vaultId: metadata.vaultId,
-        dek: ManagedSecretKey.fromBytes(dekBytes),
-        cipherAlgorithm: metadata.cipherAlgorithm,
-      );
     } finally {
       wrappingKey?.destroy();
-      if (dekBytes != null) {
-        SecureMemory.wipeBytes(dekBytes);
-      }
     }
-  }
-
-  /// Locks the vault and immediately zeroes the in-memory DEK.
-  void lockVault() {
-    _session?.lock();
-    _session = null;
   }
 
   Future<ManagedSecretKey> _deriveWrappingKey({
