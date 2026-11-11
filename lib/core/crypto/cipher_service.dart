@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
@@ -5,6 +6,7 @@ import 'package:lockleaf/core/constants/security_constants.dart';
 import 'package:lockleaf/core/crypto/cipher_algorithm.dart';
 import 'package:lockleaf/core/crypto/encrypted_payload.dart';
 import 'package:lockleaf/core/crypto/managed_secret_key.dart';
+import 'package:lockleaf/core/crypto/secure_memory.dart';
 import 'package:lockleaf/core/crypto/secure_random_service.dart';
 import 'package:lockleaf/core/errors/app_exception.dart';
 
@@ -80,6 +82,50 @@ class CipherService {
         'AEAD decryption failed.',
         error.runtimeType.toString(),
       );
+    }
+  }
+
+  /// Encrypts a UTF-8 [plaintext] string, scrubbing temporary byte buffers.
+  Future<EncryptedPayload> encryptString({
+    required String plaintext,
+    required ManagedSecretKey key,
+    VaultCipherAlgorithm algorithm = VaultCipherAlgorithm.xchacha20Poly1305,
+    String? associatedData,
+  }) async {
+    final plainBytes = Uint8List.fromList(utf8.encode(plaintext));
+    final aadBytes =
+        associatedData == null ? null : utf8.encode(associatedData);
+    try {
+      return await encryptBytes(
+        plaintext: plainBytes,
+        key: key,
+        algorithm: algorithm,
+        associatedData: aadBytes,
+      );
+    } finally {
+      SecureMemory.wipeBytes(plainBytes);
+    }
+  }
+
+  /// Decrypts an [EncryptedPayload] back into a UTF-8 string.
+  Future<String> decryptString({
+    required EncryptedPayload payload,
+    required ManagedSecretKey key,
+    String? associatedData,
+  }) async {
+    final aadBytes =
+        associatedData == null ? null : utf8.encode(associatedData);
+    final clearBytes = await decryptBytes(
+      payload: payload,
+      key: key,
+      associatedData: aadBytes,
+    );
+    try {
+      return utf8.decode(clearBytes);
+    } on FormatException {
+      throw const CryptoException('Decrypted payload is not valid UTF-8.');
+    } finally {
+      SecureMemory.wipeBytes(clearBytes);
     }
   }
 
