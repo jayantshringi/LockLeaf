@@ -5,12 +5,16 @@ import 'package:lockleaf/core/constants/security_constants.dart';
 import 'package:lockleaf/core/crypto/argon2id_kdf_service.dart';
 import 'package:lockleaf/core/crypto/cipher_algorithm.dart';
 import 'package:lockleaf/core/crypto/cipher_service.dart';
+import 'package:lockleaf/core/crypto/encrypted_payload.dart';
 import 'package:lockleaf/core/crypto/kdf_params.dart';
 import 'package:lockleaf/core/crypto/managed_secret_key.dart';
 import 'package:lockleaf/core/crypto/secure_memory.dart';
 import 'package:lockleaf/core/crypto/secure_random_service.dart';
 import 'package:lockleaf/core/errors/app_exception.dart';
 import 'package:lockleaf/features/vault/data/vault_storage_repository.dart';
+import 'package:lockleaf/features/vault/domain/encrypted_entry_record.dart';
+import 'package:lockleaf/features/vault/domain/vault_entry.dart';
+import 'package:lockleaf/features/vault/domain/vault_entry_category.dart';
 import 'package:lockleaf/features/vault/domain/vault_metadata.dart';
 import 'package:lockleaf/features/vault/domain/vault_session.dart';
 import 'package:uuid/uuid.dart';
@@ -203,6 +207,140 @@ class VaultService {
   void lockVault() {
     _session?.lock();
     _session = null;
+  }
+
+  /// Creates, encrypts, and stores a new [VaultEntry].
+  ///
+  /// Throws [VaultLockedException] if the vault is currently locked.
+  Future<VaultEntry> createEntry({
+    required String title,
+    required String username,
+    required String password,
+    String? url,
+    String? notes,
+    VaultEntryCategory category = VaultEntryCategory.login,
+    bool isFavorite = false,
+  }) async {
+    final session = _requireSession();
+    final now = DateTime.now().toUtc();
+    final entry = VaultEntry(
+      id: _uuid.v4(),
+      title: title,
+      username: username,
+      password: password,
+      url: url,
+      notes: notes,
+      category: category,
+      isFavorite: isFavorite,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    final record = await _encryptEntry(session, entry);
+    await _storage.upsertEntry(record);
+    return entry;
+  }
+
+  /// Decrypts and returns all entries stored in the unlocked vault.
+  Future<List<VaultEntry>> getAllEntries() async {
+    final session = _requireSession();
+    final records = await _storage.getAllEntries();
+    final entries = <VaultEntry>[];
+    for (final record in records) {
+      entries.add(await _decryptRecord(session, record));
+    }
+    return entries;
+  }
+
+  /// Decrypts and returns a single entry by [id], or null if not found.
+  Future<VaultEntry?> getEntryById(String id) async {
+    final session = _requireSession();
+    final record = await _storage.getEntryById(id);
+    if (record == null) {
+      return null;
+    }
+    return _decryptRecord(session, record);
+  }
+
+  /// Re-encrypts [entry] with a fresh nonce and updates local storage.
+  ///
+  /// Throws [StorageException] if no entry with `entry.id` exists.
+  Future<VaultEntry> updateEntry(VaultEntry entry) async {
+    final session = _requireSession();
+    final existing = await _storage.getEntryById(entry.id);
+    if (existing == null) {
+      throw const StorageException('Cannot update missing vault entry.');
+    }
+
+    final updated = entry.copyWith(updatedAt: DateTime.now().toUtc());
+    final record = await _encryptEntry(session, updated);
+    await _storage.upsertEntry(record);
+    return updated;
+  }
+
+  /// Deletes the entry identified by [id].
+  Future<bool> deleteEntry(String id) async {
+    _requireSession();
+    return _storage.deleteEntry(id);
+  }
+
+  VaultSession _requireSession() {
+    final session = _session;
+    if (session == null || !session.isActive) {
+      _session = null;
+      throw const VaultLockedException();
+    }
+    return session;
+  }
+
+  Future<EncryptedEntryRecord> _encryptEntry(
+    VaultSession session,
+    VaultEntry entry,
+  ) async {
+    final jsonBytes = Uint8List.fromList(utf8.encode(jsonEncode(entry.toJson())));
+    try {
+      final payload = await _cipherService.encryptBytes(
+        plaintext: jsonBytes,
+        key: session.activeKey,
+        algorithm: session.cipherAlgorithm,
+        associatedData: utf8.encode(session.entryAad(entry.id)),
+      );
+      return EncryptedEntryRecord(
+        id: entry.id,
+        encryptedBlob: payload.toBytes(),
+        createdAt: entry.createdAt,
+        updatedAt: entry.updatedAt,
+      );
+    } finally {
+      SecureMemory.wipeBytes(jsonBytes);
+    }
+  }
+
+  Future<VaultEntry> _decryptRecord(
+    VaultSession session,
+    EncryptedEntryRecord record,
+  ) async {
+    final payload = EncryptedPayload.fromBytes(record.encryptedBlob);
+    final clearBytes = await _cipherService.decryptBytes(
+      payload: payload,
+      key: session.activeKey,
+      associatedData: utf8.encode(session.entryAad(record.id)),
+    );
+    try {
+      final decoded = jsonDecode(utf8.decode(clearBytes));
+      if (decoded is! Map<String, dynamic>) {
+        throw const CryptoException('Decrypted entry is not a JSON object.');
+      }
+      final entry = VaultEntry.fromJson(decoded);
+      if (entry.id != record.id) {
+        throw const CryptoException('Entry ID mismatch in decrypted payload.');
+      }
+      return entry;
+    } on FormatException {
+      throw const CryptoException('Decrypted entry JSON is malformed.');
+    } finally {
+      SecureMemory.wipeBytes(clearBytes);
+    }
   }
 
   Future<Uint8List> _unwrapDek({
