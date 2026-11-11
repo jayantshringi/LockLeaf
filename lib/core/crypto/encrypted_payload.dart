@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
@@ -145,5 +146,22 @@ class EncryptedPayload {
       cipherText: Uint8List.fromList(bytes.sublist(nonceEnd, macStart)),
       mac: Uint8List.fromList(bytes.sublist(macStart)),
     );
+  }
+
+  /// Encodes the serialized payload as a URL-safe Base64 string.
+  String toBase64() => base64Url.encode(toBytes());
+
+  /// Decodes a Base64-encoded [EncryptedPayload] string.
+  factory EncryptedPayload.fromBase64(String encoded) {
+    final trimmed = encoded.trim();
+    if (trimmed.isEmpty) {
+      throw const CryptoException('Encoded payload string cannot be empty.');
+    }
+    try {
+      final decoded = base64Url.decode(trimmed);
+      return EncryptedPayload.fromBytes(decoded);
+    } on FormatException {
+      throw const CryptoException('Invalid Base64 encrypted payload.');
+    }
   }
 }
