@@ -108,6 +108,68 @@ class VaultEntry extends Equatable {
     );
   }
 
+  /// Serializes all entry fields into JSON for authenticated encryption.
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'title': title,
+      'username': username,
+      'password': password,
+      'url': url,
+      'notes': notes,
+      'category': category.id,
+      'isFavorite': isFavorite,
+      'createdAt': createdAt.millisecondsSinceEpoch,
+      'updatedAt': updatedAt.millisecondsSinceEpoch,
+    };
+  }
+
+  /// Parses a [VaultEntry] from decrypted JSON data.
+  factory VaultEntry.fromJson(Map<String, dynamic> json) {
+    final id = json['id'];
+    final title = json['title'];
+    final username = json['username'];
+    final password = json['password'];
+    final url = json['url'];
+    final notes = json['notes'];
+    final categoryId = json['category'];
+    final isFavorite = json['isFavorite'];
+    final createdAtMillis = json['createdAt'];
+    final updatedAtMillis = json['updatedAt'];
+
+    if (id is! String ||
+        title is! String ||
+        username is! String ||
+        password is! String ||
+        url is! String? ||
+        notes is! String? ||
+        categoryId is! String ||
+        isFavorite is! bool ||
+        createdAtMillis is! int ||
+        updatedAtMillis is! int) {
+      throw const ValidationException('Invalid vault entry JSON structure.');
+    }
+
+    return VaultEntry(
+      id: id,
+      title: title,
+      username: username,
+      password: password,
+      url: url,
+      notes: notes,
+      category: VaultEntryCategory.fromId(categoryId),
+      isFavorite: isFavorite,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(
+        createdAtMillis,
+        isUtc: true,
+      ),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(
+        updatedAtMillis,
+        isUtc: true,
+      ),
+    );
+  }
+
   /// Redacted string representation preventing accidental credential logging.
   @override
   String toString() =>
