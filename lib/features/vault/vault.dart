@@ -1,0 +1,10 @@
+export 'package:lockleaf/features/vault/data/sqlite_vault_storage.dart';
+export 'package:lockleaf/features/vault/data/vault_database_opener.dart';
+export 'package:lockleaf/features/vault/data/vault_database_schema.dart';
+export 'package:lockleaf/features/vault/data/vault_storage_repository.dart';
+export 'package:lockleaf/features/vault/domain/encrypted_entry_record.dart';
+export 'package:lockleaf/features/vault/domain/vault_entry.dart';
+export 'package:lockleaf/features/vault/domain/vault_entry_category.dart';
+export 'package:lockleaf/features/vault/domain/vault_metadata.dart';
+export 'package:lockleaf/features/vault/domain/vault_service.dart';
+export 'package:lockleaf/features/vault/domain/vault_session.dart';
