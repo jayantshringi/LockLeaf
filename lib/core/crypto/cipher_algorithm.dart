@@ -69,3 +69,4 @@ enum VaultCipherAlgorithm {
     throw const CryptoException('Unsupported cipher algorithm identifier.');
   }
 }
+
