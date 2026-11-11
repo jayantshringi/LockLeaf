@@ -72,6 +72,38 @@ class KdfParams extends Equatable {
       parallelism >= 1 &&
       hashLength >= SecurityConstants.derivedKeyLengthBytes;
 
+  /// Serializes parameters for storage in vault metadata or backup headers.
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'memoryKiB': memoryKiB,
+      'iterations': iterations,
+      'parallelism': parallelism,
+      'hashLength': hashLength,
+    };
+  }
+
+  /// Parses and validates [KdfParams] from decoded JSON metadata.
+  factory KdfParams.fromJson(Map<String, dynamic> json) {
+    final memoryKiB = json['memoryKiB'];
+    final iterations = json['iterations'];
+    final parallelism = json['parallelism'];
+    final hashLength = json['hashLength'];
+
+    if (memoryKiB is! int ||
+        iterations is! int ||
+        parallelism is! int ||
+        hashLength is! int) {
+      throw const CryptoException('Invalid or incomplete KDF parameters.');
+    }
+
+    return KdfParams(
+      memoryKiB: memoryKiB,
+      iterations: iterations,
+      parallelism: parallelism,
+      hashLength: hashLength,
+    );
+  }
+
   @override
   List<Object?> get props => [
         memoryKiB,
