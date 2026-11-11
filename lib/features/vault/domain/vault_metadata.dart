@@ -106,6 +106,70 @@ class VaultMetadata extends Equatable {
     );
   }
 
+  /// Serializes metadata into a SQLite-compatible column map.
+  Map<String, Object?> toMap() {
+    return <String, Object?>{
+      'vault_id': vaultId,
+      'schema_version': schemaVersion,
+      'salt': salt,
+      'kdf_params_json': jsonEncode(kdfParams.toJson()),
+      'cipher_algorithm': cipherAlgorithm.id,
+      'wrapped_dek': wrappedDek.toBytes(),
+      'created_at': createdAt.millisecondsSinceEpoch,
+      'updated_at': updatedAt.millisecondsSinceEpoch,
+    };
+  }
+
+  /// Restores [VaultMetadata] from a SQLite row map.
+  factory VaultMetadata.fromMap(Map<String, Object?> map) {
+    final vaultId = map['vault_id'];
+    final schemaVersion = map['schema_version'];
+    final saltRaw = map['salt'];
+    final kdfParamsJson = map['kdf_params_json'];
+    final cipherId = map['cipher_algorithm'];
+    final wrappedDekRaw = map['wrapped_dek'];
+    final createdAtMillis = map['created_at'];
+    final updatedAtMillis = map['updated_at'];
+
+    if (vaultId is! String ||
+        schemaVersion is! int ||
+        saltRaw is! List<int> ||
+        kdfParamsJson is! String ||
+        cipherId is! String ||
+        wrappedDekRaw is! List<int> ||
+        createdAtMillis is! int ||
+        updatedAtMillis is! int) {
+      throw const StorageException('Corrupt vault metadata row in database.');
+    }
+
+    try {
+      final decodedKdf = jsonDecode(kdfParamsJson);
+      if (decodedKdf is! Map<String, dynamic>) {
+        throw const StorageException('Invalid KDF JSON in vault metadata.');
+      }
+      return VaultMetadata(
+        vaultId: vaultId,
+        schemaVersion: schemaVersion,
+        salt: saltRaw,
+        kdfParams: KdfParams.fromJson(decodedKdf),
+        cipherAlgorithm: VaultCipherAlgorithm.fromId(cipherId),
+        wrappedDek: EncryptedPayload.fromBytes(wrappedDekRaw),
+        createdAt: DateTime.fromMillisecondsSinceEpoch(
+          createdAtMillis,
+          isUtc: true,
+        ),
+        updatedAt: DateTime.fromMillisecondsSinceEpoch(
+          updatedAtMillis,
+          isUtc: true,
+        ),
+      );
+    } on AppException {
+      rethrow;
+    } on FormatException {
+      throw const StorageException('Malformed KDF JSON in vault metadata.');
+    }
+  }
+
   @override
   String toString() =>
       'VaultMetadata(vaultId: $vaultId, schemaVersion: $schemaVersion, cipher: ${cipherAlgorithm.id})';
