@@ -35,10 +35,12 @@ class LockLeafApp extends StatefulWidget {
 }
 
 class _LockLeafAppState extends State<LockLeafApp> with WidgetsBindingObserver {
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   VaultController? _ownedController;
   SecurityController? _ownedSecurityController;
   late final VaultController _controller;
   SecurityController? _securityController;
+  AuthFlowStage? _lastStage;
 
   @override
   void initState() {
@@ -73,8 +75,24 @@ class _LockLeafAppState extends State<LockLeafApp> with WidgetsBindingObserver {
       }
     }
 
+    _lastStage = _controller.stage;
+    _controller.addListener(_onControllerChanged);
+
     if (_controller.stage == AuthFlowStage.loading) {
       unawaited(_controller.initialize());
+    }
+  }
+
+  void _onControllerChanged() {
+    final current = _controller.stage;
+    if (current == _lastStage) {
+      return;
+    }
+    _lastStage = current;
+    if (current == AuthFlowStage.locked) {
+      _navigatorKey.currentState?.popUntil(
+        (Route<dynamic> route) => route.isFirst,
+      );
     }
   }
 
@@ -86,6 +104,7 @@ class _LockLeafAppState extends State<LockLeafApp> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _controller.removeListener(_onControllerChanged);
     _ownedSecurityController?.dispose();
     _ownedController?.dispose();
     super.dispose();
@@ -141,6 +160,7 @@ class _LockLeafAppState extends State<LockLeafApp> with WidgetsBindingObserver {
       listenable: listenable,
       builder: (BuildContext context, Widget? child) {
         return MaterialApp(
+          navigatorKey: _navigatorKey,
           title: 'LockLeaf',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
