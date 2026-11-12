@@ -8,3 +8,7 @@ export 'package:lockleaf/features/vault/domain/vault_entry_category.dart';
 export 'package:lockleaf/features/vault/domain/vault_metadata.dart';
 export 'package:lockleaf/features/vault/domain/vault_service.dart';
 export 'package:lockleaf/features/vault/domain/vault_session.dart';
+export 'package:lockleaf/features/vault/presentation/screens/add_edit_entry_screen.dart';
+export 'package:lockleaf/features/vault/presentation/screens/entry_detail_screen.dart';
+export 'package:lockleaf/features/vault/presentation/screens/vault_list_screen.dart';
+export 'package:lockleaf/features/vault/presentation/widgets/vault_entry_tile.dart';
