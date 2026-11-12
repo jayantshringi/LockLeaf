@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lockleaf/core/crypto/kdf_params.dart';
 import 'package:lockleaf/core/errors/app_exception.dart';
+import 'package:lockleaf/features/vault/domain/vault_entry.dart';
+import 'package:lockleaf/features/vault/domain/vault_entry_category.dart';
 import 'package:lockleaf/features/vault/domain/vault_service.dart';
 
 /// Top-level authentication flow states driving app navigation.
@@ -28,6 +30,11 @@ class VaultController extends ChangeNotifier {
   bool _isBusy = false;
   String? _errorMessage;
 
+  List<VaultEntry> _entries = <VaultEntry>[];
+  String _searchQuery = '';
+  VaultEntryCategory? _selectedCategory;
+  bool _favoritesOnly = false;
+
   /// Creates a [VaultController] backed by [vaultService].
   VaultController({
     required VaultService vaultService,
@@ -52,6 +59,45 @@ class VaultController extends ChangeNotifier {
   /// User-safe error message from the last failed operation, if any.
   String? get errorMessage => _errorMessage;
 
+  /// Unmodifiable snapshot of decrypted entries while unlocked.
+  List<VaultEntry> get entries => List<VaultEntry>.unmodifiable(_entries);
+
+  /// Current search filter query.
+  String get searchQuery => _searchQuery;
+
+  /// Active category filter, or null when showing all categories.
+  VaultEntryCategory? get selectedCategory => _selectedCategory;
+
+  /// Whether the vault list shows favorite entries only.
+  bool get favoritesOnly => _favoritesOnly;
+
+  /// Filtered list matching category, favorites, and search query.
+  ///
+  /// Intentionally matches `title`, `username`, and `url` only, never `password`.
+  List<VaultEntry> get filteredEntries {
+    final normalizedQuery = _searchQuery.trim().toLowerCase();
+    return List<VaultEntry>.unmodifiable(
+      _entries.where((VaultEntry entry) {
+        if (_selectedCategory != null && entry.category != _selectedCategory) {
+          return false;
+        }
+        if (_favoritesOnly && !entry.isFavorite) {
+          return false;
+        }
+        if (normalizedQuery.isEmpty) {
+          return true;
+        }
+        final matchesTitle =
+            entry.title.toLowerCase().contains(normalizedQuery);
+        final matchesUser =
+            entry.username.toLowerCase().contains(normalizedQuery);
+        final matchesUrl =
+            entry.url?.toLowerCase().contains(normalizedQuery) ?? false;
+        return matchesTitle || matchesUser || matchesUrl;
+      }),
+    );
+  }
+
   /// Inspects local storage to determine onboarding vs lock screen launch.
   Future<void> initialize() async {
     _isBusy = true;
@@ -62,10 +108,11 @@ class VaultController extends ChangeNotifier {
       final initialized = await _vaultService.isVaultInitialized();
       if (!initialized) {
         _stage = AuthFlowStage.onboarding;
+      } else if (_vaultService.isUnlocked) {
+        _entries = await _vaultService.getAllEntries();
+        _stage = AuthFlowStage.unlocked;
       } else {
-        _stage = _vaultService.isUnlocked
-            ? AuthFlowStage.unlocked
-            : AuthFlowStage.locked;
+        _stage = AuthFlowStage.locked;
       }
     } on AppException catch (error) {
       _errorMessage = error.message;
@@ -83,6 +130,7 @@ class VaultController extends ChangeNotifier {
         masterPassword: masterPassword,
         kdfParams: _kdfParams,
       );
+      _entries = <VaultEntry>[];
       _stage = AuthFlowStage.unlocked;
     });
   }
@@ -91,16 +139,102 @@ class VaultController extends ChangeNotifier {
   Future<bool> unlock(String masterPassword) async {
     return _runBusyAction(() async {
       await _vaultService.unlockVault(masterPassword);
+      _entries = await _vaultService.getAllEntries();
       _stage = AuthFlowStage.unlocked;
     });
   }
 
-  /// Immediately locks the vault and zeroes in-memory keys.
+  /// Immediately locks the vault, clears in-memory entries, and zeroes keys.
   void lock() {
     _vaultService.lockVault();
+    _clearInMemoryEntries();
     _errorMessage = null;
     _stage = AuthFlowStage.locked;
     notifyListeners();
+  }
+
+  /// Reloads decrypted entries from encrypted storage.
+  Future<void> refreshEntries() async {
+    await _runBusyAction(() async {
+      _entries = await _vaultService.getAllEntries();
+    });
+  }
+
+  /// Encrypts and persists a new vault entry, returning it on success.
+  Future<VaultEntry?> addEntry({
+    required String title,
+    required String username,
+    required String password,
+    String? url,
+    String? notes,
+    VaultEntryCategory category = VaultEntryCategory.login,
+    bool isFavorite = false,
+  }) async {
+    VaultEntry? created;
+    final ok = await _runBusyAction(() async {
+      created = await _vaultService.createEntry(
+        title: title,
+        username: username,
+        password: password,
+        url: url,
+        notes: notes,
+        category: category,
+        isFavorite: isFavorite,
+      );
+      _entries = await _vaultService.getAllEntries();
+    });
+    return ok ? created : null;
+  }
+
+  /// Encrypts and updates an existing [entry], returning the updated version.
+  Future<VaultEntry?> editEntry(VaultEntry entry) async {
+    VaultEntry? updated;
+    final ok = await _runBusyAction(() async {
+      updated = await _vaultService.updateEntry(entry);
+      _entries = await _vaultService.getAllEntries();
+    });
+    return ok ? updated : null;
+  }
+
+  /// Deletes the entry with [id] and refreshes the list.
+  Future<bool> deleteEntry(String id) async {
+    var deleted = false;
+    final ok = await _runBusyAction(() async {
+      deleted = await _vaultService.deleteEntry(id);
+      _entries = await _vaultService.getAllEntries();
+    });
+    return ok && deleted;
+  }
+
+  /// Updates the real-time search query.
+  void setSearchQuery(String query) {
+    if (_searchQuery == query) {
+      return;
+    }
+    _searchQuery = query;
+    notifyListeners();
+  }
+
+  /// Sets or clears the category filter.
+  void setCategoryFilter(VaultEntryCategory? category) {
+    if (_selectedCategory == category) {
+      return;
+    }
+    _selectedCategory = category;
+    notifyListeners();
+  }
+
+  /// Toggles filtering by favorite entries only.
+  void toggleFavoritesOnly() {
+    _favoritesOnly = !_favoritesOnly;
+    notifyListeners();
+  }
+
+  void _clearInMemoryEntries() {
+    _entries = <VaultEntry>[];
+    _searchQuery = '';
+    _selectedCategory = null;
+    _favoritesOnly = false;
   }
 
   /// Toggles between dark and light theme modes.
@@ -150,6 +284,7 @@ class VaultController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _clearInMemoryEntries();
     _vaultService.lockVault();
     super.dispose();
   }
