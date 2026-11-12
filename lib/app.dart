@@ -6,49 +6,106 @@ import 'package:lockleaf/features/auth/presentation/screens/master_password_setu
 import 'package:lockleaf/features/auth/presentation/screens/onboarding_screen.dart';
 import 'package:lockleaf/features/auth/presentation/screens/unlock_screen.dart';
 import 'package:lockleaf/features/auth/presentation/vault_controller.dart';
+import 'package:lockleaf/features/security/data/biometric_auth_service.dart';
+import 'package:lockleaf/features/security/data/secure_key_storage.dart';
+import 'package:lockleaf/features/security/domain/biometric_vault_manager.dart';
+import 'package:lockleaf/features/security/presentation/security_controller.dart';
+import 'package:lockleaf/features/security/presentation/widgets/privacy_shield_overlay.dart';
 import 'package:lockleaf/features/vault/data/sqlite_vault_storage.dart';
 import 'package:lockleaf/features/vault/domain/vault_service.dart';
 import 'package:lockleaf/features/vault/presentation/screens/vault_list_screen.dart';
 
 /// Root application widget for LockLeaf.
 class LockLeafApp extends StatefulWidget {
-  /// Optional injected [VaultController] for testing or custom storage wiring.
+  /// Optional injected [VaultController] for testing or custom wiring.
   final VaultController? controller;
+
+  /// Optional injected [SecurityController] for device security policies.
+  final SecurityController? securityController;
 
   /// Creates the root [LockLeafApp].
   const LockLeafApp({
     super.key,
     this.controller,
+    this.securityController,
   });
 
   @override
   State<LockLeafApp> createState() => _LockLeafAppState();
 }
 
-class _LockLeafAppState extends State<LockLeafApp> {
+class _LockLeafAppState extends State<LockLeafApp> with WidgetsBindingObserver {
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   VaultController? _ownedController;
+  SecurityController? _ownedSecurityController;
   late final VaultController _controller;
+  SecurityController? _securityController;
+  AuthFlowStage? _lastStage;
 
   @override
   void initState() {
     super.initState();
-    final provided = widget.controller;
-    if (provided != null) {
-      _controller = provided;
+    WidgetsBinding.instance.addObserver(this);
+
+    final providedController = widget.controller;
+    if (providedController != null) {
+      _controller = providedController;
+      _securityController = widget.securityController;
     } else {
-      final created = VaultController(
-        vaultService: VaultService(storage: SqliteVaultStorage()),
-      );
-      _ownedController = created;
-      _controller = created;
+      final vaultService = VaultService(storage: SqliteVaultStorage());
+      final createdController = VaultController(vaultService: vaultService);
+      _ownedController = createdController;
+      _controller = createdController;
+
+      final providedSecurity = widget.securityController;
+      if (providedSecurity != null) {
+        _securityController = providedSecurity;
+      } else {
+        final createdSecurity = SecurityController(
+          vaultController: createdController,
+          biometricManager: BiometricVaultManager(
+            vaultService: vaultService,
+            secureStorage: FlutterKeychainStorage(),
+            biometricAuth: LocalAuthBiometricService(),
+          ),
+        );
+        _ownedSecurityController = createdSecurity;
+        _securityController = createdSecurity;
+        unawaited(createdSecurity.initialize());
+      }
     }
+
+    _lastStage = _controller.stage;
+    _controller.addListener(_onControllerChanged);
+
     if (_controller.stage == AuthFlowStage.loading) {
       unawaited(_controller.initialize());
     }
   }
 
+  void _onControllerChanged() {
+    final current = _controller.stage;
+    if (current == _lastStage) {
+      return;
+    }
+    _lastStage = current;
+    if (current == AuthFlowStage.locked) {
+      _navigatorKey.currentState?.popUntil(
+        (Route<dynamic> route) => route.isFirst,
+      );
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _securityController?.handleLifecycleState(state);
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _controller.removeListener(_onControllerChanged);
+    _ownedSecurityController?.dispose();
     _ownedController?.dispose();
     super.dispose();
   }
@@ -80,23 +137,45 @@ class _LockLeafAppState extends State<LockLeafApp> {
           },
         );
       case AuthFlowStage.locked:
-        return UnlockScreen(controller: _controller);
+        return UnlockScreen(
+          controller: _controller,
+          securityController: _securityController,
+        );
       case AuthFlowStage.unlocked:
-        return VaultListScreen(controller: _controller);
+        return VaultListScreen(
+          controller: _controller,
+          securityController: _securityController,
+        );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final security = _securityController;
+    final listenable = security == null
+        ? _controller
+        : Listenable.merge(<Listenable>[_controller, security]);
+
     return ListenableBuilder(
-      listenable: _controller,
+      listenable: listenable,
       builder: (BuildContext context, Widget? child) {
         return MaterialApp(
+          navigatorKey: _navigatorKey,
           title: 'LockLeaf',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: _controller.themeMode,
+          builder: (BuildContext context, Widget? appChild) {
+            return Listener(
+              behavior: HitTestBehavior.translucent,
+              onPointerDown: (_) => security?.recordUserActivity(),
+              child: PrivacyShieldOverlay(
+                visible: security?.isPrivacyOverlayVisible ?? false,
+                child: appChild ?? const SizedBox.shrink(),
+              ),
+            );
+          },
           home: _buildHome(),
         );
       },

@@ -56,6 +56,12 @@ class VaultService {
   /// Returns true if a vault has already been initialized in local storage.
   Future<bool> isVaultInitialized() => _storage.hasVault();
 
+  /// Returns the initialized vault identifier, or null if no vault exists.
+  Future<String?> getInitializedVaultId() async {
+    final metadata = await _storage.getMetadata();
+    return metadata?.vaultId;
+  }
+
   /// Initializes a new zero-knowledge vault protected by [masterPassword].
   ///
   /// Generates a random 256-bit DEK, wraps it with an Argon2id+HKDF wrapping key,
@@ -207,6 +213,50 @@ class VaultService {
   void lockVault() {
     _session?.lock();
     _session = null;
+  }
+
+  /// Executes [action] with a temporary copy of the active DEK bytes, wiping
+  /// the copy immediately once [action] completes.
+  Future<T> withSessionDek<T>(
+    Future<T> Function(
+      String vaultId,
+      VaultCipherAlgorithm algorithm,
+      Uint8List dekBytes,
+    ) action,
+  ) async {
+    final session = _requireSession();
+    final dekBytes = session.activeKey.copyBytes();
+    try {
+      return await action(session.vaultId, session.cipherAlgorithm, dekBytes);
+    } finally {
+      SecureMemory.wipeBytes(dekBytes);
+    }
+  }
+
+  /// Opens a vault session directly from unwrapped [dekBytes] (e.g. biometrics
+  /// or recovery key), verifying [expectedVaultId] matches metadata.
+  Future<void> unlockWithDekBytes({
+    required String expectedVaultId,
+    required List<int> dekBytes,
+  }) async {
+    if (dekBytes.length != SecurityConstants.derivedKeyLengthBytes) {
+      throw const CryptoException('Invalid DEK length for vault unlock.');
+    }
+    final metadata = await _storage.getMetadata();
+    if (metadata == null) {
+      throw const StorageException('No initialized vault found.');
+    }
+    if (metadata.vaultId != expectedVaultId) {
+      throw const AuthenticationException(
+        'Wrapped key does not belong to the active vault.',
+      );
+    }
+    lockVault();
+    _session = VaultSession(
+      vaultId: metadata.vaultId,
+      dek: ManagedSecretKey.fromBytes(dekBytes),
+      cipherAlgorithm: metadata.cipherAlgorithm,
+    );
   }
 
   /// Creates, encrypts, and stores a new [VaultEntry].

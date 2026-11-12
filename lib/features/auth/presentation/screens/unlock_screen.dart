@@ -1,17 +1,24 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:lockleaf/core/theme/app_theme.dart';
 import 'package:lockleaf/features/auth/presentation/vault_controller.dart';
 import 'package:lockleaf/features/auth/presentation/widgets/secret_text_field.dart';
+import 'package:lockleaf/features/security/presentation/security_controller.dart';
 
 /// Master password unlock screen shown whenever the vault is locked.
 class UnlockScreen extends StatefulWidget {
   /// Controller managing authentication state.
   final VaultController controller;
 
+  /// Optional controller providing biometric quick unlock.
+  final SecurityController? securityController;
+
   /// Creates an [UnlockScreen].
   const UnlockScreen({
     super.key,
     required this.controller,
+    this.securityController,
   });
 
   @override
@@ -44,13 +51,33 @@ class _UnlockScreenState extends State<UnlockScreen> {
     }
   }
 
+  Future<void> _unlockBiometrics() async {
+    final security = widget.securityController;
+    if (security == null) {
+      return;
+    }
+    final success = await security.unlockWithBiometrics();
+    if (!mounted) {
+      return;
+    }
+    if (success) {
+      _passwordController.clear();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final security = widget.securityController;
+    final listenable = security == null
+        ? widget.controller
+        : Listenable.merge(<Listenable>[widget.controller, security]);
+
     return ListenableBuilder(
-      listenable: widget.controller,
+      listenable: listenable,
       builder: (BuildContext context, Widget? child) {
         final isBusy = widget.controller.isBusy;
         final errorMessage = widget.controller.errorMessage;
+        final showBiometrics = security?.biometricEnabled ?? false;
 
         return Scaffold(
           appBar: AppBar(
@@ -147,6 +174,19 @@ class _UnlockScreenState extends State<UnlockScreen> {
                               : const Text('Unlock Vault'),
                         ),
                       ),
+                      if (showBiometrics) ...[
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 52,
+                          child: OutlinedButton.icon(
+                            key: const Key('unlock_biometric_button'),
+                            onPressed:
+                                isBusy ? null : () => unawaited(_unlockBiometrics()),
+                            icon: const Icon(Icons.fingerprint),
+                            label: const Text('Unlock with Biometrics'),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

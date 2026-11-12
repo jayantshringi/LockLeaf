@@ -1,0 +1,9 @@
+export 'package:lockleaf/features/security/data/biometric_auth_service.dart';
+export 'package:lockleaf/features/security/data/screenshot_protection_service.dart';
+export 'package:lockleaf/features/security/data/secure_key_storage.dart';
+export 'package:lockleaf/features/security/domain/auto_lock_service.dart';
+export 'package:lockleaf/features/security/domain/biometric_vault_manager.dart';
+export 'package:lockleaf/features/security/domain/secure_clipboard_service.dart';
+export 'package:lockleaf/features/security/presentation/screens/security_settings_screen.dart';
+export 'package:lockleaf/features/security/presentation/security_controller.dart';
+export 'package:lockleaf/features/security/presentation/widgets/privacy_shield_overlay.dart';

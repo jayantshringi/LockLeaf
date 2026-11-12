@@ -144,6 +144,23 @@ class VaultController extends ChangeNotifier {
     });
   }
 
+  /// Finalizes UI state after an external unlock (e.g. biometrics or recovery).
+  Future<bool> completeExternalUnlock() async {
+    return _runBusyAction(() async {
+      if (!_vaultService.isUnlocked) {
+        throw const AuthenticationException('Vault unlock did not complete.');
+      }
+      _entries = await _vaultService.getAllEntries();
+      _stage = AuthFlowStage.unlocked;
+    });
+  }
+
+  /// Displays a user-safe [message] without changing the current stage.
+  void reportError(String message) {
+    _errorMessage = message;
+    notifyListeners();
+  }
+
   /// Immediately locks the vault, clears in-memory entries, and zeroes keys.
   void lock() {
     _vaultService.lockVault();
