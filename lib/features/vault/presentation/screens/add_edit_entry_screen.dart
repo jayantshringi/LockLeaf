@@ -4,6 +4,7 @@ import 'package:lockleaf/features/auth/domain/password_strength.dart';
 import 'package:lockleaf/features/auth/presentation/vault_controller.dart';
 import 'package:lockleaf/features/auth/presentation/widgets/password_strength_meter.dart';
 import 'package:lockleaf/features/auth/presentation/widgets/secret_text_field.dart';
+import 'package:lockleaf/features/tools/presentation/screens/password_generator_screen.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry_category.dart';
 
@@ -109,6 +110,23 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
     if (saved != null) {
       Navigator.of(context).pop(saved);
     }
+  }
+
+  Future<void> _pickGeneratedPassword() async {
+    final generated = await Navigator.of(context).push<String>(
+      MaterialPageRoute<String>(
+        builder: (BuildContext context) => const PasswordGeneratorScreen(
+          returnSelection: true,
+        ),
+      ),
+    );
+    if (!mounted || generated == null || generated.isEmpty) {
+      return;
+    }
+    setState(() {
+      _passwordController.text = generated;
+      _strength = PasswordStrengthEvaluator.evaluate(generated);
+    });
   }
 
   @override
@@ -225,7 +243,16 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        key: const Key('entry_generate_password_button'),
+                        onPressed: isBusy ? null : _pickGeneratedPassword,
+                        icon: const Icon(Icons.auto_fix_high, size: 18),
+                        label: const Text('Generate Password'),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
                     PasswordStrengthMeter(result: _strength),
                     const SizedBox(height: 16),
                     TextFormField(

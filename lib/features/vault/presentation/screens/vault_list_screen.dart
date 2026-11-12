@@ -3,6 +3,7 @@ import 'package:lockleaf/core/theme/app_theme.dart';
 import 'package:lockleaf/features/auth/presentation/vault_controller.dart';
 import 'package:lockleaf/features/security/presentation/screens/security_settings_screen.dart';
 import 'package:lockleaf/features/security/presentation/security_controller.dart';
+import 'package:lockleaf/features/tools/presentation/screens/tools_hub_screen.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry_category.dart';
 import 'package:lockleaf/features/vault/presentation/screens/add_edit_entry_screen.dart';
@@ -73,6 +74,17 @@ class _VaultListScreenState extends State<VaultListScreen> {
     );
   }
 
+  Future<void> _openTools() async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => ToolsHubScreen(
+          controller: widget.controller,
+          securityController: widget.securityController,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -87,6 +99,12 @@ class _VaultListScreenState extends State<VaultListScreen> {
           appBar: AppBar(
             title: const Text('LockLeaf Vault'),
             actions: [
+              IconButton(
+                key: const Key('vault_tools_button'),
+                tooltip: 'Security tools',
+                icon: const Icon(Icons.handyman_outlined),
+                onPressed: _openTools,
+              ),
               if (widget.securityController != null)
                 IconButton(
                   key: const Key('vault_security_settings_button'),
