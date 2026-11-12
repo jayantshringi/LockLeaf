@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lockleaf/core/theme/app_theme.dart';
 import 'package:lockleaf/features/auth/presentation/vault_controller.dart';
+import 'package:lockleaf/features/security/presentation/screens/security_settings_screen.dart';
+import 'package:lockleaf/features/security/presentation/security_controller.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry_category.dart';
 import 'package:lockleaf/features/vault/presentation/screens/add_edit_entry_screen.dart';
@@ -12,10 +14,14 @@ class VaultListScreen extends StatefulWidget {
   /// Controller managing unlocked vault entries and theme.
   final VaultController controller;
 
+  /// Optional controller managing device security policies.
+  final SecurityController? securityController;
+
   /// Creates a [VaultListScreen].
   const VaultListScreen({
     super.key,
     required this.controller,
+    this.securityController,
   });
 
   @override
@@ -47,6 +53,21 @@ class _VaultListScreenState extends State<VaultListScreen> {
         builder: (BuildContext context) => EntryDetailScreen(
           controller: widget.controller,
           entry: entry,
+          securityController: widget.securityController,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openSecuritySettings() async {
+    final security = widget.securityController;
+    if (security == null) {
+      return;
+    }
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => SecuritySettingsScreen(
+          securityController: security,
         ),
       ),
     );
@@ -66,6 +87,13 @@ class _VaultListScreenState extends State<VaultListScreen> {
           appBar: AppBar(
             title: const Text('LockLeaf Vault'),
             actions: [
+              if (widget.securityController != null)
+                IconButton(
+                  key: const Key('vault_security_settings_button'),
+                  tooltip: 'Device security',
+                  icon: const Icon(Icons.security_outlined),
+                  onPressed: _openSecuritySettings,
+                ),
               IconButton(
                 key: const Key('vault_theme_toggle'),
                 tooltip: 'Toggle theme',
