@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lockleaf/core/constants/security_constants.dart';
 import 'package:lockleaf/core/theme/app_theme.dart';
 import 'package:lockleaf/features/auth/presentation/vault_controller.dart';
+import 'package:lockleaf/features/security/presentation/security_controller.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry.dart';
 import 'package:lockleaf/features/vault/presentation/screens/add_edit_entry_screen.dart';
 import 'package:lockleaf/features/vault/presentation/widgets/vault_entry_tile.dart';
@@ -14,11 +16,15 @@ class EntryDetailScreen extends StatefulWidget {
   /// Initial decrypted entry to display.
   final VaultEntry entry;
 
+  /// Optional device security controller for 30s clipboard auto-clear.
+  final SecurityController? securityController;
+
   /// Creates an [EntryDetailScreen].
   const EntryDetailScreen({
     super.key,
     required this.controller,
     required this.entry,
+    this.securityController,
   });
 
   @override
@@ -35,13 +41,26 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
     _entry = widget.entry;
   }
 
-  Future<void> _copyToClipboard(String label, String value) async {
-    await Clipboard.setData(ClipboardData(text: value));
+  Future<void> _copyToClipboard(
+    String label,
+    String value, {
+    bool isSensitive = false,
+  }) async {
+    final security = widget.securityController;
+    final String message;
+    if (isSensitive && security != null) {
+      await security.copySecret(value);
+      message = '$label copied — clears in '
+          '${SecurityConstants.clipboardClearDelaySeconds}s';
+    } else {
+      await Clipboard.setData(ClipboardData(text: value));
+      message = '$label copied to clipboard';
+    }
     if (!mounted) {
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$label copied to clipboard')),
+      SnackBar(content: Text(message)),
     );
   }
 
@@ -190,8 +209,11 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                     key: const Key('detail_copy_password_button'),
                     tooltip: 'Copy password',
                     icon: const Icon(Icons.copy_outlined),
-                    onPressed: () =>
-                        _copyToClipboard('Password', _entry.password),
+                    onPressed: () => _copyToClipboard(
+                      'Password',
+                      _entry.password,
+                      isSensitive: true,
+                    ),
                   ),
                 ],
               ),
