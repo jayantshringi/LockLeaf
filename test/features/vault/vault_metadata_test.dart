@@ -42,6 +42,32 @@ void main() {
       final parsed = VaultMetadata.fromMap(metadata.toMap());
 
       expect(parsed, equals(metadata));
+      expect(parsed.hasRecoveryKey, isFalse);
+    });
+
+    test('round-trips recovery salt and recovery wrapped DEK serialization', () {
+      final now = DateTime.utc(2026, 11, 13, 11, 0, 0);
+      final recoverySalt = randomService.generateSalt();
+      final recoveryDek = makeSyntheticWrappedDek();
+      final metadata = VaultMetadata(
+        vaultId: 'vault-uuid-recovery',
+        salt: randomService.generateSalt(),
+        kdfParams: const KdfParams.standard(),
+        cipherAlgorithm: VaultCipherAlgorithm.xchacha20Poly1305,
+        wrappedDek: makeSyntheticWrappedDek(),
+        recoverySalt: recoverySalt,
+        recoveryWrappedDek: recoveryDek,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      expect(metadata.hasRecoveryKey, isTrue);
+
+      final parsed = VaultMetadata.fromMap(metadata.toMap());
+      expect(parsed, equals(metadata));
+      expect(parsed.hasRecoveryKey, isTrue);
+      expect(parsed.recoverySalt, equals(recoverySalt));
+      expect(parsed.recoveryWrappedDek, equals(recoveryDek));
     });
 
     test('validates vaultId, schemaVersion, and salt length', () {

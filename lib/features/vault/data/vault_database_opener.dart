@@ -32,6 +32,12 @@ class VaultDatabaseOpener {
           await db.execute(VaultDatabaseSchema.createEntriesTableSql);
           await db.execute(VaultDatabaseSchema.createEntriesUpdatedAtIndexSql);
         },
+        onUpgrade: (Database db, int oldVersion, int newVersion) async {
+          if (oldVersion < 2) {
+            await db.execute(VaultDatabaseSchema.upgradeV1ToV2AddRecoverySaltSql);
+            await db.execute(VaultDatabaseSchema.upgradeV1ToV2AddRecoveryDekSql);
+          }
+        },
       );
     } on DatabaseException catch (error) {
       throw StorageException(
