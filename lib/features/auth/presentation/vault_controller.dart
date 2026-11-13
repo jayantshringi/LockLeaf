@@ -46,6 +46,9 @@ class VaultController extends ChangeNotifier {
         _kdfParams = kdfParams,
         _themeMode = initialThemeMode;
 
+  /// Underlying zero-knowledge vault service.
+  VaultService get vaultService => _vaultService;
+
   /// The most recently generated recovery key (e.g. at vault creation or reset).
   RecoveryKey? get lastGeneratedRecoveryKey => _lastGeneratedRecoveryKey;
 
