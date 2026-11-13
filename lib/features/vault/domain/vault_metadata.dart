@@ -12,8 +12,11 @@ import 'package:lockleaf/core/errors/app_exception.dart';
 /// Contains zero secrets: only the public random salt, KDF parameters,
 /// cipher identifier, and the AEAD-wrapped Data Encryption Key (DEK).
 class VaultMetadata extends Equatable {
+  /// Associated data context string bound into the recovery key DEK wrapping AEAD tag.
+  static String recoveryDekWrapAad(String vaultId) => 'lockleaf:rek:v1:$vaultId';
+
   /// Current vault metadata schema version.
-  static const int currentSchemaVersion = 1;
+  static const int currentSchemaVersion = 2;
 
   /// Stable UUID v4 identifying this vault instance (used in AAD binding).
   final String vaultId;
@@ -32,6 +35,12 @@ class VaultMetadata extends Equatable {
   /// Random 256-bit vault DEK encrypted under the master key-wrapping subkey.
   final EncryptedPayload wrappedDek;
 
+  final Uint8List? _recoverySalt;
+
+  /// Random 256-bit vault DEK encrypted under the recovery key wrapping subkey,
+  /// or null if a recovery key has not yet been provisioned.
+  final EncryptedPayload? recoveryWrappedDek;
+
   /// UTC timestamp when the vault was initialized.
   final DateTime createdAt;
 
@@ -45,9 +54,12 @@ class VaultMetadata extends Equatable {
     required this.kdfParams,
     required this.cipherAlgorithm,
     required this.wrappedDek,
+    Uint8List? recoverySalt,
+    this.recoveryWrappedDek,
     required DateTime createdAt,
     required DateTime updatedAt,
   })  : _salt = salt,
+        _recoverySalt = recoverySalt,
         createdAt = createdAt.toUtc(),
         updatedAt = updatedAt.toUtc();
 
@@ -59,6 +71,8 @@ class VaultMetadata extends Equatable {
     required KdfParams kdfParams,
     required VaultCipherAlgorithm cipherAlgorithm,
     required EncryptedPayload wrappedDek,
+    List<int>? recoverySalt,
+    EncryptedPayload? recoveryWrappedDek,
     required DateTime createdAt,
     required DateTime updatedAt,
   }) {
@@ -71,6 +85,9 @@ class VaultMetadata extends Equatable {
     if (salt.length < 16) {
       throw const ValidationException('Vault salt must be at least 16 bytes.');
     }
+    if (recoverySalt != null && recoverySalt.length < 16) {
+      throw const ValidationException('Recovery salt must be at least 16 bytes.');
+    }
     return VaultMetadata._(
       vaultId: vaultId.trim(),
       schemaVersion: schemaVersion,
@@ -78,6 +95,8 @@ class VaultMetadata extends Equatable {
       kdfParams: kdfParams,
       cipherAlgorithm: cipherAlgorithm,
       wrappedDek: wrappedDek,
+      recoverySalt: recoverySalt == null ? null : Uint8List.fromList(recoverySalt),
+      recoveryWrappedDek: recoveryWrappedDek,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -86,12 +105,22 @@ class VaultMetadata extends Equatable {
   /// Defensive copy of the KDF salt bytes.
   Uint8List get salt => Uint8List.fromList(_salt);
 
+  /// Defensive copy of the recovery KDF salt bytes, if set.
+  Uint8List? get recoverySalt =>
+      _recoverySalt == null ? null : Uint8List.fromList(_recoverySalt!);
+
+  /// Whether a recovery key has been configured for this vault.
+  bool get hasRecoveryKey => recoveryWrappedDek != null && _recoverySalt != null;
+
   /// Creates an updated copy (e.g., when rotating master password or KDF cost).
   VaultMetadata copyWith({
     List<int>? salt,
     KdfParams? kdfParams,
     VaultCipherAlgorithm? cipherAlgorithm,
     EncryptedPayload? wrappedDek,
+    List<int>? recoverySalt,
+    EncryptedPayload? recoveryWrappedDek,
+    bool clearRecoveryKey = false,
     DateTime? updatedAt,
   }) {
     return VaultMetadata(
@@ -101,6 +130,9 @@ class VaultMetadata extends Equatable {
       kdfParams: kdfParams ?? this.kdfParams,
       cipherAlgorithm: cipherAlgorithm ?? this.cipherAlgorithm,
       wrappedDek: wrappedDek ?? this.wrappedDek,
+      recoverySalt: clearRecoveryKey ? null : (recoverySalt ?? _recoverySalt),
+      recoveryWrappedDek:
+          clearRecoveryKey ? null : (recoveryWrappedDek ?? this.recoveryWrappedDek),
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -115,6 +147,8 @@ class VaultMetadata extends Equatable {
       'kdf_params_json': jsonEncode(kdfParams.toJson()),
       'cipher_algorithm': cipherAlgorithm.id,
       'wrapped_dek': wrappedDek.toBytes(),
+      'recovery_salt': recoverySalt,
+      'recovery_wrapped_dek': recoveryWrappedDek?.toBytes(),
       'created_at': createdAt.millisecondsSinceEpoch,
       'updated_at': updatedAt.millisecondsSinceEpoch,
     };
@@ -128,6 +162,8 @@ class VaultMetadata extends Equatable {
     final kdfParamsJson = map['kdf_params_json'];
     final cipherId = map['cipher_algorithm'];
     final wrappedDekRaw = map['wrapped_dek'];
+    final recoverySaltRaw = map['recovery_salt'] as List<int>?;
+    final recoveryWrappedDekRaw = map['recovery_wrapped_dek'] as List<int>?;
     final createdAtMillis = map['created_at'];
     final updatedAtMillis = map['updated_at'];
 
@@ -154,6 +190,10 @@ class VaultMetadata extends Equatable {
         kdfParams: KdfParams.fromJson(decodedKdf),
         cipherAlgorithm: VaultCipherAlgorithm.fromId(cipherId),
         wrappedDek: EncryptedPayload.fromBytes(wrappedDekRaw),
+        recoverySalt: recoverySaltRaw,
+        recoveryWrappedDek: recoveryWrappedDekRaw == null
+            ? null
+            : EncryptedPayload.fromBytes(recoveryWrappedDekRaw),
         createdAt: DateTime.fromMillisecondsSinceEpoch(
           createdAtMillis,
           isUtc: true,
@@ -172,7 +212,7 @@ class VaultMetadata extends Equatable {
 
   @override
   String toString() =>
-      'VaultMetadata(vaultId: $vaultId, schemaVersion: $schemaVersion, cipher: ${cipherAlgorithm.id})';
+      'VaultMetadata(vaultId: $vaultId, schemaVersion: $schemaVersion, cipher: ${cipherAlgorithm.id}, hasRecoveryKey: $hasRecoveryKey)';
 
   @override
   List<Object?> get props => [
@@ -182,7 +222,10 @@ class VaultMetadata extends Equatable {
         kdfParams,
         cipherAlgorithm,
         wrappedDek.toBase64(),
+        _recoverySalt == null ? null : base64Url.encode(_recoverySalt!),
+        recoveryWrappedDek?.toBase64(),
         createdAt,
         updatedAt,
       ];
+}
 }

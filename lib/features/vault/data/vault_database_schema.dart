@@ -4,7 +4,7 @@ abstract class VaultDatabaseSchema {
   static const String databaseName = 'lockleaf_vault.db';
 
   /// Current SQLite schema version.
-  static const int databaseVersion = 1;
+  static const int databaseVersion = 2;
 
   /// Table storing public KDF parameters and the wrapped vault DEK.
   static const String metadataTable = 'vault_metadata';
@@ -21,10 +21,18 @@ CREATE TABLE $metadataTable (
   kdf_params_json TEXT NOT NULL,
   cipher_algorithm TEXT NOT NULL,
   wrapped_dek BLOB NOT NULL,
+  recovery_salt BLOB,
+  recovery_wrapped_dek BLOB,
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL
 )
 ''';
+
+  /// DDL upgrade statements from version 1 to 2.
+  static const String upgradeV1ToV2AddRecoverySaltSql =
+      'ALTER TABLE $metadataTable ADD COLUMN recovery_salt BLOB;';
+  static const String upgradeV1ToV2AddRecoveryDekSql =
+      'ALTER TABLE $metadataTable ADD COLUMN recovery_wrapped_dek BLOB;';
 
   /// Creates the [entriesTable] holding opaque encrypted entry payloads.
   static const String createEntriesTableSql = '''

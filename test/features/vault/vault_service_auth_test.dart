@@ -160,5 +160,48 @@ void main() {
       expect(restored, isNotNull);
       expect(restored?.password, equals(entrySecret));
     });
+
+    test('resets master password using recovery key and retains entries', () async {
+      final initialPass = generateEphemeralInput();
+      final newPass = generateEphemeralInput();
+      final entrySecret = generateEphemeralInput(length: 16);
+
+      final recoveryKey = await vaultService.createVault(
+        masterPassword: initialPass,
+        kdfParams: fastParams,
+      );
+
+      final created = await vaultService.createEntry(
+        title: 'Recovery Target',
+        username: 'user@example.com',
+        password: entrySecret,
+      );
+
+      vaultService.lockVault();
+
+      // Reset master password using the recovery key
+      final rotatedKey = await vaultService.resetMasterPasswordWithRecoveryKey(
+        recoveryKey: recoveryKey,
+        newPassword: newPass,
+      );
+
+      expect(rotatedKey.formatted, isNotEmpty);
+      expect(vaultService.isUnlocked, isTrue);
+
+      final entryAfterReset = await vaultService.getEntryById(created.id);
+      expect(entryAfterReset?.password, equals(entrySecret));
+
+      vaultService.lockVault();
+
+      // Old password must fail
+      await expectLater(
+        vaultService.unlockVault(initialPass),
+        throwsA(isA<AuthenticationException>()),
+      );
+
+      // New password unlocks successfully
+      await vaultService.unlockVault(newPass);
+      expect(vaultService.isUnlocked, isTrue);
+    });
   });
 }

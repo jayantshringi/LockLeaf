@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lockleaf/core/theme/app_theme.dart';
 import 'package:lockleaf/features/auth/presentation/vault_controller.dart';
 import 'package:lockleaf/features/auth/presentation/widgets/secret_text_field.dart';
+import 'package:lockleaf/features/backup/presentation/screens/recovery_key_reset_screen.dart';
 import 'package:lockleaf/features/security/presentation/security_controller.dart';
 
 /// Master password unlock screen shown whenever the vault is locked.
@@ -187,6 +188,22 @@ class _UnlockScreenState extends State<UnlockScreen> {
                           ),
                         ),
                       ],
+                      const SizedBox(height: 16),
+                      TextButton(
+                        key: const Key('unlock_forgot_password_button'),
+                        onPressed: isBusy
+                            ? null
+                            : () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => RecoveryKeyResetScreen(
+                                      vaultController: widget.controller,
+                                    ),
+                                  ),
+                                );
+                              },
+                        child: const Text('Forgot Master Password? Use Recovery Key'),
+                      ),
                     ],
                   ),
                 ),

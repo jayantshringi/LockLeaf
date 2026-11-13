@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lockleaf/core/crypto/kdf_params.dart';
 import 'package:lockleaf/core/errors/app_exception.dart';
+import 'package:lockleaf/features/backup/domain/recovery_key.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry_category.dart';
 import 'package:lockleaf/features/vault/domain/vault_service.dart';
@@ -34,6 +35,7 @@ class VaultController extends ChangeNotifier {
   String _searchQuery = '';
   VaultEntryCategory? _selectedCategory;
   bool _favoritesOnly = false;
+  RecoveryKey? _lastGeneratedRecoveryKey;
 
   /// Creates a [VaultController] backed by [vaultService].
   VaultController({
@@ -43,6 +45,18 @@ class VaultController extends ChangeNotifier {
   })  : _vaultService = vaultService,
         _kdfParams = kdfParams,
         _themeMode = initialThemeMode;
+
+  /// Underlying zero-knowledge vault service.
+  VaultService get vaultService => _vaultService;
+
+  /// The most recently generated recovery key (e.g. at vault creation or reset).
+  RecoveryKey? get lastGeneratedRecoveryKey => _lastGeneratedRecoveryKey;
+
+  /// Clears the cached recovery key from controller state.
+  void clearLastGeneratedRecoveryKey() {
+    _lastGeneratedRecoveryKey = null;
+    notifyListeners();
+  }
 
   /// Current authentication stage.
   AuthFlowStage get stage => _stage;
@@ -126,11 +140,28 @@ class VaultController extends ChangeNotifier {
   /// Creates a new zero-knowledge vault protected by [masterPassword].
   Future<bool> createMasterPassword(String masterPassword) async {
     return _runBusyAction(() async {
-      await _vaultService.createVault(
+      _lastGeneratedRecoveryKey = await _vaultService.createVault(
         masterPassword: masterPassword,
         kdfParams: _kdfParams,
       );
       _entries = <VaultEntry>[];
+      _stage = AuthFlowStage.unlocked;
+    });
+  }
+
+  /// Resets the master password using a verified [recoveryKey].
+  Future<bool> resetWithRecoveryKey({
+    required RecoveryKey recoveryKey,
+    required String newMasterPassword,
+  }) async {
+    return _runBusyAction(() async {
+      _lastGeneratedRecoveryKey =
+          await _vaultService.resetMasterPasswordWithRecoveryKey(
+        recoveryKey: recoveryKey,
+        newPassword: newMasterPassword,
+        newKdfParams: _kdfParams,
+      );
+      _entries = await _vaultService.getAllEntries();
       _stage = AuthFlowStage.unlocked;
     });
   }

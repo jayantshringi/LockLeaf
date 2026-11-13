@@ -5,6 +5,7 @@ import 'package:lockleaf/features/auth/domain/password_strength.dart';
 import 'package:lockleaf/features/auth/presentation/vault_controller.dart';
 import 'package:lockleaf/features/auth/presentation/widgets/password_strength_meter.dart';
 import 'package:lockleaf/features/auth/presentation/widgets/secret_text_field.dart';
+import 'package:lockleaf/features/backup/presentation/screens/recovery_key_display_screen.dart';
 
 /// Master password creation screen with live strength evaluation.
 class MasterPasswordSetupScreen extends StatefulWidget {
@@ -66,6 +67,22 @@ class _MasterPasswordSetupScreenState extends State<MasterPasswordSetupScreen> {
     if (success) {
       _passwordController.clear();
       _confirmController.clear();
+      final recoveryKey = widget.controller.lastGeneratedRecoveryKey;
+      if (recoveryKey != null) {
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => RecoveryKeyDisplayScreen(
+              recoveryKey: recoveryKey,
+              isInitialSetup: true,
+              onConfirmed: () {
+                widget.controller.clearLastGeneratedRecoveryKey();
+                Navigator.of(context).pop();
+              },
+            ),
+          ),
+        );
+      }
+      if (!mounted) return;
       if (widget.onVaultCreated != null) {
         widget.onVaultCreated!();
       } else if (Navigator.of(context).canPop()) {
