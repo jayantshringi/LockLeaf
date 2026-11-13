@@ -11,6 +11,8 @@ import 'package:lockleaf/core/crypto/managed_secret_key.dart';
 import 'package:lockleaf/core/crypto/secure_memory.dart';
 import 'package:lockleaf/core/crypto/secure_random_service.dart';
 import 'package:lockleaf/core/errors/app_exception.dart';
+import 'package:lockleaf/features/backup/domain/recovery_key.dart';
+import 'package:lockleaf/features/backup/domain/recovery_key_service.dart';
 import 'package:lockleaf/features/vault/data/vault_storage_repository.dart';
 import 'package:lockleaf/features/vault/domain/encrypted_entry_record.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry.dart';
@@ -27,6 +29,7 @@ class VaultService {
   final Argon2idKdfService _kdfService;
   final CipherService _cipherService;
   final SecureRandomService _randomService;
+  final RecoveryKeyService _recoveryKeyService;
   final Uuid _uuid;
 
   VaultSession? _session;
@@ -37,6 +40,7 @@ class VaultService {
     Argon2idKdfService? kdfService,
     CipherService? cipherService,
     SecureRandomService? randomService,
+    RecoveryKeyService? recoveryKeyService,
     Uuid? uuid,
   })  : _storage = storage,
         _kdfService = kdfService ?? Argon2idKdfService(),
@@ -44,6 +48,12 @@ class VaultService {
         _cipherService = cipherService ??
             CipherService(
               randomService: randomService ?? SecureRandomService(),
+            ),
+        _recoveryKeyService = recoveryKeyService ??
+            RecoveryKeyService(
+              kdfService: kdfService,
+              cipherService: cipherService,
+              randomService: randomService,
             ),
         _uuid = uuid ?? const Uuid();
 
@@ -64,10 +74,12 @@ class VaultService {
 
   /// Initializes a new zero-knowledge vault protected by [masterPassword].
   ///
-  /// Generates a random 256-bit DEK, wraps it with an Argon2id+HKDF wrapping key,
-  /// stores only public KDF metadata and the wrapped DEK, and opens an active
-  /// unlocked session.
-  Future<void> createVault({
+  /// Generates a random 256-bit DEK, wraps it with an Argon2id+HKDF master key
+  /// and with a freshly generated [RecoveryKey], stores only public KDF metadata
+  /// and the wrapped DEK payloads, and opens an active unlocked session.
+  ///
+  /// Returns the newly generated [RecoveryKey] so the user can store it safely.
+  Future<RecoveryKey> createVault({
     required String masterPassword,
     KdfParams kdfParams = const KdfParams.standard(),
     VaultCipherAlgorithm cipherAlgorithm = VaultCipherAlgorithm.xchacha20Poly1305,
@@ -101,12 +113,23 @@ class VaultService {
         associatedData: utf8.encode(VaultSession.dekWrapAad(vaultId)),
       );
 
+      final recoveryKey = RecoveryKey.generate(randomService: _randomService);
+      final recoveryWrap = await _recoveryKeyService.wrapDek(
+        recoveryKey: recoveryKey,
+        dekBytes: dekBytes,
+        vaultId: vaultId,
+        cipherAlgorithm: cipherAlgorithm,
+        params: kdfParams,
+      );
+
       final metadata = VaultMetadata(
         vaultId: vaultId,
         salt: salt,
         kdfParams: kdfParams,
         cipherAlgorithm: cipherAlgorithm,
         wrappedDek: wrappedDek,
+        recoverySalt: recoveryWrap.recoverySalt,
+        recoveryWrappedDek: recoveryWrap.wrappedDek,
         createdAt: now,
         updatedAt: now,
       );
@@ -120,6 +143,8 @@ class VaultService {
         cipherAlgorithm: cipherAlgorithm,
         unlockedAt: now,
       );
+
+      return recoveryKey;
     } finally {
       wrappingKey?.destroy();
       SecureMemory.wipeBytes(dekBytes);
@@ -206,6 +231,123 @@ class VaultService {
     } finally {
       newWrappingKey?.destroy();
       SecureMemory.wipeBytes(dekBytes);
+    }
+  }
+
+  /// Resets the vault master password using [recoveryKey] without data loss.
+  ///
+  /// Unwraps the existing vault DEK using [recoveryKey], re-wraps it with
+  /// [newPassword] and fresh salt, generates a fresh [RecoveryKey],
+  /// updates vault metadata, and opens an active unlocked session.
+  Future<RecoveryKey> resetMasterPasswordWithRecoveryKey({
+    required RecoveryKey recoveryKey,
+    required String newPassword,
+    KdfParams? newKdfParams,
+  }) async {
+    _validateNewPassword(newPassword);
+
+    final metadata = await _storage.getMetadata();
+    if (metadata == null) {
+      throw const StorageException('No initialized vault found.');
+    }
+
+    final dekBytes = await _recoveryKeyService.unwrapDek(
+      recoveryKey: recoveryKey,
+      metadata: metadata,
+    );
+
+    ManagedSecretKey? newWrappingKey;
+    try {
+      final newSalt = _randomService.generateSalt();
+      final effectiveParams = newKdfParams ?? metadata.kdfParams;
+      newWrappingKey = await _deriveWrappingKey(
+        password: newPassword,
+        salt: newSalt,
+        params: effectiveParams,
+      );
+
+      final rewrappedDek = await _cipherService.encryptBytes(
+        plaintext: dekBytes,
+        key: newWrappingKey,
+        algorithm: metadata.cipherAlgorithm,
+        associatedData: utf8.encode(VaultSession.dekWrapAad(metadata.vaultId)),
+      );
+
+      final newRecoveryKey = RecoveryKey.generate(randomService: _randomService);
+      final newRecoveryWrap = await _recoveryKeyService.wrapDek(
+        recoveryKey: newRecoveryKey,
+        dekBytes: dekBytes,
+        vaultId: metadata.vaultId,
+        cipherAlgorithm: metadata.cipherAlgorithm,
+        params: effectiveParams,
+      );
+
+      final updatedMetadata = metadata.copyWith(
+        salt: newSalt,
+        kdfParams: effectiveParams,
+        wrappedDek: rewrappedDek,
+        recoverySalt: newRecoveryWrap.recoverySalt,
+        recoveryWrappedDek: newRecoveryWrap.wrappedDek,
+        updatedAt: DateTime.now().toUtc(),
+      );
+
+      await _storage.saveMetadata(updatedMetadata);
+
+      lockVault();
+      _session = VaultSession(
+        vaultId: metadata.vaultId,
+        dek: ManagedSecretKey.fromBytes(dekBytes),
+        cipherAlgorithm: metadata.cipherAlgorithm,
+      );
+
+      return newRecoveryKey;
+    } finally {
+      newWrappingKey?.destroy();
+      SecureMemory.wipeBytes(dekBytes);
+    }
+  }
+
+  /// Rotates the vault recovery key while vault is unlocked or with [masterPassword].
+  Future<RecoveryKey> rotateRecoveryKey({String? masterPassword}) async {
+    final metadata = await _storage.getMetadata();
+    if (metadata == null) {
+      throw const StorageException('No initialized vault found.');
+    }
+
+    Uint8List dekBytes;
+    var needsWiping = false;
+    if (_session != null && _session!.isActive) {
+      dekBytes = _session!.activeKey.copyBytes();
+      needsWiping = true;
+    } else if (masterPassword != null && masterPassword.isNotEmpty) {
+      dekBytes = await _unwrapDek(metadata: metadata, password: masterPassword);
+      needsWiping = true;
+    } else {
+      throw const VaultLockedException();
+    }
+
+    try {
+      final newRecoveryKey = RecoveryKey.generate(randomService: _randomService);
+      final newWrap = await _recoveryKeyService.wrapDek(
+        recoveryKey: newRecoveryKey,
+        dekBytes: dekBytes,
+        vaultId: metadata.vaultId,
+        cipherAlgorithm: metadata.cipherAlgorithm,
+        params: metadata.kdfParams,
+      );
+
+      final updatedMetadata = metadata.copyWith(
+        recoverySalt: newWrap.recoverySalt,
+        recoveryWrappedDek: newWrap.wrappedDek,
+        updatedAt: DateTime.now().toUtc(),
+      );
+      await _storage.saveMetadata(updatedMetadata);
+
+      return newRecoveryKey;
+    } finally {
+      if (needsWiping) {
+        SecureMemory.wipeBytes(dekBytes);
+      }
     }
   }
 
