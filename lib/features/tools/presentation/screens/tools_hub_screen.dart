@@ -63,8 +63,8 @@ class ToolsHubScreen extends StatelessWidget {
                       MaterialPageRoute<void>(
                         builder: (BuildContext context) =>
                             PasswordGeneratorScreen(
-                              securityController: securityController,
-                            ),
+                          securityController: securityController,
+                        ),
                       ),
                     ),
                   );

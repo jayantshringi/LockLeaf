@@ -50,8 +50,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
     final String message;
     if (isSensitive && security != null) {
       await security.copySecret(value);
-      message =
-          '$label copied — clears in '
+      message = '$label copied — clears in '
           '${SecurityConstants.clipboardClearDelaySeconds}s';
     } else {
       await Clipboard.setData(ClipboardData(text: value));
@@ -192,9 +191,8 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                 children: [
                   IconButton(
                     key: const Key('detail_reveal_password_button'),
-                    tooltip: _passwordVisible
-                        ? 'Hide password'
-                        : 'Reveal password',
+                    tooltip:
+                        _passwordVisible ? 'Hide password' : 'Reveal password',
                     icon: Icon(
                       _passwordVisible
                           ? Icons.visibility_off_outlined
@@ -239,7 +237,9 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
             const SizedBox(height: 20),
             Text(
               'Updated: ${_entry.updatedAt.toIso8601String()}',
-              style: Theme.of(context).textTheme.bodySmall
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
                   ?.copyWith(color: Colors.grey),
             ),
           ],
@@ -277,13 +277,17 @@ class _DetailFieldCard extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: Theme.of(context).textTheme.labelMedium
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelMedium
                         ?.copyWith(color: Colors.grey),
                   ),
                   const SizedBox(height: 4),
                   SelectableText(
                     value,
-                    style: Theme.of(context).textTheme.bodyLarge
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyLarge
                         ?.copyWith(fontFamily: monospace ? 'monospace' : null),
                   ),
                 ],

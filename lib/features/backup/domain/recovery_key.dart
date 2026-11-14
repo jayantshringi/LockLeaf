@@ -35,9 +35,9 @@ class RecoveryKey {
     required Uint8List entropy,
     required int checksum,
     required String formatted,
-  }) : _entropy = entropy,
-       _checksum = checksum,
-       _formatted = formatted;
+  })  : _entropy = entropy,
+        _checksum = checksum,
+        _formatted = formatted;
 
   /// Generates a new cryptographically secure [RecoveryKey] using [randomService].
   factory RecoveryKey.generate({SecureRandomService? randomService}) {

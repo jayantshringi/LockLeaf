@@ -49,14 +49,14 @@ class VaultEntry extends Equatable {
     required DateTime createdAt,
     required DateTime updatedAt,
     this.schemaVersion = 1,
-  }) : createdAt = DateTime.fromMillisecondsSinceEpoch(
-         createdAt.millisecondsSinceEpoch,
-         isUtc: true,
-       ),
-       updatedAt = DateTime.fromMillisecondsSinceEpoch(
-         updatedAt.millisecondsSinceEpoch,
-         isUtc: true,
-       );
+  })  : createdAt = DateTime.fromMillisecondsSinceEpoch(
+          createdAt.millisecondsSinceEpoch,
+          isUtc: true,
+        ),
+        updatedAt = DateTime.fromMillisecondsSinceEpoch(
+          updatedAt.millisecondsSinceEpoch,
+          isUtc: true,
+        );
 
   /// Creates and validates a [VaultEntry].
   factory VaultEntry({
@@ -151,8 +151,7 @@ class VaultEntry extends Equatable {
     final isFavorite = json['isFavorite'];
     final createdAtMillis = json['createdAt'];
     final updatedAtMillis = json['updatedAt'];
-    final schemaVersion =
-        (json['schemaVersion'] as int?) ??
+    final schemaVersion = (json['schemaVersion'] as int?) ??
         (json['schema_version'] as int?) ??
         1;
 
@@ -197,16 +196,16 @@ class VaultEntry extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    title,
-    username,
-    password,
-    url,
-    notes,
-    category,
-    isFavorite,
-    createdAt,
-    updatedAt,
-    schemaVersion,
-  ];
+        id,
+        title,
+        username,
+        password,
+        url,
+        notes,
+        category,
+        isFavorite,
+        createdAt,
+        updatedAt,
+        schemaVersion,
+      ];
 }

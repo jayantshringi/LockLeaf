@@ -24,10 +24,10 @@ class SyncController extends ChangeNotifier {
     required VaultController vaultController,
     required SyncStorageRepository syncStorage,
     required SyncEngine syncEngine,
-  }) : _vaultService = vaultService,
-       _vaultController = vaultController,
-       _syncStorage = syncStorage,
-       _syncEngine = syncEngine;
+  })  : _vaultService = vaultService,
+        _vaultController = vaultController,
+        _syncStorage = syncStorage,
+        _syncEngine = syncEngine;
 
   SyncState get state => _state;
   DateTime? get lastSyncedAt => _lastSyncedAt;

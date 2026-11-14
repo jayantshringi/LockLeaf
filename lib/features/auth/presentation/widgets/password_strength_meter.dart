@@ -25,9 +25,8 @@ class PasswordStrengthMeter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = result.score == 0
-        ? Colors.grey
-        : _colorForLevel(result.level);
+    final activeColor =
+        result.score == 0 ? Colors.grey : _colorForLevel(result.level);
     final progressValue = result.score == 0 ? 0.0 : result.level.progress;
     final labelText = result.score == 0 ? 'Empty' : result.level.label;
 
@@ -49,12 +48,16 @@ class PasswordStrengthMeter extends StatelessWidget {
           children: [
             Text(
               'Strength: $labelText',
-              style: Theme.of(context).textTheme.bodySmall
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
                   ?.copyWith(color: activeColor, fontWeight: FontWeight.w600),
             ),
             Text(
               '~${result.estimatedEntropyBits} bits',
-              style: Theme.of(context).textTheme.bodySmall
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
                   ?.copyWith(color: Colors.grey),
             ),
           ],
@@ -63,7 +66,9 @@ class PasswordStrengthMeter extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             result.feedback.join(' • '),
-            style: Theme.of(context).textTheme.bodySmall
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
                 ?.copyWith(color: Colors.grey),
           ),
         ],

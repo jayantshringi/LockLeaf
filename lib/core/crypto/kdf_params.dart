@@ -58,17 +58,17 @@ class KdfParams extends Equatable {
 
   /// Production OWASP-aligned baseline parameters (64 MiB, 3 iterations, 4 lanes).
   const KdfParams.standard()
-    : memoryKiB = SecurityConstants.argon2MemoryKiB,
-      iterations = SecurityConstants.argon2Iterations,
-      parallelism = SecurityConstants.argon2Parallelism,
-      hashLength = SecurityConstants.derivedKeyLengthBytes;
+      : memoryKiB = SecurityConstants.argon2MemoryKiB,
+        iterations = SecurityConstants.argon2Iterations,
+        parallelism = SecurityConstants.argon2Parallelism,
+        hashLength = SecurityConstants.derivedKeyLengthBytes;
 
   /// Fast test parameters (8 KiB, 1 iteration, 1 lane) for unit testing without slow KDF overhead.
   const KdfParams.testFast()
-    : memoryKiB = 8,
-      iterations = 1,
-      parallelism = 1,
-      hashLength = SecurityConstants.derivedKeyLengthBytes;
+      : memoryKiB = 8,
+        iterations = 1,
+        parallelism = 1,
+        hashLength = SecurityConstants.derivedKeyLengthBytes;
 
   /// Whether these parameters meet LockLeaf's minimum production security policy.
   bool get meetsProductionBaseline =>

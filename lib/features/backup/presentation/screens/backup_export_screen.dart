@@ -211,9 +211,8 @@ class _BackupExportScreenState extends State<BackupExportScreen> {
                               : Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isDark
-                                ? Colors.white12
-                                : Colors.grey.shade300,
+                            color:
+                                isDark ? Colors.white12 : Colors.grey.shade300,
                           ),
                         ),
                         child: Column(

@@ -82,12 +82,12 @@ class PasswordHealthReport extends Equatable {
 
   /// Empty report for vaults with zero password entries.
   const PasswordHealthReport.empty()
-    : overallScore = 100,
-      totalEntries = 0,
-      weakFindings = const <EntryHealthFinding>[],
-      reusedFindings = const <EntryHealthFinding>[],
-      healthyCount = 0,
-      reusedGroupCount = 0;
+      : overallScore = 100,
+        totalEntries = 0,
+        weakFindings = const <EntryHealthFinding>[],
+        reusedFindings = const <EntryHealthFinding>[],
+        healthyCount = 0,
+        reusedGroupCount = 0;
 
   /// Whether any weak or reused passwords exist.
   bool get hasIssues => weakFindings.isNotEmpty || reusedFindings.isNotEmpty;
@@ -98,11 +98,11 @@ class PasswordHealthReport extends Equatable {
 
   @override
   List<Object?> get props => [
-    overallScore,
-    totalEntries,
-    weakFindings,
-    reusedFindings,
-    healthyCount,
-    reusedGroupCount,
-  ];
+        overallScore,
+        totalEntries,
+        weakFindings,
+        reusedFindings,
+        healthyCount,
+        reusedGroupCount,
+      ];
 }

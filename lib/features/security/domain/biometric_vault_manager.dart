@@ -35,13 +35,13 @@ class BiometricVaultManager {
     required BiometricAuthService biometricAuth,
     CipherService? cipherService,
     SecureRandomService? randomService,
-  }) : _vaultService = vaultService,
-       _secureStorage = secureStorage,
-       _biometricAuth = biometricAuth,
-       _randomService = randomService ?? SecureRandomService(),
-       _cipherService =
-           cipherService ??
-           CipherService(randomService: randomService ?? SecureRandomService());
+  })  : _vaultService = vaultService,
+        _secureStorage = secureStorage,
+        _biometricAuth = biometricAuth,
+        _randomService = randomService ?? SecureRandomService(),
+        _cipherService = cipherService ??
+            CipherService(
+                randomService: randomService ?? SecureRandomService());
 
   /// Returns true if biometric hardware and enrolled credentials exist.
   Future<bool> isBiometricsSupported() =>

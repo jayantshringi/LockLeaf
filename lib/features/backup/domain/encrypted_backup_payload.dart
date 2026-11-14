@@ -49,14 +49,14 @@ class EncryptedBackupHeader extends Equatable {
 
   @override
   List<Object?> get props => [
-    vaultId,
-    formatVersion,
-    createdAt,
-    entryCount,
-    kdfParams,
-    cipherAlgorithm,
-    notes,
-  ];
+        vaultId,
+        formatVersion,
+        createdAt,
+        entryCount,
+        kdfParams,
+        cipherAlgorithm,
+        notes,
+      ];
 }
 
 /// Representation of an authenticated zero-knowledge LockLeaf encrypted backup.
@@ -75,9 +75,9 @@ class EncryptedBackupPayload extends Equatable {
     required EncryptedBackupHeader header,
     required Uint8List salt,
     required EncryptedPayload encryptedPayload,
-  }) : _header = header,
-       _salt = salt,
-       _encryptedPayload = encryptedPayload;
+  })  : _header = header,
+        _salt = salt,
+        _encryptedPayload = encryptedPayload;
 
   /// Creates a new [EncryptedBackupPayload].
   factory EncryptedBackupPayload({
@@ -284,10 +284,10 @@ class EncryptedBackupPayload extends Equatable {
 
   @override
   List<Object?> get props => [
-    _header,
-    base64.encode(_salt),
-    _encryptedPayload.toBase64(),
-  ];
+        _header,
+        base64.encode(_salt),
+        _encryptedPayload.toBase64(),
+      ];
 }
 
 /// Plaintext bundle of decrypted vault entries before encryption or after restoration.
@@ -307,11 +307,11 @@ class BackupBundle extends Equatable {
 
   /// Serializes the cleartext bundle into a JSON-encodable map.
   Map<String, dynamic> toJson() => {
-    'version': currentBundleVersion,
-    'vault_id': vaultId,
-    'exported_at': exportedAt.toUtc().toIso8601String(),
-    'entries': entries.map((e) => e.toJson()).toList(growable: false),
-  };
+        'version': currentBundleVersion,
+        'vault_id': vaultId,
+        'exported_at': exportedAt.toUtc().toIso8601String(),
+        'entries': entries.map((e) => e.toJson()).toList(growable: false),
+      };
 
   /// Restores a cleartext bundle from a decoded JSON map.
   factory BackupBundle.fromJson(Map<String, dynamic> json) {

@@ -176,9 +176,9 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
                           .map(
                             (VaultEntryCategory category) =>
                                 DropdownMenuItem<VaultEntryCategory>(
-                                  value: category,
-                                  child: Text(category.label),
-                                ),
+                              value: category,
+                              child: Text(category.label),
+                            ),
                           )
                           .toList(),
                       onChanged: isBusy

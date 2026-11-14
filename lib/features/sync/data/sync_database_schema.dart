@@ -7,8 +7,7 @@ abstract class SyncDatabaseSchema {
   static const String queueTable = 'sync_queue';
 
   /// Creates [stateTable].
-  static const String createStateTableSql =
-      '''
+  static const String createStateTableSql = '''
 CREATE TABLE IF NOT EXISTS $stateTable (
   vault_id TEXT PRIMARY KEY,
   device_id TEXT NOT NULL,
@@ -19,8 +18,7 @@ CREATE TABLE IF NOT EXISTS $stateTable (
 ''';
 
   /// Creates [queueTable].
-  static const String createQueueTableSql =
-      '''
+  static const String createQueueTableSql = '''
 CREATE TABLE IF NOT EXISTS $queueTable (
   entry_id TEXT PRIMARY KEY,
   vault_id TEXT NOT NULL,
@@ -31,8 +29,7 @@ CREATE TABLE IF NOT EXISTS $queueTable (
 ''';
 
   /// Index on [queueTable] by vault_id and queued_at timestamp.
-  static const String createQueueIndexSql =
-      '''
+  static const String createQueueIndexSql = '''
 CREATE INDEX IF NOT EXISTS idx_sync_queue_vault_queued
 ON $queueTable (vault_id, queued_at ASC);
 ''';

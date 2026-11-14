@@ -50,7 +50,8 @@ void main() {
   });
 
   group('BiometricVaultManager', () {
-    test('seals DEK in secure storage without storing master password', () async {
+    test('seals DEK in secure storage without storing master password',
+        () async {
       final masterPass = randomToken();
       final entrySecret = randomToken();
 

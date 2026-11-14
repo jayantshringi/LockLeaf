@@ -28,8 +28,7 @@ void main() {
     });
 
     test('classifies short input below 12 chars as weak', () {
-      final shortMixed =
-          '${randomChars('abcdef', 4)}'
+      final shortMixed = '${randomChars('abcdef', 4)}'
           '${randomChars('ABCDEF', 2)}'
           '${randomChars('0123456789', 2)}';
 

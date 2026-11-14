@@ -25,9 +25,9 @@ class EncryptedEntryRecord extends Equatable {
     required Uint8List encryptedBlob,
     required DateTime createdAt,
     required DateTime updatedAt,
-  }) : _encryptedBlob = encryptedBlob,
-       createdAt = createdAt.toUtc(),
-       updatedAt = updatedAt.toUtc();
+  })  : _encryptedBlob = encryptedBlob,
+        createdAt = createdAt.toUtc(),
+        updatedAt = updatedAt.toUtc();
 
   /// Creates and validates an [EncryptedEntryRecord].
   factory EncryptedEntryRecord({
@@ -97,9 +97,9 @@ class EncryptedEntryRecord extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    base64Url.encode(_encryptedBlob),
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        base64Url.encode(_encryptedBlob),
+        createdAt,
+        updatedAt,
+      ];
 }

@@ -180,11 +180,11 @@ void main() {
         vaultService.lockVault();
 
         // Reset master password using the recovery key
-        final rotatedKey = await vaultService
-            .resetMasterPasswordWithRecoveryKey(
-              recoveryKey: recoveryKey,
-              newPassword: newPass,
-            );
+        final rotatedKey =
+            await vaultService.resetMasterPasswordWithRecoveryKey(
+          recoveryKey: recoveryKey,
+          newPassword: newPass,
+        );
 
         expect(rotatedKey.formatted, isNotEmpty);
         expect(vaultService.isUnlocked, isTrue);

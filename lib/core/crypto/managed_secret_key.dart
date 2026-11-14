@@ -12,7 +12,7 @@ class ManagedSecretKey {
   bool _destroyed = false;
 
   ManagedSecretKey._(this._backingBuffer, this._keyData)
-    : length = _backingBuffer.length;
+      : length = _backingBuffer.length;
 
   /// Creates a [ManagedSecretKey] from raw [bytes], taking an isolated copy.
   ///

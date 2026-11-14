@@ -294,7 +294,9 @@ class _VaultEmptyState extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               hasAnyEntries ? 'No matching entries' : 'Your vault is empty',
-              style: Theme.of(context).textTheme.titleLarge
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -303,7 +305,9 @@ class _VaultEmptyState extends StatelessWidget {
                   ? 'Try adjusting your search query or category filter.'
                   : 'Tap + to encrypt and store your first credential locally.',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
                   ?.copyWith(color: Colors.grey),
             ),
           ],

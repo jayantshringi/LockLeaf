@@ -31,12 +31,11 @@ class FlutterKeychainStorage implements SecureKeyStorage {
 
   /// Creates a [FlutterKeychainStorage] with hardened platform options.
   FlutterKeychainStorage({FlutterSecureStorage? storage})
-    : _storage =
-          storage ??
-          const FlutterSecureStorage(
-            aOptions: _androidOptions,
-            iOptions: _iosOptions,
-          );
+      : _storage = storage ??
+            const FlutterSecureStorage(
+              aOptions: _androidOptions,
+              iOptions: _iosOptions,
+            );
 
   Future<T> _runStorage<T>(Future<T> Function() action) async {
     try {

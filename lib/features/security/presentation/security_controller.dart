@@ -33,11 +33,11 @@ class SecurityController extends ChangeNotifier {
     SecureClipboardService? clipboard,
     ScreenshotProtectionService? screenshotProtection,
     AutoLockService? autoLock,
-  }) : _vaultController = vaultController,
-       _biometricManager = biometricManager,
-       _clipboard = clipboard ?? SecureClipboardService(),
-       _screenshotProtection =
-           screenshotProtection ?? PlatformScreenshotProtectionService() {
+  })  : _vaultController = vaultController,
+        _biometricManager = biometricManager,
+        _clipboard = clipboard ?? SecureClipboardService(),
+        _screenshotProtection =
+            screenshotProtection ?? PlatformScreenshotProtectionService() {
     _autoLock = autoLock ?? AutoLockService(onLock: _vaultController.lock);
     _lastObservedStage = _vaultController.stage;
     _vaultController.addListener(_onVaultStateChanged);
@@ -174,8 +174,7 @@ class SecurityController extends ChangeNotifier {
       return;
     }
 
-    final shouldShield =
-        _screenshotBlockingEnabled &&
+    final shouldShield = _screenshotBlockingEnabled &&
         (state == AppLifecycleState.inactive ||
             state == AppLifecycleState.paused ||
             state == AppLifecycleState.hidden);

@@ -39,8 +39,8 @@ class EncryptedSyncRecord extends Equatable {
     required DateTime updatedAt,
     required this.isDeleted,
     required Uint8List encryptedBlob,
-  }) : updatedAt = updatedAt.toUtc(),
-       _encryptedBlob = encryptedBlob;
+  })  : updatedAt = updatedAt.toUtc(),
+        _encryptedBlob = encryptedBlob;
 
   /// Creates and validates a new [EncryptedSyncRecord].
   factory EncryptedSyncRecord({
@@ -135,12 +135,12 @@ class EncryptedSyncRecord extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    vaultId,
-    version,
-    deviceId,
-    updatedAt,
-    isDeleted,
-    base64.encode(_encryptedBlob),
-  ];
+        id,
+        vaultId,
+        version,
+        deviceId,
+        updatedAt,
+        isDeleted,
+        base64.encode(_encryptedBlob),
+      ];
 }

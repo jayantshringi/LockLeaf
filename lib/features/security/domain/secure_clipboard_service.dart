@@ -39,7 +39,7 @@ class SecureClipboardService {
 
   /// Creates a [SecureClipboardService].
   SecureClipboardService({ClipboardAdapter? adapter})
-    : _adapter = adapter ?? FlutterClipboardAdapter();
+      : _adapter = adapter ?? FlutterClipboardAdapter();
 
   /// Whether a secret auto-clear timer is currently scheduled.
   bool get hasPendingClear => _clearTimer?.isActive ?? false;

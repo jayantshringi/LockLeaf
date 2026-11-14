@@ -115,14 +115,18 @@ class _UnlockScreenState extends State<UnlockScreen> {
                       Text(
                         'Vault Locked',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.headlineSmall
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Enter your master password to decrypt your local vault.',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyMedium
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
                             ?.copyWith(color: Colors.grey),
                       ),
                       const SizedBox(height: 32),
@@ -196,8 +200,8 @@ class _UnlockScreenState extends State<UnlockScreen> {
                                   MaterialPageRoute<void>(
                                     builder: (context) =>
                                         RecoveryKeyResetScreen(
-                                          vaultController: widget.controller,
-                                        ),
+                                      vaultController: widget.controller,
+                                    ),
                                   ),
                                 );
                               },

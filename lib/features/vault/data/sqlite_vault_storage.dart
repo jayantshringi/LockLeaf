@@ -15,7 +15,7 @@ class SqliteVaultStorage implements VaultStorageRepository {
 
   /// Creates a [SqliteVaultStorage] instance.
   SqliteVaultStorage({VaultDatabaseOpener? opener})
-    : _opener = opener ?? VaultDatabaseOpener();
+      : _opener = opener ?? VaultDatabaseOpener();
 
   Future<Database> _getDb() async {
     final existing = _database;

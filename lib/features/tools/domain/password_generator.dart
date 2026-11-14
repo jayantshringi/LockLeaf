@@ -21,7 +21,7 @@ class PasswordGenerator {
 
   /// Creates a [PasswordGenerator].
   PasswordGenerator({SecureRandomService? randomService})
-    : _randomService = randomService ?? SecureRandomService();
+      : _randomService = randomService ?? SecureRandomService();
 
   /// Generates a random password matching [options].
   String generate([

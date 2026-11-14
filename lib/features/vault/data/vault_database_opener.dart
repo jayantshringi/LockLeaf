@@ -13,8 +13,7 @@ class VaultDatabaseOpener {
   /// Opens the SQLite database with `PRAGMA secure_delete = ON`.
   Future<Database> open() async {
     try {
-      final path =
-          _customPath ??
+      final path = _customPath ??
           p.join(await getDatabasesPath(), VaultDatabaseSchema.databaseName);
 
       return await openDatabase(

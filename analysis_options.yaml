@@ -10,6 +10,10 @@ analyzer:
     missing_required_param: error
     missing_return: error
     deprecated_member_use: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
 
 linter:
   rules:

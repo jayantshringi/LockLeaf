@@ -93,10 +93,9 @@ class SecuritySettingsScreen extends StatelessWidget {
                         subtitle: const Text('Lock vault after inactivity'),
                         trailing: DropdownButton<Duration>(
                           key: const Key('settings_autolock_dropdown'),
-                          value:
-                              _timeoutOptions.contains(
-                                securityController.autoLockTimeout,
-                              )
+                          value: _timeoutOptions.contains(
+                            securityController.autoLockTimeout,
+                          )
                               ? securityController.autoLockTimeout
                               : const Duration(minutes: 5),
                           underline: const SizedBox.shrink(),

@@ -101,9 +101,8 @@ class SyncMetadata extends Equatable {
     return SyncMetadata(
       vaultId: vaultId ?? this.vaultId,
       deviceId: deviceId ?? this.deviceId,
-      lastSyncedAt: clearLastSyncedAt
-          ? null
-          : (lastSyncedAt ?? this.lastSyncedAt),
+      lastSyncedAt:
+          clearLastSyncedAt ? null : (lastSyncedAt ?? this.lastSyncedAt),
       syncCursor: clearSyncCursor ? null : (syncCursor ?? this.syncCursor),
       remoteVersion: remoteVersion ?? this.remoteVersion,
       pendingUploadCount: pendingUploadCount ?? this.pendingUploadCount,
@@ -152,13 +151,13 @@ class SyncMetadata extends Equatable {
 
   @override
   List<Object?> get props => [
-    vaultId,
-    deviceId,
-    lastSyncedAt,
-    syncCursor,
-    remoteVersion,
-    pendingUploadCount,
-    syncState,
-    lastError,
-  ];
+        vaultId,
+        deviceId,
+        lastSyncedAt,
+        syncCursor,
+        remoteVersion,
+        pendingUploadCount,
+        syncState,
+        lastError,
+      ];
 }

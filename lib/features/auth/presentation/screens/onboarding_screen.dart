@@ -38,17 +38,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _OnboardingSlide(
       icon: Icons.shield_outlined,
       title: 'Zero-Knowledge Vault',
-      description: 'Your master password never leaves your device. Only you hold the keys to decrypt your secrets.',
+      description:
+          'Your master password never leaves your device. Only you hold the keys to decrypt your secrets.',
     ),
     _OnboardingSlide(
       icon: Icons.enhanced_encryption_outlined,
       title: 'Audited Cryptography',
-      description: 'Protected with Argon2id key derivation and XChaCha20-Poly1305 encryption using unique random nonces.',
+      description:
+          'Protected with Argon2id key derivation and XChaCha20-Poly1305 encryption using unique random nonces.',
     ),
     _OnboardingSlide(
       icon: Icons.storage_outlined,
       title: 'Encrypted Local Storage',
-      description: 'Every entry title, username, and password is stored exclusively as authenticated ciphertext.',
+      description:
+          'Every entry title, username, and password is stored exclusively as authenticated ciphertext.',
     ),
   ];
 
@@ -131,14 +134,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         Text(
                           slide.title,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineSmall
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           slide.description,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyLarge
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
                               ?.copyWith(color: Colors.grey),
                         ),
                       ],

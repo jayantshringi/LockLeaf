@@ -66,8 +66,7 @@ void main() {
       expect(find.text('Strength: Weak'), findsOneWidget);
 
       // Strong random input updates strength meter to Strong
-      final strongInput =
-          '${randomChars('abcdefghijklmnopqrstuvwxyz', 6)}'
+      final strongInput = '${randomChars('abcdefghijklmnopqrstuvwxyz', 6)}'
           '${randomChars('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 5)}'
           '${randomChars('0123456789', 4)}'
           '${randomChars('!@#%^&*', 3)}';

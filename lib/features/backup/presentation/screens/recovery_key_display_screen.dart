@@ -152,8 +152,8 @@ class _RecoveryKeyDisplayScreenState extends State<RecoveryKeyDisplayScreen> {
                               color: isPrefix
                                   ? AppTheme.primaryGreen
                                   : (isDark
-                                        ? Colors.white12
-                                        : Colors.grey.shade300),
+                                      ? Colors.white12
+                                      : Colors.grey.shade300),
                             ),
                           ),
                           child: Text(

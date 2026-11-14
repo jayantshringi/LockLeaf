@@ -73,7 +73,9 @@ class PasswordHealthScreen extends StatelessWidget {
                         Text(
                           '${report.overallScore}%',
                           key: const Key('health_overall_score'),
-                          style: Theme.of(context).textTheme.displaySmall
+                          style: Theme.of(context)
+                              .textTheme
+                              .displaySmall
                               ?.copyWith(
                                 color: scoreColor,
                                 fontWeight: FontWeight.bold,
@@ -159,7 +161,9 @@ class PasswordHealthScreen extends StatelessWidget {
                     ),
                     child: Text(
                       'Weak Passwords',
-                      style: Theme.of(context).textTheme.titleMedium
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -181,7 +185,9 @@ class PasswordHealthScreen extends StatelessWidget {
                     ),
                     child: Text(
                       'Reused Passwords',
-                      style: Theme.of(context).textTheme.titleMedium
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -221,12 +227,16 @@ class _StatBadge extends StatelessWidget {
       children: [
         Text(
           '$count',
-          style: Theme.of(context).textTheme.headlineSmall
+          style: Theme.of(context)
+              .textTheme
+              .headlineSmall
               ?.copyWith(color: color, fontWeight: FontWeight.bold),
         ),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall
               ?.copyWith(color: Colors.grey),
         ),
       ],

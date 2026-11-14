@@ -46,21 +46,20 @@ class VaultService {
     RecoveryKeyService? recoveryKeyService,
     SyncStorageRepository? syncStorage,
     Uuid? uuid,
-  }) : _storage = storage,
-       _kdfService = kdfService ?? Argon2idKdfService(),
-       _randomService = randomService ?? SecureRandomService(),
-       _cipherService =
-           cipherService ??
-           CipherService(randomService: randomService ?? SecureRandomService()),
-       _recoveryKeyService =
-           recoveryKeyService ??
-           RecoveryKeyService(
-             kdfService: kdfService,
-             cipherService: cipherService,
-             randomService: randomService,
-           ),
-       _syncStorage = syncStorage,
-       _uuid = uuid ?? const Uuid();
+  })  : _storage = storage,
+        _kdfService = kdfService ?? Argon2idKdfService(),
+        _randomService = randomService ?? SecureRandomService(),
+        _cipherService = cipherService ??
+            CipherService(
+                randomService: randomService ?? SecureRandomService()),
+        _recoveryKeyService = recoveryKeyService ??
+            RecoveryKeyService(
+              kdfService: kdfService,
+              cipherService: cipherService,
+              randomService: randomService,
+            ),
+        _syncStorage = syncStorage,
+        _uuid = uuid ?? const Uuid();
 
   /// Whether a vault session is currently unlocked with a live DEK.
   bool get isUnlocked => _session?.isActive ?? false;
@@ -377,8 +376,7 @@ class VaultService {
       String vaultId,
       VaultCipherAlgorithm algorithm,
       Uint8List dekBytes,
-    )
-    action,
+    ) action,
   ) async {
     final session = _requireSession();
     final dekBytes = session.activeKey.copyBytes();

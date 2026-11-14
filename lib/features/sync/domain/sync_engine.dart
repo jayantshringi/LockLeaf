@@ -52,14 +52,13 @@ class SyncEngine {
     required String localDeviceId,
     CipherService? cipherService,
     SyncConflictResolver? conflictResolver,
-  }) : _vaultStorage = vaultStorage,
-       _syncStorage = syncStorage,
-       _transport = transport,
-       _localDeviceId = localDeviceId,
-       _cipherService = cipherService ?? CipherService(),
-       _conflictResolver =
-           conflictResolver ??
-           SyncConflictResolver(localDeviceId: localDeviceId);
+  })  : _vaultStorage = vaultStorage,
+        _syncStorage = syncStorage,
+        _transport = transport,
+        _localDeviceId = localDeviceId,
+        _cipherService = cipherService ?? CipherService(),
+        _conflictResolver = conflictResolver ??
+            SyncConflictResolver(localDeviceId: localDeviceId);
 
   String get localDeviceId => _localDeviceId;
   CloudSyncTransport get transport => _transport;

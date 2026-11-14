@@ -18,7 +18,7 @@ class LocalAuthBiometricService implements BiometricAuthService {
 
   /// Creates a [LocalAuthBiometricService].
   LocalAuthBiometricService({LocalAuthentication? localAuth})
-    : _localAuth = localAuth ?? LocalAuthentication();
+      : _localAuth = localAuth ?? LocalAuthentication();
 
   @override
   Future<bool> isBiometricsAvailable() async {

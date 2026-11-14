@@ -62,10 +62,10 @@ class PassphraseGeneratorOptions extends Equatable {
 
   /// Default 6-word hyphen-separated passphrase options.
   const PassphraseGeneratorOptions.standard()
-    : wordCount = defaultWords,
-      separator = '-',
-      capitalizeWords = false,
-      appendNumber = false;
+      : wordCount = defaultWords,
+        separator = '-',
+        capitalizeWords = false,
+        appendNumber = false;
 
   /// Returns an updated, validated copy.
   PassphraseGeneratorOptions copyWith({
@@ -84,11 +84,11 @@ class PassphraseGeneratorOptions extends Equatable {
 
   @override
   List<Object?> get props => [
-    wordCount,
-    separator,
-    capitalizeWords,
-    appendNumber,
-  ];
+        wordCount,
+        separator,
+        capitalizeWords,
+        appendNumber,
+      ];
 }
 
 /// Generates memorable Diceware passphrases using [SecureRandomService].
@@ -100,8 +100,8 @@ class PassphraseGenerator {
   PassphraseGenerator({
     SecureRandomService? randomService,
     List<String>? wordList,
-  }) : _randomService = randomService ?? SecureRandomService(),
-       _wordList = wordList ?? DicewareWordlist.words {
+  })  : _randomService = randomService ?? SecureRandomService(),
+        _wordList = wordList ?? DicewareWordlist.words {
     if (_wordList.length < 64) {
       throw const ValidationException(
         'Word list must contain at least 64 words.',

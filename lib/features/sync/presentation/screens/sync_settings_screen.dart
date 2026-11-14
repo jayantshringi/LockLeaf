@@ -259,9 +259,8 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
                         const SizedBox(height: 16),
                         OutlinedButton.icon(
                           key: const Key('test_connection_button'),
-                          onPressed: _testingConnection
-                              ? null
-                              : _testConnection,
+                          onPressed:
+                              _testingConnection ? null : _testConnection,
                           icon: _testingConnection
                               ? const SizedBox(
                                   width: 16,

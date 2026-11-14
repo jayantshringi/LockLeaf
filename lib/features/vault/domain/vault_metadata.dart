@@ -59,10 +59,10 @@ class VaultMetadata extends Equatable {
     this.recoveryWrappedDek,
     required DateTime createdAt,
     required DateTime updatedAt,
-  }) : _salt = salt,
-       _recoverySalt = recoverySalt,
-       createdAt = createdAt.toUtc(),
-       updatedAt = updatedAt.toUtc();
+  })  : _salt = salt,
+        _recoverySalt = recoverySalt,
+        createdAt = createdAt.toUtc(),
+        updatedAt = updatedAt.toUtc();
 
   /// Creates and validates [VaultMetadata].
   factory VaultMetadata({
@@ -98,9 +98,8 @@ class VaultMetadata extends Equatable {
       kdfParams: kdfParams,
       cipherAlgorithm: cipherAlgorithm,
       wrappedDek: wrappedDek,
-      recoverySalt: recoverySalt == null
-          ? null
-          : Uint8List.fromList(recoverySalt),
+      recoverySalt:
+          recoverySalt == null ? null : Uint8List.fromList(recoverySalt),
       recoveryWrappedDek: recoveryWrappedDek,
       createdAt: createdAt,
       updatedAt: updatedAt,
@@ -223,15 +222,15 @@ class VaultMetadata extends Equatable {
 
   @override
   List<Object?> get props => [
-    vaultId,
-    schemaVersion,
-    base64Url.encode(_salt),
-    kdfParams,
-    cipherAlgorithm,
-    wrappedDek.toBase64(),
-    _recoverySalt == null ? null : base64Url.encode(_recoverySalt!),
-    recoveryWrappedDek?.toBase64(),
-    createdAt,
-    updatedAt,
-  ];
+        vaultId,
+        schemaVersion,
+        base64Url.encode(_salt),
+        kdfParams,
+        cipherAlgorithm,
+        wrappedDek.toBase64(),
+        _recoverySalt == null ? null : base64Url.encode(_recoverySalt!),
+        recoveryWrappedDek?.toBase64(),
+        createdAt,
+        updatedAt,
+      ];
 }

@@ -30,9 +30,9 @@ class EncryptedPayload {
     required Uint8List nonce,
     required Uint8List cipherText,
     required Uint8List mac,
-  }) : _nonce = nonce,
-       _cipherText = cipherText,
-       _mac = mac;
+  })  : _nonce = nonce,
+        _cipherText = cipherText,
+        _mac = mac;
 
   /// Creates a validated [EncryptedPayload] from raw cryptographic components.
   factory EncryptedPayload({
@@ -183,10 +183,10 @@ class EncryptedPayload {
 
   @override
   int get hashCode => Object.hash(
-    version,
-    algorithm,
-    Object.hashAll(_nonce),
-    Object.hashAll(_cipherText),
-    Object.hashAll(_mac),
-  );
+        version,
+        algorithm,
+        Object.hashAll(_nonce),
+        Object.hashAll(_cipherText),
+        Object.hashAll(_mac),
+      );
 }
