@@ -65,6 +65,7 @@ void main() {
         find.byKey(const Key('entry_password_field')),
         entrySecret,
       );
+      await tester.ensureVisible(find.byKey(const Key('entry_save_button')));
       await tester.tap(find.byKey(const Key('entry_save_button')));
       await tester.pumpAndSettle();
 
@@ -113,6 +114,7 @@ void main() {
         find.byKey(const Key('entry_title_field')),
         'Hosting Console',
       );
+      await tester.ensureVisible(find.byKey(const Key('entry_save_button')));
       await tester.tap(find.byKey(const Key('entry_save_button')));
       await tester.pumpAndSettle();
 
