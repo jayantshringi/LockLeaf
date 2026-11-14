@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lockleaf/core/crypto/cipher_algorithm.dart';
+import 'package:lockleaf/core/crypto/encrypted_payload.dart';
 import 'package:lockleaf/core/crypto/kdf_params.dart';
 import 'package:lockleaf/core/crypto/secure_random_service.dart';
 import 'package:lockleaf/core/errors/app_exception.dart';
@@ -103,7 +104,7 @@ void main() {
           version: 1,
           algorithm: VaultCipherAlgorithm.xchacha20Poly1305,
           nonce: randomService.generateNonce(24),
-          ciphertext: randomService.generateBytes(32),
+          cipherText: randomService.generateBytes(32),
           mac: randomService.generateBytes(16),
         );
 
