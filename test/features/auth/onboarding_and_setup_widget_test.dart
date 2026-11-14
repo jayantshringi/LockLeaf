@@ -98,6 +98,17 @@ void main() {
       await tester.tap(find.byKey(const Key('setup_create_vault_button')));
       await tester.pumpAndSettle();
 
+      // If initial recovery key screen appears, acknowledge and continue to vault
+      if (find
+          .byKey(const Key('recovery_key_saved_checkbox'))
+          .evaluate()
+          .isNotEmpty) {
+        await tester.tap(find.byKey(const Key('recovery_key_saved_checkbox')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('recovery_key_continue_button')));
+        await tester.pumpAndSettle();
+      }
+
       expect(find.text('LockLeaf Vault'), findsOneWidget);
       expect(find.text('Your vault is empty'), findsOneWidget);
       expect(controller.stage, equals(AuthFlowStage.unlocked));
