@@ -83,6 +83,9 @@ void main() {
       );
       expect(continueButtonEnabled.onPressed, isNotNull);
 
+      await tester.ensureVisible(
+        find.byKey(const Key('recovery_key_continue_button')),
+      );
       await tester.tap(find.byKey(const Key('recovery_key_continue_button')));
       await tester.pumpAndSettle();
       expect(confirmed, isTrue);
