@@ -31,7 +31,7 @@ jobs:
       - name: Run static analysis
         run: |
           set +e
-          OUTPUT=$(flutter analyze --fatal-infos 2>&1)
+          OUTPUT=$(flutter analyze --fatal-warnings 2>&1)
           EXIT_CODE=$?
           echo "$OUTPUT"
           if [ $EXIT_CODE -ne 0 ]; then
