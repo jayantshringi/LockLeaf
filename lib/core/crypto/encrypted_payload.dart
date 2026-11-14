@@ -131,7 +131,7 @@ class EncryptedPayload {
       );
     }
 
-    final nonceStart = _headerLengthBytes;
+    const nonceStart = _headerLengthBytes;
     final nonceEnd = nonceStart + algorithm.nonceLength;
     final macStart = bytes.length - algorithm.macLength;
 
