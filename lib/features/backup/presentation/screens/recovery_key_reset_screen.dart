@@ -24,7 +24,7 @@ class _RecoveryKeyResetScreenState extends State<RecoveryKeyResetScreen> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
 
-  PasswordStrength _strength = PasswordStrength.empty;
+  PasswordStrengthResult _strength = PasswordStrengthEvaluator.evaluate('');
   String? _keyFormatValidationMessage;
   bool _isKeyChecksumValid = false;
 
@@ -71,7 +71,7 @@ class _RecoveryKeyResetScreenState extends State<RecoveryKeyResetScreen> {
 
   void _onPasswordChanged() {
     setState(() {
-      _strength = PasswordStrength.evaluate(_passwordController.text);
+      _strength = PasswordStrengthEvaluator.evaluate(_passwordController.text);
     });
   }
 
@@ -117,7 +117,6 @@ class _RecoveryKeyResetScreenState extends State<RecoveryKeyResetScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final controller = widget.vaultController;
 
     return Scaffold(
@@ -248,7 +247,7 @@ class _RecoveryKeyResetScreenState extends State<RecoveryKeyResetScreen> {
                       },
                     ),
                     const SizedBox(height: 12),
-                    PasswordStrengthMeter(strength: _strength),
+                    PasswordStrengthMeter(result: _strength),
                     const SizedBox(height: 16),
                     SecretTextField(
                       key: const Key('reset_confirm_password_field'),
