@@ -27,8 +27,6 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
   final _backupPasswordController = TextEditingController();
   final _newMasterPasswordController = TextEditingController();
 
-  bool _obscureBackupPassword = true;
-  bool _obscureMasterPassword = true;
   bool _overwrite = false;
 
   @override
@@ -92,8 +90,6 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final controller = widget.backupController;
 
     return Scaffold(
@@ -203,21 +199,8 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                     SecretTextField(
                       key: const Key('restore_backup_password_field'),
                       controller: _backupPasswordController,
-                      obscureText: _obscureBackupPassword,
                       labelText: 'Backup Decryption Password',
                       hintText: 'Enter password used when exporting',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureBackupPassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                        ),
-                        onPressed: () => setState(
-                          () =>
-                              _obscureBackupPassword = !_obscureBackupPassword,
-                        ),
-                      ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Enter the backup password.';
@@ -230,21 +213,8 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                       SecretTextField(
                         key: const Key('new_vault_master_password_field'),
                         controller: _newMasterPasswordController,
-                        obscureText: _obscureMasterPassword,
                         labelText: 'New Master Password',
                         hintText: 'Create password for this restored vault',
-                        prefixIcon: const Icon(Icons.key_rounded),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureMasterPassword
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
-                          ),
-                          onPressed: () => setState(
-                            () => _obscureMasterPassword =
-                                !_obscureMasterPassword,
-                          ),
-                        ),
                         validator: (value) {
                           if (value == null || value.length < 12) {
                             return 'Master password must be at least 12 characters.';
