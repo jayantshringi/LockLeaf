@@ -26,7 +26,16 @@ jobs:
         run: flutter pub get
 
       - name: Verify code formatting
-        run: dart format --output=none --set-exit-if-changed .
+        run: |
+          set +e
+          OUTPUT=$(dart format --output=none --set-exit-if-changed . 2>&1)
+          EXIT_CODE=$?
+          echo "$OUTPUT"
+          if [ $EXIT_CODE -ne 0 ]; then
+            ESCAPED="${OUTPUT//$'\n'/'%0A'}"
+            echo "::error title=Dart Format Needed::$ESCAPED"
+            exit $EXIT_CODE
+          fi
 
       - name: Run static analysis
         run: |
