@@ -31,7 +31,7 @@ class _RecoveryKeyDisplayScreenState extends State<RecoveryKeyDisplayScreen> {
   void _copyToClipboard() {
     final text = widget.recoveryKey.formatted;
     if (widget.securityController != null) {
-      widget.securityController!.copySecret(text, label: 'Recovery Key');
+      widget.securityController!.copySecret(text);
     } else {
       Clipboard.setData(ClipboardData(text: text));
     }
