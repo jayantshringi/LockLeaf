@@ -62,7 +62,7 @@ void main() {
 
     test('throws CryptoException on invalid JSON', () {
       expect(
-        () => KdfParams.fromJson(<String, dynamic>{'memoryKiB': 65536}),
+        () => KdfParams.fromJson(const <String, dynamic>{'memoryKiB': 65536}),
         throwsA(isA<CryptoException>()),
       );
     });
