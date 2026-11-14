@@ -13,6 +13,8 @@ import 'package:lockleaf/core/crypto/secure_random_service.dart';
 import 'package:lockleaf/core/errors/app_exception.dart';
 import 'package:lockleaf/features/backup/domain/recovery_key.dart';
 import 'package:lockleaf/features/backup/domain/recovery_key_service.dart';
+import 'package:lockleaf/features/sync/data/sync_storage_repository.dart';
+import 'package:lockleaf/features/sync/domain/sync_status.dart';
 import 'package:lockleaf/features/vault/data/vault_storage_repository.dart';
 import 'package:lockleaf/features/vault/domain/encrypted_entry_record.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry.dart';
@@ -30,6 +32,7 @@ class VaultService {
   final CipherService _cipherService;
   final SecureRandomService _randomService;
   final RecoveryKeyService _recoveryKeyService;
+  final SyncStorageRepository? _syncStorage;
   final Uuid _uuid;
 
   VaultSession? _session;
@@ -41,6 +44,7 @@ class VaultService {
     CipherService? cipherService,
     SecureRandomService? randomService,
     RecoveryKeyService? recoveryKeyService,
+    SyncStorageRepository? syncStorage,
     Uuid? uuid,
   })  : _storage = storage,
         _kdfService = kdfService ?? Argon2idKdfService(),
@@ -55,10 +59,14 @@ class VaultService {
               cipherService: cipherService,
               randomService: randomService,
             ),
+        _syncStorage = syncStorage,
         _uuid = uuid ?? const Uuid();
 
   /// Whether a vault session is currently unlocked with a live DEK.
   bool get isUnlocked => _session?.isActive ?? false;
+
+  /// Active unlocked session, or null if locked.
+  VaultSession? get activeSession => _session;
 
   /// Identifier of the active unlocked vault, or null if locked.
   String? get activeVaultId => isUnlocked ? _session?.vaultId : null;
@@ -430,6 +438,11 @@ class VaultService {
 
     final record = await _encryptEntry(session, entry);
     await _storage.upsertEntry(record);
+    await _syncStorage?.enqueueAction(
+      entryId: entry.id,
+      vaultId: session.vaultId,
+      action: SyncAction.create,
+    );
     return entry;
   }
 
@@ -467,13 +480,26 @@ class VaultService {
     final updated = entry.copyWith(updatedAt: DateTime.now().toUtc());
     final record = await _encryptEntry(session, updated);
     await _storage.upsertEntry(record);
+    await _syncStorage?.enqueueAction(
+      entryId: updated.id,
+      vaultId: session.vaultId,
+      action: SyncAction.update,
+    );
     return updated;
   }
 
   /// Deletes the entry identified by [id].
   Future<bool> deleteEntry(String id) async {
-    _requireSession();
-    return _storage.deleteEntry(id);
+    final session = _requireSession();
+    final deleted = await _storage.deleteEntry(id);
+    if (deleted) {
+      await _syncStorage?.enqueueAction(
+        entryId: id,
+        vaultId: session.vaultId,
+        action: SyncAction.delete,
+      );
+    }
+    return deleted;
   }
 
   VaultSession _requireSession() {
