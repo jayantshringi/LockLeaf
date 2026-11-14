@@ -63,6 +63,13 @@ class KdfParams extends Equatable {
       parallelism = SecurityConstants.argon2Parallelism,
       hashLength = SecurityConstants.derivedKeyLengthBytes;
 
+  /// Fast test parameters (8 KiB, 1 iteration, 1 lane) for unit testing without slow KDF overhead.
+  const KdfParams.testFast()
+    : memoryKiB = 8,
+      iterations = 1,
+      parallelism = 1,
+      hashLength = SecurityConstants.derivedKeyLengthBytes;
+
   /// Whether these parameters meet LockLeaf's minimum production security policy.
   bool get meetsProductionBaseline =>
       memoryKiB >= SecurityConstants.argon2MemoryKiB &&
