@@ -121,12 +121,15 @@ void main() {
       expect(find.byKey(const Key('privacy_shield_overlay')), findsOneWidget);
 
       // 4. App paused triggers background auto-lock & wipes clipboard immediately
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
       await tester.pump();
       expect(vaultController.stage, equals(AuthFlowStage.locked));
       expect(clipboardAdapter.currentText, isEmpty);
 
       // 5. Resuming hides privacy overlay and shows UnlockScreen with biometrics
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
 
