@@ -34,6 +34,9 @@ class VaultEntry extends Equatable {
   /// UTC timestamp of the most recent modification.
   final DateTime updatedAt;
 
+  /// Schema or sequence version for sync conflict resolution.
+  final int schemaVersion;
+
   VaultEntry._({
     required this.id,
     required this.title,
@@ -45,6 +48,7 @@ class VaultEntry extends Equatable {
     required this.isFavorite,
     required DateTime createdAt,
     required DateTime updatedAt,
+    this.schemaVersion = 1,
   }) : createdAt = createdAt.toUtc(),
        updatedAt = updatedAt.toUtc();
 
@@ -60,6 +64,7 @@ class VaultEntry extends Equatable {
     bool isFavorite = false,
     required DateTime createdAt,
     required DateTime updatedAt,
+    int schemaVersion = 1,
   }) {
     if (id.trim().isEmpty) {
       throw const ValidationException('Entry ID cannot be empty.');
@@ -78,6 +83,7 @@ class VaultEntry extends Equatable {
       isFavorite: isFavorite,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      schemaVersion: schemaVersion,
     );
   }
 
@@ -93,6 +99,7 @@ class VaultEntry extends Equatable {
     VaultEntryCategory? category,
     bool? isFavorite,
     DateTime? updatedAt,
+    int? schemaVersion,
   }) {
     return VaultEntry(
       id: id,
@@ -105,6 +112,7 @@ class VaultEntry extends Equatable {
       isFavorite: isFavorite ?? this.isFavorite,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      schemaVersion: schemaVersion ?? this.schemaVersion,
     );
   }
 
@@ -121,6 +129,7 @@ class VaultEntry extends Equatable {
       'isFavorite': isFavorite,
       'createdAt': createdAt.millisecondsSinceEpoch,
       'updatedAt': updatedAt.millisecondsSinceEpoch,
+      'schemaVersion': schemaVersion,
     };
   }
 
@@ -136,6 +145,10 @@ class VaultEntry extends Equatable {
     final isFavorite = json['isFavorite'];
     final createdAtMillis = json['createdAt'];
     final updatedAtMillis = json['updatedAt'];
+    final schemaVersion =
+        (json['schemaVersion'] as int?) ??
+        (json['schema_version'] as int?) ??
+        1;
 
     if (id is! String ||
         title is! String ||
@@ -167,6 +180,7 @@ class VaultEntry extends Equatable {
         updatedAtMillis,
         isUtc: true,
       ),
+      schemaVersion: schemaVersion,
     );
   }
 
@@ -187,5 +201,6 @@ class VaultEntry extends Equatable {
     isFavorite,
     createdAt,
     updatedAt,
+    schemaVersion,
   ];
 }
