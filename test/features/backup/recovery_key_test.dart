@@ -84,9 +84,9 @@ void main() {
       final original = RecoveryKey.generate();
       final formatted = original.formatted;
 
-      // Replace a character in the middle
-      final charToFlip = formatted[7] == 'A' ? 'B' : 'A';
-      final tampered = formatted.replaceRange(7, 8, charToFlip);
+      // Replace a character in the middle (index 8 is the start of second group)
+      final charToFlip = formatted[8] == 'A' ? 'B' : 'A';
+      final tampered = formatted.replaceRange(8, 9, charToFlip);
 
       expect(
         () => RecoveryKey.fromString(tampered),
