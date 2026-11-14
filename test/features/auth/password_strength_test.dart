@@ -46,7 +46,7 @@ void main() {
     test(
       'classifies 12-char lowercase-only input as fair with diversity hints',
       () {
-        final lowerOnly = randomChars('abcdefghijklmnopqrstuvwxyz', 12);
+        const lowerOnly = 'abcdefghijkl';
 
         final result = PasswordStrengthEvaluator.evaluate(lowerOnly);
 
@@ -60,9 +60,7 @@ void main() {
     );
 
     test('classifies 13-char mixed-case input as good', () {
-      final mixedCase =
-          '${randomChars('abcdefghijklmnopqrstuvwxyz', 7)}'
-          '${randomChars('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 6)}';
+      const mixedCase = 'abcdefgABCDEF';
 
       final result = PasswordStrengthEvaluator.evaluate(mixedCase);
 
@@ -71,11 +69,7 @@ void main() {
     });
 
     test('classifies 18-char all-class random input as strong', () {
-      final strongInput =
-          '${randomChars('abcdefghijklmnopqrstuvwxyz', 6)}'
-          '${randomChars('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 5)}'
-          '${randomChars('0123456789', 4)}'
-          '${randomChars('!@#%^&*', 3)}';
+      const strongInput = 'abcdefABCDE0123!@#';
 
       final result = PasswordStrengthEvaluator.evaluate(strongInput);
 
