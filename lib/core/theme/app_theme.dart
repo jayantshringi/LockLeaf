@@ -20,7 +20,12 @@ abstract class AppTheme {
   static const Color danger = Color(0xFFEF4444);
   static const Color errorRed = danger;
   static const Color warning = Color(0xFFF59E0B);
+  static const Color accentGold = warning;
   static const Color success = Color(0xFF10B981);
+
+  // Background aliases
+  static const Color darkBackground = darkBg;
+  static const Color lightBackground = lightBg;
 
   /// Dark theme definition (default for privacy-centric utility).
   static ThemeData get darkTheme {
