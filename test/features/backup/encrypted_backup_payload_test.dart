@@ -24,7 +24,7 @@ void main() {
       version: 1,
       algorithm: VaultCipherAlgorithm.xchacha20Poly1305,
       nonce: randomService.generateBytes(24),
-      ciphertext: randomService.generateBytes(48),
+      cipherText: randomService.generateBytes(48),
       mac: randomService.generateBytes(16),
     );
 
@@ -55,8 +55,8 @@ void main() {
       expect(reconstructed.kdfParams, equals(original.kdfParams));
       expect(reconstructed.cipherAlgorithm, equals(original.cipherAlgorithm));
       expect(
-        reconstructed.encryptedPayload.ciphertext,
-        equals(original.encryptedPayload.ciphertext),
+        reconstructed.encryptedPayload.cipherText,
+        equals(original.encryptedPayload.cipherText),
       );
     });
 
@@ -114,7 +114,7 @@ void main() {
         version: 1,
         algorithm: VaultCipherAlgorithm.xchacha20Poly1305,
         nonce: Uint8List(24),
-        ciphertext: Uint8List(32),
+        cipherText: Uint8List(32),
         mac: Uint8List(16),
       );
 
@@ -123,7 +123,7 @@ void main() {
           vaultId: 'vault-1',
           createdAt: DateTime.now().toUtc(),
           entryCount: 1,
-          salt: [1, 2, 3], // < 16 bytes
+          salt: const [1, 2, 3], // < 16 bytes
           kdfParams: const KdfParams.testFast(),
           cipherAlgorithm: VaultCipherAlgorithm.xchacha20Poly1305,
           encryptedPayload: dummyEncrypted,
