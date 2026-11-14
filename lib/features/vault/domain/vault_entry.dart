@@ -49,8 +49,14 @@ class VaultEntry extends Equatable {
     required DateTime createdAt,
     required DateTime updatedAt,
     this.schemaVersion = 1,
-  }) : createdAt = createdAt.toUtc(),
-       updatedAt = updatedAt.toUtc();
+  }) : createdAt = DateTime.fromMillisecondsSinceEpoch(
+         createdAt.millisecondsSinceEpoch,
+         isUtc: true,
+       ),
+       updatedAt = DateTime.fromMillisecondsSinceEpoch(
+         updatedAt.millisecondsSinceEpoch,
+         isUtc: true,
+       );
 
   /// Creates and validates a [VaultEntry].
   factory VaultEntry({
