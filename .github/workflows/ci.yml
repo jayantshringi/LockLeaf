@@ -41,15 +41,13 @@ jobs:
           fi
 
       - name: Run test suite
+        shell: bash
         run: |
           set +e
-          OUTPUT=$(flutter test --coverage 2>&1)
-          EXIT_CODE=$?
-          echo "$OUTPUT"
+          flutter test --coverage 2>&1 | tee test_output.log
+          EXIT_CODE=${PIPESTATUS[0]}
           if [ $EXIT_CODE -ne 0 ]; then
-            ESCAPED="${OUTPUT//$'\n'/'%0A'}"
-            echo "::error title=Flutter Test Failures::$ESCAPED"
-            exit $EXIT_CODE
+            python3 .github/scripts/report_test_failures.py test_output.log $EXIT_CODE
           fi
 
       - name: Verify formatting clean
