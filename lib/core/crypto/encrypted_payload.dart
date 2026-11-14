@@ -160,4 +160,33 @@ class EncryptedPayload {
       throw const CryptoException('Invalid Base64 encrypted payload.');
     }
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EncryptedPayload &&
+          runtimeType == other.runtimeType &&
+          version == other.version &&
+          algorithm == other.algorithm &&
+          _listEquals(_nonce, other._nonce) &&
+          _listEquals(_cipherText, other._cipherText) &&
+          _listEquals(_mac, other._mac);
+
+  static bool _listEquals(List<int> a, List<int> b) {
+    if (identical(a, b)) return true;
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    version,
+    algorithm,
+    Object.hashAll(_nonce),
+    Object.hashAll(_cipherText),
+    Object.hashAll(_mac),
+  );
 }
