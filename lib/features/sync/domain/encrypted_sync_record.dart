@@ -39,8 +39,8 @@ class EncryptedSyncRecord extends Equatable {
     required DateTime updatedAt,
     required this.isDeleted,
     required Uint8List encryptedBlob,
-  })  : updatedAt = updatedAt.toUtc(),
-        _encryptedBlob = encryptedBlob;
+  }) : updatedAt = updatedAt.toUtc(),
+       _encryptedBlob = encryptedBlob;
 
   /// Creates and validates a new [EncryptedSyncRecord].
   factory EncryptedSyncRecord({
@@ -59,7 +59,9 @@ class EncryptedSyncRecord extends Equatable {
       throw const ValidationException('Sync record vaultId cannot be empty.');
     }
     if (version < 0) {
-      throw const ValidationException('Sync record version cannot be negative.');
+      throw const ValidationException(
+        'Sync record version cannot be negative.',
+      );
     }
 
     return EncryptedSyncRecord._(
@@ -106,12 +108,16 @@ class EncryptedSyncRecord extends Equatable {
         updatedAtRaw is! String ||
         isDeleted is! bool ||
         blobBase64 is! String) {
-      throw const ValidationException('Invalid or missing fields in sync record JSON.');
+      throw const ValidationException(
+        'Invalid or missing fields in sync record JSON.',
+      );
     }
 
     final parsedUpdatedAt = DateTime.tryParse(updatedAtRaw)?.toUtc();
     if (parsedUpdatedAt == null) {
-      throw const ValidationException('Invalid ISO timestamp in sync record JSON.');
+      throw const ValidationException(
+        'Invalid ISO timestamp in sync record JSON.',
+      );
     }
 
     final blobBytes = base64.decode(blobBase64);
@@ -129,13 +135,12 @@ class EncryptedSyncRecord extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        vaultId,
-        version,
-        deviceId,
-        updatedAt,
-        isDeleted,
-        base64.encode(_encryptedBlob),
-      ];
+    id,
+    vaultId,
+    version,
+    deviceId,
+    updatedAt,
+    isDeleted,
+    base64.encode(_encryptedBlob),
+  ];
 }
-

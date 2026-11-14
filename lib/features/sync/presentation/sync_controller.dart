@@ -24,10 +24,10 @@ class SyncController extends ChangeNotifier {
     required VaultController vaultController,
     required SyncStorageRepository syncStorage,
     required SyncEngine syncEngine,
-  })  : _vaultService = vaultService,
-        _vaultController = vaultController,
-        _syncStorage = syncStorage,
-        _syncEngine = syncEngine;
+  }) : _vaultService = vaultService,
+       _vaultController = vaultController,
+       _syncStorage = syncStorage,
+       _syncEngine = syncEngine;
 
   SyncState get state => _state;
   DateTime? get lastSyncedAt => _lastSyncedAt;
@@ -84,7 +84,9 @@ class SyncController extends ChangeNotifier {
           await _vaultController.refreshEntries();
         }
       } else {
-        _pendingCount = await _syncStorage.getPendingQueueCount(session.vaultId);
+        _pendingCount = await _syncStorage.getPendingQueueCount(
+          session.vaultId,
+        );
       }
 
       notifyListeners();

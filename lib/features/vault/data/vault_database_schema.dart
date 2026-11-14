@@ -13,7 +13,8 @@ abstract class VaultDatabaseSchema {
   static const String entriesTable = 'vault_entries';
 
   /// Creates the [metadataTable] storing zero plaintext secrets.
-  static const String createMetadataTableSql = '''
+  static const String createMetadataTableSql =
+      '''
 CREATE TABLE $metadataTable (
   vault_id TEXT PRIMARY KEY,
   schema_version INTEGER NOT NULL,
@@ -35,7 +36,8 @@ CREATE TABLE $metadataTable (
       'ALTER TABLE $metadataTable ADD COLUMN recovery_wrapped_dek BLOB;';
 
   /// Creates the [entriesTable] holding opaque encrypted entry payloads.
-  static const String createEntriesTableSql = '''
+  static const String createEntriesTableSql =
+      '''
 CREATE TABLE $entriesTable (
   id TEXT PRIMARY KEY,
   encrypted_blob BLOB NOT NULL,
@@ -45,7 +47,8 @@ CREATE TABLE $entriesTable (
 ''';
 
   /// Index ordering encrypted entries by modification timestamp.
-  static const String createEntriesUpdatedAtIndexSql = '''
+  static const String createEntriesUpdatedAtIndexSql =
+      '''
 CREATE INDEX idx_vault_entries_updated_at
 ON $entriesTable (updated_at DESC)
 ''';

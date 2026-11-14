@@ -7,10 +7,7 @@ void main() {
   group('AutoLockService', () {
     test('rejects non-positive timeout durations', () {
       expect(
-        () => AutoLockService(
-          onLock: () {},
-          timeout: Duration.zero,
-        ),
+        () => AutoLockService(onLock: () {}, timeout: Duration.zero),
         throwsA(isA<ValidationException>()),
       );
     });

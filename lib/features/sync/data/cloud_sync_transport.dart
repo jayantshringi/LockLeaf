@@ -133,4 +133,3 @@ class InMemorySyncTransport implements CloudSyncTransport {
     isHealthy = true;
   }
 }
-

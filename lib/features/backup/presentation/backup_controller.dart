@@ -25,10 +25,10 @@ class BackupController extends ChangeNotifier {
     required VaultService vaultService,
     required VaultController vaultController,
     KdfParams kdfParams = const KdfParams.standard(),
-  })  : _backupService = backupService ?? BackupService(),
-        _vaultService = vaultService,
-        _vaultController = vaultController,
-        _kdfParams = kdfParams;
+  }) : _backupService = backupService ?? BackupService(),
+       _vaultService = vaultService,
+       _vaultController = vaultController,
+       _kdfParams = kdfParams;
 
   bool get isBusy => _isBusy;
   String? get errorMessage => _errorMessage;

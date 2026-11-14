@@ -63,8 +63,9 @@ void main() {
     });
 
     test('detects weak and reused passwords and redacts toString', () {
-      final sharedStrong =
-          generator.generate(PasswordGeneratorOptions(length: 20));
+      final sharedStrong = generator.generate(
+        PasswordGeneratorOptions(length: 20),
+      );
       final weakUnique = generateWeakToken();
       final weakShared = generateWeakToken();
 

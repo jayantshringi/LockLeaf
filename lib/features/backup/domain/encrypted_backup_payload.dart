@@ -49,14 +49,14 @@ class EncryptedBackupHeader extends Equatable {
 
   @override
   List<Object?> get props => [
-        vaultId,
-        formatVersion,
-        createdAt,
-        entryCount,
-        kdfParams,
-        cipherAlgorithm,
-        notes,
-      ];
+    vaultId,
+    formatVersion,
+    createdAt,
+    entryCount,
+    kdfParams,
+    cipherAlgorithm,
+    notes,
+  ];
 }
 
 /// Representation of an authenticated zero-knowledge LockLeaf encrypted backup.
@@ -75,9 +75,9 @@ class EncryptedBackupPayload extends Equatable {
     required EncryptedBackupHeader header,
     required Uint8List salt,
     required EncryptedPayload encryptedPayload,
-  })  : _header = header,
-        _salt = salt,
-        _encryptedPayload = encryptedPayload;
+  }) : _header = header,
+       _salt = salt,
+       _encryptedPayload = encryptedPayload;
 
   /// Creates a new [EncryptedBackupPayload].
   factory EncryptedBackupPayload({
@@ -150,7 +150,9 @@ class EncryptedBackupPayload extends Equatable {
     try {
       final decoded = jsonDecode(jsonString);
       if (decoded is! Map<String, dynamic>) {
-        throw const ValidationException('Invalid backup: Root is not a JSON object.');
+        throw const ValidationException(
+          'Invalid backup: Root is not a JSON object.',
+        );
       }
       return _parseHeader(decoded);
     } on FormatException {
@@ -163,7 +165,9 @@ class EncryptedBackupPayload extends Equatable {
     try {
       final decoded = jsonDecode(jsonString);
       if (decoded is! Map<String, dynamic>) {
-        throw const ValidationException('Invalid backup: Root is not a JSON object.');
+        throw const ValidationException(
+          'Invalid backup: Root is not a JSON object.',
+        );
       }
 
       final header = _parseHeader(decoded);
@@ -176,7 +180,9 @@ class EncryptedBackupPayload extends Equatable {
 
       final payloadRaw = decoded['payload'];
       if (payloadRaw is! String) {
-        throw const ValidationException('Missing or invalid encrypted payload in backup.');
+        throw const ValidationException(
+          'Missing or invalid encrypted payload in backup.',
+        );
       }
       final encryptedPayload = EncryptedPayload.fromBase64(payloadRaw);
 
@@ -193,7 +199,9 @@ class EncryptedBackupPayload extends Equatable {
   static EncryptedBackupHeader _parseHeader(Map<String, dynamic> map) {
     final magic = map['magic'];
     if (magic != EncryptedBackupHeader.expectedMagic) {
-      throw const ValidationException('Invalid backup file: Unrecognized magic header.');
+      throw const ValidationException(
+        'Invalid backup file: Unrecognized magic header.',
+      );
     }
 
     final version = map['version'];
@@ -208,7 +216,9 @@ class EncryptedBackupPayload extends Equatable {
 
     final createdAtStr = map['created_at'];
     if (createdAtStr is! String) {
-      throw const ValidationException('Missing or invalid created_at timestamp in backup.');
+      throw const ValidationException(
+        'Missing or invalid created_at timestamp in backup.',
+      );
     }
     final createdAt = DateTime.tryParse(createdAtStr)?.toUtc();
     if (createdAt == null) {
@@ -217,18 +227,24 @@ class EncryptedBackupPayload extends Equatable {
 
     final entryCount = map['entry_count'];
     if (entryCount is! int || entryCount < 0) {
-      throw const ValidationException('Missing or invalid entry_count in backup.');
+      throw const ValidationException(
+        'Missing or invalid entry_count in backup.',
+      );
     }
 
     final kdfMap = map['kdf_params'];
     if (kdfMap is! Map<String, dynamic>) {
-      throw const ValidationException('Missing or invalid kdf_params in backup.');
+      throw const ValidationException(
+        'Missing or invalid kdf_params in backup.',
+      );
     }
     final kdfParams = KdfParams.fromJson(kdfMap);
 
     final cipherId = map['cipher_algorithm'];
     if (cipherId is! String) {
-      throw const ValidationException('Missing or invalid cipher_algorithm in backup.');
+      throw const ValidationException(
+        'Missing or invalid cipher_algorithm in backup.',
+      );
     }
     final cipher = VaultCipherAlgorithm.fromId(cipherId);
 
@@ -268,10 +284,10 @@ class EncryptedBackupPayload extends Equatable {
 
   @override
   List<Object?> get props => [
-        _header,
-        base64.encode(_salt),
-        _encryptedPayload.toBase64(),
-      ];
+    _header,
+    base64.encode(_salt),
+    _encryptedPayload.toBase64(),
+  ];
 }
 
 /// Plaintext bundle of decrypted vault entries before encryption or after restoration.
@@ -291,28 +307,35 @@ class BackupBundle extends Equatable {
 
   /// Serializes the cleartext bundle into a JSON-encodable map.
   Map<String, dynamic> toJson() => {
-        'version': currentBundleVersion,
-        'vault_id': vaultId,
-        'exported_at': exportedAt.toUtc().toIso8601String(),
-        'entries': entries.map((e) => e.toJson()).toList(growable: false),
-      };
+    'version': currentBundleVersion,
+    'vault_id': vaultId,
+    'exported_at': exportedAt.toUtc().toIso8601String(),
+    'entries': entries.map((e) => e.toJson()).toList(growable: false),
+  };
 
   /// Restores a cleartext bundle from a decoded JSON map.
   factory BackupBundle.fromJson(Map<String, dynamic> json) {
     final vaultId = json['vault_id'];
     if (vaultId is! String || vaultId.isEmpty) {
-      throw const ValidationException('Missing vault_id in decrypted backup bundle.');
+      throw const ValidationException(
+        'Missing vault_id in decrypted backup bundle.',
+      );
     }
 
     final exportedAtStr = json['exported_at'];
     if (exportedAtStr is! String) {
-      throw const ValidationException('Missing exported_at in decrypted backup bundle.');
+      throw const ValidationException(
+        'Missing exported_at in decrypted backup bundle.',
+      );
     }
-    final exportedAt = DateTime.tryParse(exportedAtStr)?.toUtc() ?? DateTime.now().toUtc();
+    final exportedAt =
+        DateTime.tryParse(exportedAtStr)?.toUtc() ?? DateTime.now().toUtc();
 
     final rawEntries = json['entries'];
     if (rawEntries is! List) {
-      throw const ValidationException('Missing entries list in decrypted backup bundle.');
+      throw const ValidationException(
+        'Missing entries list in decrypted backup bundle.',
+      );
     }
 
     final entries = <VaultEntry>[];

@@ -13,14 +13,9 @@ void main() {
   group('PasswordGenerator', () {
     test('generates password of exact default and custom lengths', () {
       final standard = generator.generate();
-      expect(
-        standard.length,
-        equals(PasswordGeneratorOptions.defaultLength),
-      );
+      expect(standard.length, equals(PasswordGeneratorOptions.defaultLength));
 
-      final custom = generator.generate(
-        PasswordGeneratorOptions(length: 48),
-      );
+      final custom = generator.generate(PasswordGeneratorOptions(length: 48));
       expect(custom.length, equals(48));
     });
 

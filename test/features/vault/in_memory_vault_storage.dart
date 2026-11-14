@@ -35,9 +35,7 @@ class InMemoryVaultStorage implements VaultStorageRepository {
 
   @override
   Future<List<EncryptedEntryRecord>> getAllEntries() async {
-    final records = _entryRows.values
-        .map(EncryptedEntryRecord.fromMap)
-        .toList()
+    final records = _entryRows.values.map(EncryptedEntryRecord.fromMap).toList()
       ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
     return records;
   }

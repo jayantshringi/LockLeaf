@@ -100,9 +100,7 @@ class _MasterPasswordSetupScreenState extends State<MasterPasswordSetupScreen> {
         final errorMessage = widget.controller.errorMessage;
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Create Master Password'),
-          ),
+          appBar: AppBar(title: const Text('Create Master Password')),
           body: SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
@@ -125,8 +123,7 @@ class _MasterPasswordSetupScreenState extends State<MasterPasswordSetupScreen> {
                       textInputAction: TextInputAction.next,
                       onChanged: (String value) {
                         setState(() {
-                          _strength =
-                              PasswordStrengthEvaluator.evaluate(value);
+                          _strength = PasswordStrengthEvaluator.evaluate(value);
                         });
                       },
                       validator: (String? value) {

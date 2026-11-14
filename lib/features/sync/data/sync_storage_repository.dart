@@ -79,7 +79,7 @@ class SqliteSyncStorageRepository implements SyncStorageRepository {
   final Database Function() _getDatabase;
 
   SqliteSyncStorageRepository({required Database Function() getDatabase})
-      : _getDatabase = getDatabase;
+    : _getDatabase = getDatabase;
 
   @override
   Future<SyncMetadata?> getMetadata(String vaultId) async {
@@ -223,4 +223,3 @@ class InMemorySyncStorageRepository implements SyncStorageRepository {
     return _queueMap.values.where((item) => item.vaultId == vaultId).length;
   }
 }
-

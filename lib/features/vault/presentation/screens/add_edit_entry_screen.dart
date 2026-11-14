@@ -115,9 +115,8 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
   Future<void> _pickGeneratedPassword() async {
     final generated = await Navigator.of(context).push<String>(
       MaterialPageRoute<String>(
-        builder: (BuildContext context) => const PasswordGeneratorScreen(
-          returnSelection: true,
-        ),
+        builder: (BuildContext context) =>
+            const PasswordGeneratorScreen(returnSelection: true),
       ),
     );
     if (!mounted || generated == null || generated.isEmpty) {
@@ -177,9 +176,9 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
                           .map(
                             (VaultEntryCategory category) =>
                                 DropdownMenuItem<VaultEntryCategory>(
-                              value: category,
-                              child: Text(category.label),
-                            ),
+                                  value: category,
+                                  child: Text(category.label),
+                                ),
                           )
                           .toList(),
                       onChanged: isBusy
@@ -232,8 +231,7 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
                       textInputAction: TextInputAction.next,
                       onChanged: (String value) {
                         setState(() {
-                          _strength =
-                              PasswordStrengthEvaluator.evaluate(value);
+                          _strength = PasswordStrengthEvaluator.evaluate(value);
                         });
                       },
                       validator: (String? value) {

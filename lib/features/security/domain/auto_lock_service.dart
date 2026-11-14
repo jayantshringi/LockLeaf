@@ -17,12 +17,13 @@ class AutoLockService {
     required VoidCallback onLock,
     Duration? timeout,
     bool lockOnBackground = true,
-  })  : _onLock = onLock,
-        _timeout = timeout ??
-            const Duration(
-              seconds: SecurityConstants.defaultAutoLockTimeoutSeconds,
-            ),
-        _lockOnBackground = lockOnBackground {
+  }) : _onLock = onLock,
+       _timeout =
+           timeout ??
+           const Duration(
+             seconds: SecurityConstants.defaultAutoLockTimeoutSeconds,
+           ),
+       _lockOnBackground = lockOnBackground {
     if (_timeout <= Duration.zero) {
       throw const ValidationException('Auto-lock timeout must be positive.');
     }

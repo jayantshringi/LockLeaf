@@ -49,7 +49,10 @@ void main() {
         key: activeKey,
       );
 
-      expect(encrypted.algorithm, equals(VaultCipherAlgorithm.xchacha20Poly1305));
+      expect(
+        encrypted.algorithm,
+        equals(VaultCipherAlgorithm.xchacha20Poly1305),
+      );
       expect(encrypted.nonce.length, equals(24));
       expect(decrypted, equals(plaintext));
     });
@@ -224,4 +227,3 @@ void main() {
     });
   });
 }
-

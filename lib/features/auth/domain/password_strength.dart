@@ -23,10 +23,7 @@ enum PasswordStrengthLevel {
   /// Normalized progress bar fraction in `[0.0, 1.0]`.
   final double progress;
 
-  const PasswordStrengthLevel({
-    required this.label,
-    required this.progress,
-  });
+  const PasswordStrengthLevel({required this.label, required this.progress});
 }
 
 /// Evaluation result returned by [PasswordStrengthEvaluator].
@@ -52,12 +49,7 @@ class PasswordStrengthResult extends Equatable {
   });
 
   @override
-  List<Object?> get props => [
-        level,
-        score,
-        estimatedEntropyBits,
-        feedback,
-      ];
+  List<Object?> get props => [level, score, estimatedEntropyBits, feedback];
 }
 
 /// Evaluates password strength locally using length, diversity, and entropy.

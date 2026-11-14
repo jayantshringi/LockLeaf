@@ -81,11 +81,13 @@ void main() {
 
       expect(
         () => EncryptedBackupPayload.inspect(tampered),
-        throwsA(isA<ValidationException>().having(
-          (e) => e.message,
-          'message',
-          contains('Unrecognized magic header'),
-        )),
+        throwsA(
+          isA<ValidationException>().having(
+            (e) => e.message,
+            'message',
+            contains('Unrecognized magic header'),
+          ),
+        ),
       );
     });
 
@@ -97,11 +99,13 @@ void main() {
 
       expect(
         () => EncryptedBackupPayload.inspect(tampered),
-        throwsA(isA<ValidationException>().having(
-          (e) => e.message,
-          'message',
-          contains('Unsupported backup format version'),
-        )),
+        throwsA(
+          isA<ValidationException>().having(
+            (e) => e.message,
+            'message',
+            contains('Unsupported backup format version'),
+          ),
+        ),
       );
     });
 
@@ -172,7 +176,10 @@ void main() {
       expect(restored.entries.length, equals(2));
       expect(restored.entries[0].title, equals('GitHub'));
       expect(restored.entries[0].password, equals('SecretPassword123!'));
-      expect(restored.entries[1].category, equals(VaultEntryCategory.secureNote));
+      expect(
+        restored.entries[1].category,
+        equals(VaultEntryCategory.secureNote),
+      );
     });
   });
 }

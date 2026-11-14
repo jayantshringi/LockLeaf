@@ -33,24 +33,26 @@ void main() {
       expect(SecurityConstants.clipboardClearDelaySeconds, equals(30));
     });
 
-    test('copies secret and clears clipboard automatically after delay',
-        () async {
-      final secret = randomToken();
+    test(
+      'copies secret and clears clipboard automatically after delay',
+      () async {
+        final secret = randomToken();
 
-      await clipboardService.copySecret(
-        secret,
-        clearAfter: const Duration(milliseconds: 40),
-      );
+        await clipboardService.copySecret(
+          secret,
+          clearAfter: const Duration(milliseconds: 40),
+        );
 
-      expect(adapter.currentText, equals(secret));
-      expect(clipboardService.hasPendingClear, isTrue);
+        expect(adapter.currentText, equals(secret));
+        expect(clipboardService.hasPendingClear, isTrue);
 
-      await Future<void>.delayed(const Duration(milliseconds: 80));
+        await Future<void>.delayed(const Duration(milliseconds: 80));
 
-      expect(adapter.currentText, isEmpty);
-      expect(adapter.clearCount, equals(1));
-      expect(clipboardService.hasPendingClear, isFalse);
-    });
+        expect(adapter.currentText, isEmpty);
+        expect(adapter.clearCount, equals(1));
+        expect(clipboardService.hasPendingClear, isFalse);
+      },
+    );
 
     test('does not wipe newer unrelated clipboard text', () async {
       final secret = randomToken();
@@ -82,19 +84,21 @@ void main() {
       expect(clipboardService.hasPendingClear, isFalse);
     });
 
-    test('clears clipboard when OS denies reading current clipboard text',
-        () async {
-      final secret = randomToken();
+    test(
+      'clears clipboard when OS denies reading current clipboard text',
+      () async {
+        final secret = randomToken();
 
-      await clipboardService.copySecret(
-        secret,
-        clearAfter: const Duration(milliseconds: 40),
-      );
-      adapter.currentText = null;
+        await clipboardService.copySecret(
+          secret,
+          clearAfter: const Duration(milliseconds: 40),
+        );
+        adapter.currentText = null;
 
-      await Future<void>.delayed(const Duration(milliseconds: 80));
+        await Future<void>.delayed(const Duration(milliseconds: 80));
 
-      expect(adapter.clearCount, equals(1));
-    });
+        expect(adapter.clearCount, equals(1));
+      },
+    );
   });
 }

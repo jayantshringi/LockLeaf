@@ -23,16 +23,13 @@ void main() {
     randomService = SecureRandomService();
   });
 
-  testWidgets('unlock screen handles validation, theme toggle, and login',
-      (WidgetTester tester) async {
+  testWidgets('unlock screen handles validation, theme toggle, and login', (
+    WidgetTester tester,
+  ) async {
     final masterPass = randomToken();
     final wrongPass = randomToken();
     final storage = InMemoryVaultStorage();
-    final fastParams = KdfParams(
-      memoryKiB: 256,
-      iterations: 1,
-      parallelism: 1,
-    );
+    final fastParams = KdfParams(memoryKiB: 256, iterations: 1, parallelism: 1);
 
     final vaultService = VaultService(
       storage: storage,

@@ -25,15 +25,8 @@ void main() {
   setUp(() {
     storage = InMemoryVaultStorage();
     randomService = SecureRandomService();
-    vaultService = VaultService(
-      storage: storage,
-      randomService: randomService,
-    );
-    fastParams = KdfParams(
-      memoryKiB: 256,
-      iterations: 1,
-      parallelism: 1,
-    );
+    vaultService = VaultService(storage: storage, randomService: randomService);
+    fastParams = KdfParams(memoryKiB: 256, iterations: 1, parallelism: 1);
   });
 
   tearDown(() {
@@ -67,30 +60,32 @@ void main() {
       expect(vaultService.isUnlocked, isTrue);
     });
 
-    test('rejects short master passwords and duplicate initialization',
-        () async {
-      await expectLater(
-        vaultService.createVault(
-          masterPassword: generateEphemeralInput(length: 8),
-          kdfParams: fastParams,
-        ),
-        throwsA(isA<ValidationException>()),
-      );
+    test(
+      'rejects short master passwords and duplicate initialization',
+      () async {
+        await expectLater(
+          vaultService.createVault(
+            masterPassword: generateEphemeralInput(length: 8),
+            kdfParams: fastParams,
+          ),
+          throwsA(isA<ValidationException>()),
+        );
 
-      final validPassphrase = generateEphemeralInput();
-      await vaultService.createVault(
-        masterPassword: validPassphrase,
-        kdfParams: fastParams,
-      );
-
-      await expectLater(
-        vaultService.createVault(
+        final validPassphrase = generateEphemeralInput();
+        await vaultService.createVault(
           masterPassword: validPassphrase,
           kdfParams: fastParams,
-        ),
-        throwsA(isA<ValidationException>()),
-      );
-    });
+        );
+
+        await expectLater(
+          vaultService.createVault(
+            masterPassword: validPassphrase,
+            kdfParams: fastParams,
+          ),
+          throwsA(isA<ValidationException>()),
+        );
+      },
+    );
 
     test('rejects wrong or empty master password on unlock', () async {
       final correctPass = generateEphemeralInput();
@@ -114,12 +109,15 @@ void main() {
       expect(vaultService.isUnlocked, isFalse);
     });
 
-    test('throws StorageException when unlocking uninitialized vault', () async {
-      await expectLater(
-        vaultService.unlockVault(generateEphemeralInput()),
-        throwsA(isA<StorageException>()),
-      );
-    });
+    test(
+      'throws StorageException when unlocking uninitialized vault',
+      () async {
+        await expectLater(
+          vaultService.unlockVault(generateEphemeralInput()),
+          throwsA(isA<StorageException>()),
+        );
+      },
+    );
 
     test('rotates master password without losing encrypted entries', () async {
       final oldPass = generateEphemeralInput();
@@ -161,47 +159,51 @@ void main() {
       expect(restored?.password, equals(entrySecret));
     });
 
-    test('resets master password using recovery key and retains entries', () async {
-      final initialPass = generateEphemeralInput();
-      final newPass = generateEphemeralInput();
-      final entrySecret = generateEphemeralInput(length: 16);
+    test(
+      'resets master password using recovery key and retains entries',
+      () async {
+        final initialPass = generateEphemeralInput();
+        final newPass = generateEphemeralInput();
+        final entrySecret = generateEphemeralInput(length: 16);
 
-      final recoveryKey = await vaultService.createVault(
-        masterPassword: initialPass,
-        kdfParams: fastParams,
-      );
+        final recoveryKey = await vaultService.createVault(
+          masterPassword: initialPass,
+          kdfParams: fastParams,
+        );
 
-      final created = await vaultService.createEntry(
-        title: 'Recovery Target',
-        username: 'user@example.com',
-        password: entrySecret,
-      );
+        final created = await vaultService.createEntry(
+          title: 'Recovery Target',
+          username: 'user@example.com',
+          password: entrySecret,
+        );
 
-      vaultService.lockVault();
+        vaultService.lockVault();
 
-      // Reset master password using the recovery key
-      final rotatedKey = await vaultService.resetMasterPasswordWithRecoveryKey(
-        recoveryKey: recoveryKey,
-        newPassword: newPass,
-      );
+        // Reset master password using the recovery key
+        final rotatedKey = await vaultService
+            .resetMasterPasswordWithRecoveryKey(
+              recoveryKey: recoveryKey,
+              newPassword: newPass,
+            );
 
-      expect(rotatedKey.formatted, isNotEmpty);
-      expect(vaultService.isUnlocked, isTrue);
+        expect(rotatedKey.formatted, isNotEmpty);
+        expect(vaultService.isUnlocked, isTrue);
 
-      final entryAfterReset = await vaultService.getEntryById(created.id);
-      expect(entryAfterReset?.password, equals(entrySecret));
+        final entryAfterReset = await vaultService.getEntryById(created.id);
+        expect(entryAfterReset?.password, equals(entrySecret));
 
-      vaultService.lockVault();
+        vaultService.lockVault();
 
-      // Old password must fail
-      await expectLater(
-        vaultService.unlockVault(initialPass),
-        throwsA(isA<AuthenticationException>()),
-      );
+        // Old password must fail
+        await expectLater(
+          vaultService.unlockVault(initialPass),
+          throwsA(isA<AuthenticationException>()),
+        );
 
-      // New password unlocks successfully
-      await vaultService.unlockVault(newPass);
-      expect(vaultService.isUnlocked, isTrue);
-    });
+        // New password unlocks successfully
+        await vaultService.unlockVault(newPass);
+        expect(vaultService.isUnlocked, isTrue);
+      },
+    );
   });
 }

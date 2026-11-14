@@ -30,9 +30,9 @@ class EncryptedPayload {
     required Uint8List nonce,
     required Uint8List cipherText,
     required Uint8List mac,
-  })  : _nonce = nonce,
-        _cipherText = cipherText,
-        _mac = mac;
+  }) : _nonce = nonce,
+       _cipherText = cipherText,
+       _mac = mac;
 
   /// Creates a validated [EncryptedPayload] from raw cryptographic components.
   factory EncryptedPayload({
@@ -88,11 +88,7 @@ class EncryptedPayload {
 
   /// Converts this envelope back into a [SecretBox] for decryption.
   SecretBox toSecretBox() {
-    return SecretBox(
-      _cipherText,
-      nonce: _nonce,
-      mac: Mac(_mac),
-    );
+    return SecretBox(_cipherText, nonce: _nonce, mac: Mac(_mac));
   }
 
   /// Serializes the version header, algorithm ID, nonce, ciphertext, and MAC.

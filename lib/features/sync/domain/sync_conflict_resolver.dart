@@ -62,7 +62,8 @@ class SyncConflictResolver {
           remoteRecord.updatedAt.isAtSameMomentAs(localEntry.updatedAt)) {
         return const ConflictResolutionResult(
           decision: ConflictDecision.deleteLocal,
-          reason: 'Remote deletion timestamp is newer or equal to local update.',
+          reason:
+              'Remote deletion timestamp is newer or equal to local update.',
         );
       } else {
         return const ConflictResolutionResult(
@@ -124,4 +125,3 @@ class SyncConflictResolver {
     }
   }
 }
-

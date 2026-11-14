@@ -12,11 +12,7 @@ class VaultEntryTile extends StatelessWidget {
   final VoidCallback onTap;
 
   /// Creates a [VaultEntryTile].
-  const VaultEntryTile({
-    super.key,
-    required this.entry,
-    required this.onTap,
-  });
+  const VaultEntryTile({super.key, required this.entry, required this.onTap});
 
   /// Returns an icon appropriate for [category].
   static IconData iconForCategory(VaultEntryCategory category) {

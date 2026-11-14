@@ -9,10 +9,7 @@ import 'package:lockleaf/features/sync/presentation/sync_controller.dart';
 class SyncSettingsScreen extends StatefulWidget {
   final SyncController syncController;
 
-  const SyncSettingsScreen({
-    super.key,
-    required this.syncController,
-  });
+  const SyncSettingsScreen({super.key, required this.syncController});
 
   @override
   State<SyncSettingsScreen> createState() => _SyncSettingsScreenState();
@@ -108,9 +105,7 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
     final controller = widget.syncController;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cloud Synchronization'),
-      ),
+      appBar: AppBar(title: const Text('Cloud Synchronization')),
       body: SafeArea(
         child: AnimatedBuilder(
           animation: controller,
@@ -175,7 +170,9 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
                               const SizedBox(width: 10),
                               Text(
                                 _statusText(state),
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ],
                           ),
@@ -192,7 +189,9 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
                           const SizedBox(height: 4),
                           Text(
                             'Active Backend: ${controller.transport.name}',
-                            style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.grey,
+                            ),
                           ),
                           const SizedBox(height: 16),
                           SizedBox(
@@ -204,10 +203,14 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
                                   ? const SizedBox(
                                       width: 18,
                                       height: 18,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
                                     )
                                   : const Icon(Icons.sync_rounded),
-                              label: Text(isSyncing ? 'Syncing...' : 'Sync Now'),
+                              label: Text(
+                                isSyncing ? 'Syncing...' : 'Sync Now',
+                              ),
                             ),
                           ),
                         ],
@@ -269,12 +272,16 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
                         const SizedBox(height: 16),
                         OutlinedButton.icon(
                           key: const Key('test_connection_button'),
-                          onPressed: _testingConnection ? null : _testConnection,
+                          onPressed: _testingConnection
+                              ? null
+                              : _testConnection,
                           icon: _testingConnection
                               ? const SizedBox(
                                   width: 16,
                                   height: 16,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 )
                               : const Icon(Icons.network_check_rounded),
                           label: const Text('Test Connection'),
@@ -300,13 +307,29 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
           child: CircularProgressIndicator(strokeWidth: 2),
         );
       case SyncState.success:
-        return const Icon(Icons.check_circle_rounded, color: AppTheme.primaryGreen, size: 20);
+        return const Icon(
+          Icons.check_circle_rounded,
+          color: AppTheme.primaryGreen,
+          size: 20,
+        );
       case SyncState.offline:
-        return const Icon(Icons.cloud_off_rounded, color: Colors.grey, size: 20);
+        return const Icon(
+          Icons.cloud_off_rounded,
+          color: Colors.grey,
+          size: 20,
+        );
       case SyncState.error:
-        return const Icon(Icons.error_outline_rounded, color: AppTheme.errorRed, size: 20);
+        return const Icon(
+          Icons.error_outline_rounded,
+          color: AppTheme.errorRed,
+          size: 20,
+        );
       case SyncState.idle:
-        return const Icon(Icons.cloud_done_outlined, color: AppTheme.primaryGreen, size: 20);
+        return const Icon(
+          Icons.cloud_done_outlined,
+          color: AppTheme.primaryGreen,
+          size: 20,
+        );
     }
   }
 
@@ -325,4 +348,3 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
     }
   }
 }
-

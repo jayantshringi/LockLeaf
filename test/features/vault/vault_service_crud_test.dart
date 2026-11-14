@@ -28,17 +28,10 @@ void main() {
   setUp(() async {
     storage = InMemoryVaultStorage();
     randomService = SecureRandomService();
-    vaultService = VaultService(
-      storage: storage,
-      randomService: randomService,
-    );
+    vaultService = VaultService(storage: storage, randomService: randomService);
     await vaultService.createVault(
       masterPassword: generateToken(),
-      kdfParams: KdfParams(
-        memoryKiB: 256,
-        iterations: 1,
-        parallelism: 1,
-      ),
+      kdfParams: KdfParams(memoryKiB: 256, iterations: 1, parallelism: 1),
     );
   });
 

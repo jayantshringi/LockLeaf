@@ -93,7 +93,10 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
     required bool symbols,
   }) {
     final activeCount =
-        (lower ? 1 : 0) + (upper ? 1 : 0) + (digits ? 1 : 0) + (symbols ? 1 : 0);
+        (lower ? 1 : 0) +
+        (upper ? 1 : 0) +
+        (digits ? 1 : 0) +
+        (symbols ? 1 : 0);
     return activeCount > 0;
   }
 
@@ -102,7 +105,8 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
     final String message;
     if (security != null) {
       await security.copySecret(_generated);
-      message = 'Generated secret copied — clears in '
+      message =
+          'Generated secret copied — clears in '
           '${SecurityConstants.clipboardClearDelaySeconds}s';
     } else {
       await Clipboard.setData(ClipboardData(text: _generated));
@@ -111,9 +115,8 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
     if (!mounted) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -121,9 +124,7 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
     final strength = PasswordStrengthEvaluator.evaluate(_generated);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Generator'),
-      ),
+      appBar: AppBar(title: const Text('Generator')),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(20),
@@ -161,9 +162,9 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
                       _generated,
                       key: const Key('generator_output_text'),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontFamily: 'monospace',
-                            fontWeight: FontWeight.w600,
-                          ),
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     PasswordStrengthMeter(result: strength),
@@ -365,9 +366,9 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
                   .map(
                     (MapEntry<String, String> entry) =>
                         DropdownMenuItem<String>(
-                      value: entry.key,
-                      child: Text(entry.value),
-                    ),
+                          value: entry.key,
+                          child: Text(entry.value),
+                        ),
                   )
                   .toList(),
               onChanged: (String? selected) {

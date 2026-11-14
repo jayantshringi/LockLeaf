@@ -29,10 +29,7 @@ void main() {
       expect(standard.split('-').length, equals(6));
 
       final custom = generator.generate(
-        PassphraseGeneratorOptions(
-          wordCount: 8,
-          separator: '_',
-        ),
+        PassphraseGeneratorOptions(wordCount: 8, separator: '_'),
       );
       expect(custom.split('_').length, equals(8));
     });

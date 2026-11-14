@@ -40,10 +40,11 @@ class RecoveryKeyService {
     Argon2idKdfService? kdfService,
     CipherService? cipherService,
     SecureRandomService? randomService,
-  })  : _kdfService = kdfService ?? Argon2idKdfService(),
-        _randomService = randomService ?? SecureRandomService(),
-        _cipherService = cipherService ??
-            CipherService(randomService: randomService ?? SecureRandomService());
+  }) : _kdfService = kdfService ?? Argon2idKdfService(),
+       _randomService = randomService ?? SecureRandomService(),
+       _cipherService =
+           cipherService ??
+           CipherService(randomService: randomService ?? SecureRandomService());
 
   /// Derives the 256-bit recovery wrapping subkey from a [RecoveryKey] and [recoverySalt].
   Future<ManagedSecretKey> deriveWrappingKey({

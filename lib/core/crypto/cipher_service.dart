@@ -18,7 +18,7 @@ class CipherService {
 
   /// Creates a [CipherService] using [SecureRandomService] for unique nonces.
   CipherService({SecureRandomService? randomService})
-      : _randomService = randomService ?? SecureRandomService();
+    : _randomService = randomService ?? SecureRandomService();
 
   /// Encrypts [plaintext] bytes using [key] and [algorithm].
   ///
@@ -93,8 +93,9 @@ class CipherService {
     String? associatedData,
   }) async {
     final plainBytes = Uint8List.fromList(utf8.encode(plaintext));
-    final aadBytes =
-        associatedData == null ? null : utf8.encode(associatedData);
+    final aadBytes = associatedData == null
+        ? null
+        : utf8.encode(associatedData);
     try {
       return await encryptBytes(
         plaintext: plainBytes,
@@ -113,8 +114,9 @@ class CipherService {
     required ManagedSecretKey key,
     String? associatedData,
   }) async {
-    final aadBytes =
-        associatedData == null ? null : utf8.encode(associatedData);
+    final aadBytes = associatedData == null
+        ? null
+        : utf8.encode(associatedData);
     final clearBytes = await decryptBytes(
       payload: payload,
       key: key,

@@ -42,9 +42,9 @@ class VaultController extends ChangeNotifier {
     required VaultService vaultService,
     KdfParams kdfParams = const KdfParams.standard(),
     ThemeMode initialThemeMode = ThemeMode.dark,
-  })  : _vaultService = vaultService,
-        _kdfParams = kdfParams,
-        _themeMode = initialThemeMode;
+  }) : _vaultService = vaultService,
+       _kdfParams = kdfParams,
+       _themeMode = initialThemeMode;
 
   /// Underlying zero-knowledge vault service.
   VaultService get vaultService => _vaultService;
@@ -101,10 +101,12 @@ class VaultController extends ChangeNotifier {
         if (normalizedQuery.isEmpty) {
           return true;
         }
-        final matchesTitle =
-            entry.title.toLowerCase().contains(normalizedQuery);
-        final matchesUser =
-            entry.username.toLowerCase().contains(normalizedQuery);
+        final matchesTitle = entry.title.toLowerCase().contains(
+          normalizedQuery,
+        );
+        final matchesUser = entry.username.toLowerCase().contains(
+          normalizedQuery,
+        );
         final matchesUrl =
             entry.url?.toLowerCase().contains(normalizedQuery) ?? false;
         return matchesTitle || matchesUser || matchesUrl;
@@ -155,12 +157,12 @@ class VaultController extends ChangeNotifier {
     required String newMasterPassword,
   }) async {
     return _runBusyAction(() async {
-      _lastGeneratedRecoveryKey =
-          await _vaultService.resetMasterPasswordWithRecoveryKey(
-        recoveryKey: recoveryKey,
-        newPassword: newMasterPassword,
-        newKdfParams: _kdfParams,
-      );
+      _lastGeneratedRecoveryKey = await _vaultService
+          .resetMasterPasswordWithRecoveryKey(
+            recoveryKey: recoveryKey,
+            newPassword: newMasterPassword,
+            newKdfParams: _kdfParams,
+          );
       _entries = await _vaultService.getAllEntries();
       _stage = AuthFlowStage.unlocked;
     });
@@ -287,8 +289,9 @@ class VaultController extends ChangeNotifier {
 
   /// Toggles between dark and light theme modes.
   void toggleDarkMode() {
-    _themeMode =
-        _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    _themeMode = _themeMode == ThemeMode.dark
+        ? ThemeMode.light
+        : ThemeMode.dark;
     notifyListeners();
   }
 

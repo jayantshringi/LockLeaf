@@ -12,7 +12,7 @@ class ManagedSecretKey {
   bool _destroyed = false;
 
   ManagedSecretKey._(this._backingBuffer, this._keyData)
-      : length = _backingBuffer.length;
+    : length = _backingBuffer.length;
 
   /// Creates a [ManagedSecretKey] from raw [bytes], taking an isolated copy.
   ///
@@ -22,10 +22,7 @@ class ManagedSecretKey {
       throw const CryptoException('Secret key bytes cannot be empty.');
     }
     final buffer = Uint8List.fromList(bytes);
-    final keyData = SecretKeyData(
-      buffer,
-      overwriteWhenDestroyed: true,
-    );
+    final keyData = SecretKeyData(buffer, overwriteWhenDestroyed: true);
     return ManagedSecretKey._(buffer, keyData);
   }
 
@@ -65,4 +62,3 @@ class ManagedSecretKey {
     }
   }
 }
-

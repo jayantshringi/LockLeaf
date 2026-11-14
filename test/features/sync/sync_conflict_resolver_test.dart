@@ -54,7 +54,11 @@ void main() {
   group('SyncConflictResolver', () {
     test('applies new remote entry when local entry is absent', () {
       final now = DateTime.utc(2026, 11, 14, 10, 0, 0);
-      final remoteRecord = makeSyncRecord(id: 'entry-1', updatedAt: now, isDeleted: false);
+      final remoteRecord = makeSyncRecord(
+        id: 'entry-1',
+        updatedAt: now,
+        isDeleted: false,
+      );
       final remoteEntry = makeEntry(id: 'entry-1', updatedAt: now);
 
       final result = resolver.resolve(
@@ -68,7 +72,11 @@ void main() {
 
     test('ignores remote tombstone when local entry is already absent', () {
       final now = DateTime.utc(2026, 11, 14, 10, 0, 0);
-      final remoteRecord = makeSyncRecord(id: 'entry-2', updatedAt: now, isDeleted: true);
+      final remoteRecord = makeSyncRecord(
+        id: 'entry-2',
+        updatedAt: now,
+        isDeleted: true,
+      );
 
       final result = resolver.resolve(
         localEntry: null,
@@ -83,7 +91,11 @@ void main() {
       final remoteTime = DateTime.utc(2026, 11, 14, 11, 0, 0);
 
       final localEntry = makeEntry(id: 'entry-3', updatedAt: localTime);
-      final remoteRecord = makeSyncRecord(id: 'entry-3', updatedAt: remoteTime, isDeleted: true);
+      final remoteRecord = makeSyncRecord(
+        id: 'entry-3',
+        updatedAt: remoteTime,
+        isDeleted: true,
+      );
 
       final result = resolver.resolve(
         localEntry: localEntry,
@@ -93,28 +105,43 @@ void main() {
       expect(result.decision, equals(ConflictDecision.deleteLocal));
     });
 
-    test('keeps local entry when local update is newer than remote tombstone', () {
-      final localTime = DateTime.utc(2026, 11, 14, 12, 0, 0);
-      final remoteTime = DateTime.utc(2026, 11, 14, 10, 0, 0);
+    test(
+      'keeps local entry when local update is newer than remote tombstone',
+      () {
+        final localTime = DateTime.utc(2026, 11, 14, 12, 0, 0);
+        final remoteTime = DateTime.utc(2026, 11, 14, 10, 0, 0);
 
-      final localEntry = makeEntry(id: 'entry-4', updatedAt: localTime);
-      final remoteRecord = makeSyncRecord(id: 'entry-4', updatedAt: remoteTime, isDeleted: true);
+        final localEntry = makeEntry(id: 'entry-4', updatedAt: localTime);
+        final remoteRecord = makeSyncRecord(
+          id: 'entry-4',
+          updatedAt: remoteTime,
+          isDeleted: true,
+        );
 
-      final result = resolver.resolve(
-        localEntry: localEntry,
-        remoteRecord: remoteRecord,
-      );
+        final result = resolver.resolve(
+          localEntry: localEntry,
+          remoteRecord: remoteRecord,
+        );
 
-      expect(result.decision, equals(ConflictDecision.keepLocal));
-    });
+        expect(result.decision, equals(ConflictDecision.keepLocal));
+      },
+    );
 
     test('applies remote when remote update is strictly newer', () {
       final localTime = DateTime.utc(2026, 11, 14, 9, 0, 0);
       final remoteTime = DateTime.utc(2026, 11, 14, 10, 0, 0);
 
       final localEntry = makeEntry(id: 'entry-5', updatedAt: localTime);
-      final remoteEntry = makeEntry(id: 'entry-5', updatedAt: remoteTime, title: 'Updated Remotely');
-      final remoteRecord = makeSyncRecord(id: 'entry-5', updatedAt: remoteTime, isDeleted: false);
+      final remoteEntry = makeEntry(
+        id: 'entry-5',
+        updatedAt: remoteTime,
+        title: 'Updated Remotely',
+      );
+      final remoteRecord = makeSyncRecord(
+        id: 'entry-5',
+        updatedAt: remoteTime,
+        isDeleted: false,
+      );
 
       final result = resolver.resolve(
         localEntry: localEntry,
@@ -129,9 +156,17 @@ void main() {
       final localTime = DateTime.utc(2026, 11, 14, 11, 0, 0);
       final remoteTime = DateTime.utc(2026, 11, 14, 10, 0, 0);
 
-      final localEntry = makeEntry(id: 'entry-6', updatedAt: localTime, title: 'Updated Locally');
+      final localEntry = makeEntry(
+        id: 'entry-6',
+        updatedAt: localTime,
+        title: 'Updated Locally',
+      );
       final remoteEntry = makeEntry(id: 'entry-6', updatedAt: remoteTime);
-      final remoteRecord = makeSyncRecord(id: 'entry-6', updatedAt: remoteTime, isDeleted: false);
+      final remoteRecord = makeSyncRecord(
+        id: 'entry-6',
+        updatedAt: remoteTime,
+        isDeleted: false,
+      );
 
       final result = resolver.resolve(
         localEntry: localEntry,
@@ -145,8 +180,16 @@ void main() {
     test('tie-breaks equal timestamps by higher version', () {
       final sameTime = DateTime.utc(2026, 11, 14, 10, 0, 0);
 
-      final localEntry = makeEntry(id: 'entry-7', updatedAt: sameTime, schemaVersion: 2);
-      final remoteEntry = makeEntry(id: 'entry-7', updatedAt: sameTime, schemaVersion: 3);
+      final localEntry = makeEntry(
+        id: 'entry-7',
+        updatedAt: sameTime,
+        schemaVersion: 2,
+      );
+      final remoteEntry = makeEntry(
+        id: 'entry-7',
+        updatedAt: sameTime,
+        schemaVersion: 3,
+      );
       final remoteRecord = makeSyncRecord(
         id: 'entry-7',
         updatedAt: sameTime,
@@ -163,29 +206,39 @@ void main() {
       expect(result.decision, equals(ConflictDecision.applyRemote));
     });
 
-    test('tie-breaks equal timestamps and versions by deviceId lexicographically', () {
-      final sameTime = DateTime.utc(2026, 11, 14, 10, 0, 0);
+    test(
+      'tie-breaks equal timestamps and versions by deviceId lexicographically',
+      () {
+        final sameTime = DateTime.utc(2026, 11, 14, 10, 0, 0);
 
-      final localEntry = makeEntry(id: 'entry-8', updatedAt: sameTime, schemaVersion: 1);
-      final remoteEntry = makeEntry(id: 'entry-8', updatedAt: sameTime, schemaVersion: 1);
+        final localEntry = makeEntry(
+          id: 'entry-8',
+          updatedAt: sameTime,
+          schemaVersion: 1,
+        );
+        final remoteEntry = makeEntry(
+          id: 'entry-8',
+          updatedAt: sameTime,
+          schemaVersion: 1,
+        );
 
-      // 'device-beta' > 'device-alpha' -> remote wins
-      final remoteRecord = makeSyncRecord(
-        id: 'entry-8',
-        updatedAt: sameTime,
-        isDeleted: false,
-        version: 1,
-        deviceId: 'device-beta',
-      );
+        // 'device-beta' > 'device-alpha' -> remote wins
+        final remoteRecord = makeSyncRecord(
+          id: 'entry-8',
+          updatedAt: sameTime,
+          isDeleted: false,
+          version: 1,
+          deviceId: 'device-beta',
+        );
 
-      final result = resolver.resolve(
-        localEntry: localEntry,
-        remoteRecord: remoteRecord,
-        decryptedRemoteEntry: remoteEntry,
-      );
+        final result = resolver.resolve(
+          localEntry: localEntry,
+          remoteRecord: remoteRecord,
+          decryptedRemoteEntry: remoteEntry,
+        );
 
-      expect(result.decision, equals(ConflictDecision.applyRemote));
-    });
+        expect(result.decision, equals(ConflictDecision.applyRemote));
+      },
+    );
   });
 }
-

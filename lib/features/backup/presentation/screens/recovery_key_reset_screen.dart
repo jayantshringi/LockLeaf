@@ -12,10 +12,7 @@ import 'package:lockleaf/features/backup/presentation/screens/recovery_key_displ
 class RecoveryKeyResetScreen extends StatefulWidget {
   final VaultController vaultController;
 
-  const RecoveryKeyResetScreen({
-    super.key,
-    required this.vaultController,
-  });
+  const RecoveryKeyResetScreen({super.key, required this.vaultController});
 
   @override
   State<RecoveryKeyResetScreen> createState() => _RecoveryKeyResetScreenState();
@@ -87,9 +84,8 @@ class _RecoveryKeyResetScreenState extends State<RecoveryKeyResetScreen> {
     try {
       parsedKey = RecoveryKey.fromString(_keyController.text.trim());
     } on ValidationException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message)));
       return;
     }
 
@@ -127,9 +123,7 @@ class _RecoveryKeyResetScreenState extends State<RecoveryKeyResetScreen> {
     final controller = widget.vaultController;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Reset Master Password'),
-      ),
+      appBar: AppBar(title: const Text('Reset Master Password')),
       body: SafeArea(
         child: AnimatedBuilder(
           animation: controller,
@@ -224,7 +218,8 @@ class _RecoveryKeyResetScreenState extends State<RecoveryKeyResetScreen> {
                           return 'Please enter your recovery key.';
                         }
                         if (!_isKeyChecksumValid) {
-                          return _keyFormatValidationMessage ?? 'Invalid recovery key.';
+                          return _keyFormatValidationMessage ??
+                              'Invalid recovery key.';
                         }
                         return null;
                       },
@@ -255,8 +250,9 @@ class _RecoveryKeyResetScreenState extends State<RecoveryKeyResetScreen> {
                               ? Icons.visibility_off_outlined
                               : Icons.visibility_outlined,
                         ),
-                        onPressed: () =>
-                            setState(() => _obscurePassword = !_obscurePassword),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
                       validator: (value) {
                         if (value == null || value.length < 12) {

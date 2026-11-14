@@ -77,7 +77,9 @@ void main() {
 
   EncryptedEntryRecord encryptToRecord(VaultSession session, VaultEntry entry) {
     final cipher = CipherService();
-    final jsonBytes = Uint8List.fromList(utf8.encode(jsonEncode(entry.toJson())));
+    final jsonBytes = Uint8List.fromList(
+      utf8.encode(jsonEncode(entry.toJson())),
+    );
     final payloadFuture = cipher.encryptBytes(
       plaintext: jsonBytes,
       key: session.activeKey,
@@ -111,7 +113,9 @@ void main() {
       );
 
       final cipher = CipherService();
-      final jsonBytes = Uint8List.fromList(utf8.encode(jsonEncode(newEntry.toJson())));
+      final jsonBytes = Uint8List.fromList(
+        utf8.encode(jsonEncode(newEntry.toJson())),
+      );
       final payload = await cipher.encryptBytes(
         plaintext: jsonBytes,
         key: sessionAlpha.activeKey,
@@ -164,7 +168,9 @@ void main() {
       );
 
       final cipher = CipherService();
-      final jsonBytes = Uint8List.fromList(utf8.encode(jsonEncode(entry.toJson())));
+      final jsonBytes = Uint8List.fromList(
+        utf8.encode(jsonEncode(entry.toJson())),
+      );
       final payload = await cipher.encryptBytes(
         plaintext: jsonBytes,
         key: sessionAlpha.activeKey,
@@ -200,7 +206,9 @@ void main() {
       await engineAlpha.synchronize(session: sessionAlpha);
 
       // Beta syncs and should have deleted it locally
-      final betaDeleteResult = await engineBeta.synchronize(session: sessionBeta);
+      final betaDeleteResult = await engineBeta.synchronize(
+        session: sessionBeta,
+      );
       expect(betaDeleteResult.isSuccess, isTrue);
       expect(betaDeleteResult.deletedLocalCount, equals(1));
       expect(await vaultStorageBeta.getEntryById(entry.id), isNull);

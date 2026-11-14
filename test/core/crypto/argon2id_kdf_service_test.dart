@@ -13,10 +13,7 @@ void main() {
   late KdfParams fastTestParams;
 
   String generateEphemeralInput() {
-    final codes = List<int>.generate(
-      20,
-      (_) => 97 + randomService.nextInt(26),
-    );
+    final codes = List<int>.generate(20, (_) => 97 + randomService.nextInt(26));
     return String.fromCharCodes(codes);
   }
 
@@ -190,4 +187,3 @@ void main() {
     });
   });
 }
-

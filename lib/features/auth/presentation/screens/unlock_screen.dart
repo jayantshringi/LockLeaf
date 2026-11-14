@@ -115,18 +115,15 @@ class _UnlockScreenState extends State<UnlockScreen> {
                       Text(
                         'Vault Locked',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall
+                        style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Enter your master password to decrypt your local vault.',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey,
-                            ),
+                        style: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(color: Colors.grey),
                       ),
                       const SizedBox(height: 32),
                       SecretTextField(
@@ -181,8 +178,9 @@ class _UnlockScreenState extends State<UnlockScreen> {
                           height: 52,
                           child: OutlinedButton.icon(
                             key: const Key('unlock_biometric_button'),
-                            onPressed:
-                                isBusy ? null : () => unawaited(_unlockBiometrics()),
+                            onPressed: isBusy
+                                ? null
+                                : () => unawaited(_unlockBiometrics()),
                             icon: const Icon(Icons.fingerprint),
                             label: const Text('Unlock with Biometrics'),
                           ),
@@ -196,13 +194,16 @@ class _UnlockScreenState extends State<UnlockScreen> {
                             : () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (context) => RecoveryKeyResetScreen(
-                                      vaultController: widget.controller,
-                                    ),
+                                    builder: (context) =>
+                                        RecoveryKeyResetScreen(
+                                          vaultController: widget.controller,
+                                        ),
                                   ),
                                 );
                               },
-                        child: const Text('Forgot Master Password? Use Recovery Key'),
+                        child: const Text(
+                          'Forgot Master Password? Use Recovery Key',
+                        ),
                       ),
                     ],
                   ),

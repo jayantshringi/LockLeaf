@@ -10,16 +10,16 @@ abstract class ScreenshotProtectionService {
 class PlatformScreenshotProtectionService
     implements ScreenshotProtectionService {
   /// MethodChannel shared with Android `MainActivity` and iOS `AppDelegate`.
-  static const MethodChannel channel =
-      MethodChannel('com.lockleaf.lockleaf/security');
+  static const MethodChannel channel = MethodChannel(
+    'com.lockleaf.lockleaf/security',
+  );
 
   @override
   Future<void> setEnabled(bool enabled) async {
     try {
-      await channel.invokeMethod<void>(
-        'setScreenshotBlocked',
-        <String, bool>{'blocked': enabled},
-      );
+      await channel.invokeMethod<void>('setScreenshotBlocked', <String, bool>{
+        'blocked': enabled,
+      });
     } on MissingPluginException {
       // Safe no-op in widget tests or unsupported desktop targets.
     } on PlatformException {

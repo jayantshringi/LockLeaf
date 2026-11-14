@@ -15,7 +15,7 @@ class SqliteVaultStorage implements VaultStorageRepository {
 
   /// Creates a [SqliteVaultStorage] instance.
   SqliteVaultStorage({VaultDatabaseOpener? opener})
-      : _opener = opener ?? VaultDatabaseOpener();
+    : _opener = opener ?? VaultDatabaseOpener();
 
   Future<Database> _getDb() async {
     final existing = _database;
@@ -56,10 +56,7 @@ class SqliteVaultStorage implements VaultStorageRepository {
   @override
   Future<VaultMetadata?> getMetadata() {
     return _runDb((Database db) async {
-      final rows = await db.query(
-        VaultDatabaseSchema.metadataTable,
-        limit: 1,
-      );
+      final rows = await db.query(VaultDatabaseSchema.metadataTable, limit: 1);
       if (rows.isEmpty) {
         return null;
       }

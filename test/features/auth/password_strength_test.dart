@@ -28,7 +28,8 @@ void main() {
     });
 
     test('classifies short input below 12 chars as weak', () {
-      final shortMixed = '${randomChars('abcdef', 4)}'
+      final shortMixed =
+          '${randomChars('abcdef', 4)}'
           '${randomChars('ABCDEF', 2)}'
           '${randomChars('0123456789', 2)}';
 
@@ -42,22 +43,25 @@ void main() {
       );
     });
 
-    test('classifies 12-char lowercase-only input as fair with diversity hints',
-        () {
-      final lowerOnly = randomChars('abcdefghijklmnopqrstuvwxyz', 12);
+    test(
+      'classifies 12-char lowercase-only input as fair with diversity hints',
+      () {
+        final lowerOnly = randomChars('abcdefghijklmnopqrstuvwxyz', 12);
 
-      final result = PasswordStrengthEvaluator.evaluate(lowerOnly);
+        final result = PasswordStrengthEvaluator.evaluate(lowerOnly);
 
-      expect(result.level, equals(PasswordStrengthLevel.fair));
-      expect(result.score, equals(2));
-      expect(
-        result.feedback.any((String msg) => msg.contains('uppercase')),
-        isTrue,
-      );
-    });
+        expect(result.level, equals(PasswordStrengthLevel.fair));
+        expect(result.score, equals(2));
+        expect(
+          result.feedback.any((String msg) => msg.contains('uppercase')),
+          isTrue,
+        );
+      },
+    );
 
     test('classifies 13-char mixed-case input as good', () {
-      final mixedCase = '${randomChars('abcdefghijklmnopqrstuvwxyz', 7)}'
+      final mixedCase =
+          '${randomChars('abcdefghijklmnopqrstuvwxyz', 7)}'
           '${randomChars('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 6)}';
 
       final result = PasswordStrengthEvaluator.evaluate(mixedCase);
@@ -67,7 +71,8 @@ void main() {
     });
 
     test('classifies 18-char all-class random input as strong', () {
-      final strongInput = '${randomChars('abcdefghijklmnopqrstuvwxyz', 6)}'
+      final strongInput =
+          '${randomChars('abcdefghijklmnopqrstuvwxyz', 6)}'
           '${randomChars('ABCDEFGHIJKLMNOPQRSTUVWXYZ', 5)}'
           '${randomChars('0123456789', 4)}'
           '${randomChars('!@#%^&*', 3)}';

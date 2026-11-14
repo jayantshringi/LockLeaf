@@ -46,21 +46,21 @@ class VaultService {
     RecoveryKeyService? recoveryKeyService,
     SyncStorageRepository? syncStorage,
     Uuid? uuid,
-  })  : _storage = storage,
-        _kdfService = kdfService ?? Argon2idKdfService(),
-        _randomService = randomService ?? SecureRandomService(),
-        _cipherService = cipherService ??
-            CipherService(
-              randomService: randomService ?? SecureRandomService(),
-            ),
-        _recoveryKeyService = recoveryKeyService ??
-            RecoveryKeyService(
-              kdfService: kdfService,
-              cipherService: cipherService,
-              randomService: randomService,
-            ),
-        _syncStorage = syncStorage,
-        _uuid = uuid ?? const Uuid();
+  }) : _storage = storage,
+       _kdfService = kdfService ?? Argon2idKdfService(),
+       _randomService = randomService ?? SecureRandomService(),
+       _cipherService =
+           cipherService ??
+           CipherService(randomService: randomService ?? SecureRandomService()),
+       _recoveryKeyService =
+           recoveryKeyService ??
+           RecoveryKeyService(
+             kdfService: kdfService,
+             cipherService: cipherService,
+             randomService: randomService,
+           ),
+       _syncStorage = syncStorage,
+       _uuid = uuid ?? const Uuid();
 
   /// Whether a vault session is currently unlocked with a live DEK.
   bool get isUnlocked => _session?.isActive ?? false;
@@ -90,7 +90,8 @@ class VaultService {
   Future<RecoveryKey> createVault({
     required String masterPassword,
     KdfParams kdfParams = const KdfParams.standard(),
-    VaultCipherAlgorithm cipherAlgorithm = VaultCipherAlgorithm.xchacha20Poly1305,
+    VaultCipherAlgorithm cipherAlgorithm =
+        VaultCipherAlgorithm.xchacha20Poly1305,
   }) async {
     if (await _storage.hasVault()) {
       throw const ValidationException(
@@ -281,7 +282,9 @@ class VaultService {
         associatedData: utf8.encode(VaultSession.dekWrapAad(metadata.vaultId)),
       );
 
-      final newRecoveryKey = RecoveryKey.generate(randomService: _randomService);
+      final newRecoveryKey = RecoveryKey.generate(
+        randomService: _randomService,
+      );
       final newRecoveryWrap = await _recoveryKeyService.wrapDek(
         recoveryKey: newRecoveryKey,
         dekBytes: dekBytes,
@@ -335,7 +338,9 @@ class VaultService {
     }
 
     try {
-      final newRecoveryKey = RecoveryKey.generate(randomService: _randomService);
+      final newRecoveryKey = RecoveryKey.generate(
+        randomService: _randomService,
+      );
       final newWrap = await _recoveryKeyService.wrapDek(
         recoveryKey: newRecoveryKey,
         dekBytes: dekBytes,
@@ -372,7 +377,8 @@ class VaultService {
       String vaultId,
       VaultCipherAlgorithm algorithm,
       Uint8List dekBytes,
-    ) action,
+    )
+    action,
   ) async {
     final session = _requireSession();
     final dekBytes = session.activeKey.copyBytes();
@@ -515,7 +521,9 @@ class VaultService {
     VaultSession session,
     VaultEntry entry,
   ) async {
-    final jsonBytes = Uint8List.fromList(utf8.encode(jsonEncode(entry.toJson())));
+    final jsonBytes = Uint8List.fromList(
+      utf8.encode(jsonEncode(entry.toJson())),
+    );
     try {
       final payload = await _cipherService.encryptBytes(
         plaintext: jsonBytes,
@@ -576,8 +584,9 @@ class VaultService {
         return await _cipherService.decryptBytes(
           payload: metadata.wrappedDek,
           key: wrappingKey,
-          associatedData:
-              utf8.encode(VaultSession.dekWrapAad(metadata.vaultId)),
+          associatedData: utf8.encode(
+            VaultSession.dekWrapAad(metadata.vaultId),
+          ),
         );
       } on CryptoException {
         throw const AuthenticationException('Invalid master password.');

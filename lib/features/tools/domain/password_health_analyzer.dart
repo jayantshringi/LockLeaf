@@ -8,8 +8,9 @@ import 'package:lockleaf/features/vault/domain/vault_entry.dart';
 class PasswordHealthAnalyzer {
   /// Evaluates [entries] locally and returns an aggregated [PasswordHealthReport].
   PasswordHealthReport analyze(List<VaultEntry> entries) {
-    final audited =
-        entries.where((VaultEntry entry) => entry.password.isNotEmpty).toList();
+    final audited = entries
+        .where((VaultEntry entry) => entry.password.isNotEmpty)
+        .toList();
     if (audited.isEmpty) {
       return const PasswordHealthReport.empty();
     }
@@ -60,8 +61,9 @@ class PasswordHealthAnalyzer {
       scoreAccumulator += math.max(0, math.min(100, basePoints - reusePenalty));
     }
 
-    final reusedGroupCount =
-        frequencyMap.values.where((int count) => count >= 2).length;
+    final reusedGroupCount = frequencyMap.values
+        .where((int count) => count >= 2)
+        .length;
     frequencyMap.clear();
 
     return PasswordHealthReport(

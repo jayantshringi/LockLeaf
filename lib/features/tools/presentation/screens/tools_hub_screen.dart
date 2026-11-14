@@ -34,9 +34,7 @@ class ToolsHubScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Security Tools'),
-      ),
+      appBar: AppBar(title: const Text('Security Tools')),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -65,8 +63,8 @@ class ToolsHubScreen extends StatelessWidget {
                       MaterialPageRoute<void>(
                         builder: (BuildContext context) =>
                             PasswordGeneratorScreen(
-                          securityController: securityController,
-                        ),
+                              securityController: securityController,
+                            ),
                       ),
                     ),
                   );

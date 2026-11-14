@@ -60,9 +60,7 @@ class PasswordHealthScreen extends StatelessWidget {
         final scoreColor = _scoreColor(report.overallScore);
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Password Health'),
-          ),
+          appBar: AppBar(title: const Text('Password Health')),
           body: SafeArea(
             child: ListView(
               padding: const EdgeInsets.all(16),
@@ -75,9 +73,7 @@ class PasswordHealthScreen extends StatelessWidget {
                         Text(
                           '${report.overallScore}%',
                           key: const Key('health_overall_score'),
-                          style: Theme.of(context)
-                              .textTheme
-                              .displaySmall
+                          style: Theme.of(context).textTheme.displaySmall
                               ?.copyWith(
                                 color: scoreColor,
                                 fontWeight: FontWeight.bold,
@@ -163,9 +159,8 @@ class PasswordHealthScreen extends StatelessWidget {
                     ),
                     child: Text(
                       'Weak Passwords',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
                   ...report.weakFindings.map(
@@ -186,9 +181,8 @@ class PasswordHealthScreen extends StatelessWidget {
                     ),
                     child: Text(
                       'Reused Passwords',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
                   ...report.reusedFindings.map(
@@ -227,16 +221,13 @@ class _StatBadge extends StatelessWidget {
       children: [
         Text(
           '$count',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(context).textTheme.headlineSmall
+              ?.copyWith(color: color, fontWeight: FontWeight.bold),
         ),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey,
-              ),
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: Colors.grey),
         ),
       ],
     );

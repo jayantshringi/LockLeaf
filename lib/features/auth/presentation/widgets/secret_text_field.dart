@@ -75,7 +75,9 @@ class _SecretTextFieldState extends State<SecretTextField> {
           key: widget.toggleKey,
           tooltip: _obscured ? 'Show password' : 'Hide password',
           icon: Icon(
-            _obscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+            _obscured
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
           ),
           onPressed: () {
             setState(() {

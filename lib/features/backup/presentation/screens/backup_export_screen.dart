@@ -46,12 +46,16 @@ class _BackupExportScreenState extends State<BackupExportScreen> {
 
     final success = await widget.backupController.exportBackup(
       backupPassword: _passwordController.text,
-      notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+      notes: _notesController.text.trim().isEmpty
+          ? null
+          : _notesController.text.trim(),
     );
 
     if (mounted && success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Encrypted backup generated successfully.')),
+        const SnackBar(
+          content: Text('Encrypted backup generated successfully.'),
+        ),
       );
     }
   }
@@ -75,9 +79,7 @@ class _BackupExportScreenState extends State<BackupExportScreen> {
     final controller = widget.backupController;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Export Encrypted Backup'),
-      ),
+      appBar: AppBar(title: const Text('Export Encrypted Backup')),
       body: SafeArea(
         child: AnimatedBuilder(
           animation: controller,
@@ -160,8 +162,9 @@ class _BackupExportScreenState extends State<BackupExportScreen> {
                                 ? Icons.visibility_off_outlined
                                 : Icons.visibility_outlined,
                           ),
-                          onPressed: () =>
-                              setState(() => _obscurePassword = !_obscurePassword),
+                          onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -187,8 +190,9 @@ class _BackupExportScreenState extends State<BackupExportScreen> {
                                 ? Icons.visibility_off_outlined
                                 : Icons.visibility_outlined,
                           ),
-                          onPressed: () =>
-                              setState(() => _obscureConfirm = !_obscureConfirm),
+                          onPressed: () => setState(
+                            () => _obscureConfirm = !_obscureConfirm,
+                          ),
                         ),
                         validator: (value) {
                           if (value != _passwordController.text) {
@@ -218,7 +222,9 @@ class _BackupExportScreenState extends State<BackupExportScreen> {
                             ? const SizedBox(
                                 height: 20,
                                 width: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Text('Generate Encrypted Backup'),
                       ),
@@ -226,10 +232,14 @@ class _BackupExportScreenState extends State<BackupExportScreen> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: isDark ? AppTheme.darkSurface : Colors.grey.shade100,
+                          color: isDark
+                              ? AppTheme.darkSurface
+                              : Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isDark ? Colors.white12 : Colors.grey.shade300,
+                            color: isDark
+                                ? Colors.white12
+                                : Colors.grey.shade300,
                           ),
                         ),
                         child: Column(
@@ -237,7 +247,10 @@ class _BackupExportScreenState extends State<BackupExportScreen> {
                           children: [
                             const Row(
                               children: [
-                                Icon(Icons.check_circle, color: AppTheme.primaryGreen),
+                                Icon(
+                                  Icons.check_circle,
+                                  color: AppTheme.primaryGreen,
+                                ),
                                 SizedBox(width: 8),
                                 Text(
                                   'Backup File Ready (.llbak)',
@@ -256,7 +269,11 @@ class _BackupExportScreenState extends State<BackupExportScreen> {
                               key: const Key('copy_backup_button'),
                               onPressed: _copyBackup,
                               icon: Icon(_copied ? Icons.check : Icons.copy),
-                              label: Text(_copied ? 'Copied to Clipboard' : 'Copy Backup JSON'),
+                              label: Text(
+                                _copied
+                                    ? 'Copied to Clipboard'
+                                    : 'Copy Backup JSON',
+                              ),
                             ),
                           ],
                         ),

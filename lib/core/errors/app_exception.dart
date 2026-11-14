@@ -19,8 +19,9 @@ class CryptoException extends AppException {
 
 /// Thrown when attempting to access vault resources while the vault is locked.
 class VaultLockedException extends AppException {
-  const VaultLockedException(
-      [super.message = 'Vault is locked. Master key required.']);
+  const VaultLockedException([
+    super.message = 'Vault is locked. Master key required.',
+  ]);
 }
 
 /// Thrown on invalid master password or failed biometric authentication.

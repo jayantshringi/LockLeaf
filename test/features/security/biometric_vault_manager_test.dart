@@ -42,11 +42,7 @@ void main() {
       biometricAuth: biometricAuth,
       randomService: randomService,
     );
-    fastParams = KdfParams(
-      memoryKiB: 256,
-      iterations: 1,
-      parallelism: 1,
-    );
+    fastParams = KdfParams(memoryKiB: 256, iterations: 1, parallelism: 1);
   });
 
   tearDown(() {
@@ -54,8 +50,7 @@ void main() {
   });
 
   group('BiometricVaultManager', () {
-    test('seals DEK in secure storage without storing master password',
-        () async {
+    test('seals DEK in secure storage without storing master password', () async {
       final masterPass = randomToken();
       final entrySecret = randomToken();
 
@@ -90,21 +85,23 @@ void main() {
       expect(restored?.password, equals(entrySecret));
     });
 
-    test('keeps vault locked when biometric prompt fails or is canceled',
-        () async {
-      await vaultService.createVault(
-        masterPassword: randomToken(),
-        kdfParams: fastParams,
-      );
-      await biometricManager.enableBiometricUnlock();
-      vaultService.lockVault();
+    test(
+      'keeps vault locked when biometric prompt fails or is canceled',
+      () async {
+        await vaultService.createVault(
+          masterPassword: randomToken(),
+          kdfParams: fastParams,
+        );
+        await biometricManager.enableBiometricUnlock();
+        vaultService.lockVault();
 
-      biometricAuth.shouldAuthenticate = false;
-      final unlocked = await biometricManager.unlockWithBiometrics();
+        biometricAuth.shouldAuthenticate = false;
+        final unlocked = await biometricManager.unlockWithBiometrics();
 
-      expect(unlocked, isFalse);
-      expect(vaultService.isUnlocked, isFalse);
-    });
+        expect(unlocked, isFalse);
+        expect(vaultService.isUnlocked, isFalse);
+      },
+    );
 
     test('rejects enrollment when vault is locked', () async {
       await vaultService.createVault(
@@ -119,24 +116,26 @@ void main() {
       );
     });
 
-    test('disabling biometrics clears Keystore entries and blocks unlock',
-        () async {
-      await vaultService.createVault(
-        masterPassword: randomToken(),
-        kdfParams: fastParams,
-      );
-      await biometricManager.enableBiometricUnlock();
-      expect(keyStorage.entries, isNotEmpty);
+    test(
+      'disabling biometrics clears Keystore entries and blocks unlock',
+      () async {
+        await vaultService.createVault(
+          masterPassword: randomToken(),
+          kdfParams: fastParams,
+        );
+        await biometricManager.enableBiometricUnlock();
+        expect(keyStorage.entries, isNotEmpty);
 
-      await biometricManager.disableBiometricUnlock();
-      expect(keyStorage.entries, isEmpty);
-      expect(await biometricManager.isBiometricUnlockEnabled(), isFalse);
+        await biometricManager.disableBiometricUnlock();
+        expect(keyStorage.entries, isEmpty);
+        expect(await biometricManager.isBiometricUnlockEnabled(), isFalse);
 
-      vaultService.lockVault();
-      await expectLater(
-        biometricManager.unlockWithBiometrics(),
-        throwsA(isA<AuthenticationException>()),
-      );
-    });
+        vaultService.lockVault();
+        await expectLater(
+          biometricManager.unlockWithBiometrics(),
+          throwsA(isA<AuthenticationException>()),
+        );
+      },
+    );
   });
 }

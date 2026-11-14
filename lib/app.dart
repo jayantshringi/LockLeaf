@@ -118,11 +118,7 @@ class _LockLeafAppState extends State<LockLeafApp> with WidgetsBindingObserver {
   Widget _buildHome() {
     switch (_controller.stage) {
       case AuthFlowStage.loading:
-        return const Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
       case AuthFlowStage.onboarding:
         return Builder(
           builder: (BuildContext innerContext) {

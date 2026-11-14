@@ -19,18 +19,22 @@ class RestSyncTransport implements CloudSyncTransport {
     required String serverUrl,
     String? apiToken,
     HttpClient Function()? clientFactory,
-  })  : _baseUri = Uri.parse(serverUrl.trim().replaceAll(RegExp(r'/+$'), '')),
-        _apiToken = apiToken?.trim().isEmpty ?? true ? null : apiToken!.trim(),
-        _clientFactory = clientFactory ?? (() => HttpClient());
+  }) : _baseUri = Uri.parse(serverUrl.trim().replaceAll(RegExp(r'/+$'), '')),
+       _apiToken = apiToken?.trim().isEmpty ?? true ? null : apiToken!.trim(),
+       _clientFactory = clientFactory ?? (() => HttpClient());
 
   @override
   Future<bool> checkHealth() async {
     final client = _clientFactory();
     try {
       final uri = _baseUri.replace(path: '${_baseUri.path}/api/v1/health');
-      final request = await client.getUrl(uri).timeout(const Duration(seconds: 5));
+      final request = await client
+          .getUrl(uri)
+          .timeout(const Duration(seconds: 5));
       _addHeaders(request);
-      final response = await request.close().timeout(const Duration(seconds: 5));
+      final response = await request.close().timeout(
+        const Duration(seconds: 5),
+      );
       return response.statusCode == HttpStatus.ok;
     } catch (_) {
       return false;
@@ -56,15 +60,21 @@ class RestSyncTransport implements CloudSyncTransport {
         queryParameters: queryParams.isEmpty ? null : queryParams,
       );
 
-      final request = await client.getUrl(uri).timeout(const Duration(seconds: 15));
+      final request = await client
+          .getUrl(uri)
+          .timeout(const Duration(seconds: 15));
       _addHeaders(request);
 
-      final response = await request.close().timeout(const Duration(seconds: 15));
+      final response = await request.close().timeout(
+        const Duration(seconds: 15),
+      );
       final responseBody = await response.transform(utf8.decoder).join();
 
       if (response.statusCode == HttpStatus.unauthorized ||
           response.statusCode == HttpStatus.forbidden) {
-        throw const AuthenticationException('Sync server authentication failed.');
+        throw const AuthenticationException(
+          'Sync server authentication failed.',
+        );
       }
 
       if (response.statusCode != HttpStatus.ok) {
@@ -120,7 +130,9 @@ class RestSyncTransport implements CloudSyncTransport {
         path: '${_baseUri.path}/api/v1/vaults/$vaultId/changes',
       );
 
-      final request = await client.postUrl(uri).timeout(const Duration(seconds: 15));
+      final request = await client
+          .postUrl(uri)
+          .timeout(const Duration(seconds: 15));
       _addHeaders(request);
       request.headers.contentType = ContentType.json;
 
@@ -129,12 +141,16 @@ class RestSyncTransport implements CloudSyncTransport {
       });
 
       request.write(payload);
-      final response = await request.close().timeout(const Duration(seconds: 15));
+      final response = await request.close().timeout(
+        const Duration(seconds: 15),
+      );
       final responseBody = await response.transform(utf8.decoder).join();
 
       if (response.statusCode == HttpStatus.unauthorized ||
           response.statusCode == HttpStatus.forbidden) {
-        throw const AuthenticationException('Sync server authentication failed.');
+        throw const AuthenticationException(
+          'Sync server authentication failed.',
+        );
       }
 
       if (response.statusCode != HttpStatus.ok &&
@@ -186,4 +202,3 @@ class RestSyncTransport implements CloudSyncTransport {
     request.headers.set(HttpHeaders.userAgentHeader, 'LockLeaf-Client/1.0');
   }
 }
-

@@ -45,10 +45,12 @@ void main() {
     });
 
     test('generates unique nonces of valid length', () {
-      final nonce1 =
-          randomService.generateNonce(SecurityConstants.xchacha20NonceBytes);
-      final nonce2 =
-          randomService.generateNonce(SecurityConstants.xchacha20NonceBytes);
+      final nonce1 = randomService.generateNonce(
+        SecurityConstants.xchacha20NonceBytes,
+      );
+      final nonce2 = randomService.generateNonce(
+        SecurityConstants.xchacha20NonceBytes,
+      );
 
       expect(nonce1.length, equals(SecurityConstants.xchacha20NonceBytes));
       expect(nonce2.length, equals(SecurityConstants.xchacha20NonceBytes));
@@ -62,19 +64,17 @@ void main() {
       );
     });
 
-    test('nextInt generates values within range and rejects non-positive max',
-        () {
-      for (var i = 0; i < 50; i++) {
-        final value = randomService.nextInt(10);
-        expect(value, greaterThanOrEqualTo(0));
-        expect(value, lessThan(10));
-      }
+    test(
+      'nextInt generates values within range and rejects non-positive max',
+      () {
+        for (var i = 0; i < 50; i++) {
+          final value = randomService.nextInt(10);
+          expect(value, greaterThanOrEqualTo(0));
+          expect(value, lessThan(10));
+        }
 
-      expect(
-        () => randomService.nextInt(0),
-        throwsA(isA<CryptoException>()),
-      );
-    });
+        expect(() => randomService.nextInt(0), throwsA(isA<CryptoException>()));
+      },
+    );
   });
 }
-

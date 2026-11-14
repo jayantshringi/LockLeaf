@@ -11,10 +11,7 @@ class SecuritySettingsScreen extends StatelessWidget {
   final SecurityController securityController;
 
   /// Creates a [SecuritySettingsScreen].
-  const SecuritySettingsScreen({
-    super.key,
-    required this.securityController,
-  });
+  const SecuritySettingsScreen({super.key, required this.securityController});
 
   static const List<Duration> _timeoutOptions = <Duration>[
     Duration(seconds: 30),
@@ -40,9 +37,7 @@ class SecuritySettingsScreen extends StatelessWidget {
         final error = securityController.securityError;
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Device Security'),
-          ),
+          appBar: AppBar(title: const Text('Device Security')),
           body: SafeArea(
             child: ListView(
               padding: const EdgeInsets.all(16),
@@ -81,8 +76,9 @@ class SecuritySettingsScreen extends StatelessWidget {
                         onChanged: supported
                             ? (bool value) {
                                 unawaited(
-                                  securityController
-                                      .toggleBiometricUnlock(value),
+                                  securityController.toggleBiometricUnlock(
+                                    value,
+                                  ),
                                 );
                               }
                             : null,
@@ -97,9 +93,10 @@ class SecuritySettingsScreen extends StatelessWidget {
                         subtitle: const Text('Lock vault after inactivity'),
                         trailing: DropdownButton<Duration>(
                           key: const Key('settings_autolock_dropdown'),
-                          value: _timeoutOptions.contains(
-                            securityController.autoLockTimeout,
-                          )
+                          value:
+                              _timeoutOptions.contains(
+                                securityController.autoLockTimeout,
+                              )
                               ? securityController.autoLockTimeout
                               : const Duration(minutes: 5),
                           underline: const SizedBox.shrink(),

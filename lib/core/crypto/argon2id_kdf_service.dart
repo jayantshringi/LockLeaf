@@ -49,10 +49,7 @@ class Argon2idKdfService {
     }
 
     final inputBuffer = Uint8List.fromList(secretBytes);
-    final inputKey = SecretKeyData(
-      inputBuffer,
-      overwriteWhenDestroyed: true,
-    );
+    final inputKey = SecretKeyData(inputBuffer, overwriteWhenDestroyed: true);
 
     try {
       final algorithm = Argon2id(
@@ -103,10 +100,7 @@ class Argon2idKdfService {
     }
 
     try {
-      final hkdf = Hkdf(
-        hmac: Hmac.sha256(),
-        outputLength: outputLength,
-      );
+      final hkdf = Hkdf(hmac: Hmac.sha256(), outputLength: outputLength);
       final derivedKey = await hkdf.deriveKey(
         secretKey: masterKey.secretKey,
         nonce: salt,

@@ -73,12 +73,12 @@ class PasswordGeneratorOptions extends Equatable {
 
   /// Default high-entropy 20-character mixed password options.
   const PasswordGeneratorOptions.standard()
-      : length = defaultLength,
-        includeLowercase = true,
-        includeUppercase = true,
-        includeDigits = true,
-        includeSymbols = true,
-        excludeAmbiguous = false;
+    : length = defaultLength,
+      includeLowercase = true,
+      includeUppercase = true,
+      includeDigits = true,
+      includeSymbols = true,
+      excludeAmbiguous = false;
 
   /// Returns an updated, validated copy.
   PasswordGeneratorOptions copyWith({
@@ -101,11 +101,11 @@ class PasswordGeneratorOptions extends Equatable {
 
   @override
   List<Object?> get props => [
-        length,
-        includeLowercase,
-        includeUppercase,
-        includeDigits,
-        includeSymbols,
-        excludeAmbiguous,
-      ];
+    length,
+    includeLowercase,
+    includeUppercase,
+    includeDigits,
+    includeSymbols,
+    excludeAmbiguous,
+  ];
 }

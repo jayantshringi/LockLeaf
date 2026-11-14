@@ -45,8 +45,8 @@ class VaultEntry extends Equatable {
     required this.isFavorite,
     required DateTime createdAt,
     required DateTime updatedAt,
-  })  : createdAt = createdAt.toUtc(),
-        updatedAt = updatedAt.toUtc();
+  }) : createdAt = createdAt.toUtc(),
+       updatedAt = updatedAt.toUtc();
 
   /// Creates and validates a [VaultEntry].
   factory VaultEntry({
@@ -177,15 +177,15 @@ class VaultEntry extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        username,
-        password,
-        url,
-        notes,
-        category,
-        isFavorite,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    title,
+    username,
+    password,
+    url,
+    notes,
+    category,
+    isFavorite,
+    createdAt,
+    updatedAt,
+  ];
 }

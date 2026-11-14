@@ -52,13 +52,14 @@ class SyncEngine {
     required String localDeviceId,
     CipherService? cipherService,
     SyncConflictResolver? conflictResolver,
-  })  : _vaultStorage = vaultStorage,
-        _syncStorage = syncStorage,
-        _transport = transport,
-        _localDeviceId = localDeviceId,
-        _cipherService = cipherService ?? CipherService(),
-        _conflictResolver =
-            conflictResolver ?? SyncConflictResolver(localDeviceId: localDeviceId);
+  }) : _vaultStorage = vaultStorage,
+       _syncStorage = syncStorage,
+       _transport = transport,
+       _localDeviceId = localDeviceId,
+       _cipherService = cipherService ?? CipherService(),
+       _conflictResolver =
+           conflictResolver ??
+           SyncConflictResolver(localDeviceId: localDeviceId);
 
   String get localDeviceId => _localDeviceId;
   CloudSyncTransport get transport => _transport;
@@ -82,10 +83,7 @@ class SyncEngine {
 
     // Load or initialize sync metadata
     var metadata = await _syncStorage.getMetadata(vaultId);
-    metadata ??= SyncMetadata(
-      vaultId: vaultId,
-      deviceId: _localDeviceId,
-    );
+    metadata ??= SyncMetadata(vaultId: vaultId, deviceId: _localDeviceId);
 
     var pulledCount = 0;
     var appliedRemote = 0;
@@ -196,7 +194,8 @@ class SyncEngine {
             pulledCount: pulledCount,
             appliedRemoteCount: appliedRemote,
             deletedLocalCount: deletedLocal,
-            errorMessage: pushResponse.errorMessage ?? 'Failed to push changes.',
+            errorMessage:
+                pushResponse.errorMessage ?? 'Failed to push changes.',
           );
         }
 
@@ -257,7 +256,8 @@ class SyncEngine {
       associatedData: utf8.encode(session.entryAad(id)),
     );
     try {
-      final jsonMap = jsonDecode(utf8.decode(clearBytes)) as Map<String, dynamic>;
+      final jsonMap =
+          jsonDecode(utf8.decode(clearBytes)) as Map<String, dynamic>;
       return VaultEntry.fromJson(jsonMap);
     } finally {
       SecureMemory.wipeBytes(clearBytes);
@@ -265,7 +265,9 @@ class SyncEngine {
   }
 
   Future<void> _saveLocalEntry(VaultSession session, VaultEntry entry) async {
-    final jsonBytes = Uint8List.fromList(utf8.encode(jsonEncode(entry.toJson())));
+    final jsonBytes = Uint8List.fromList(
+      utf8.encode(jsonEncode(entry.toJson())),
+    );
     try {
       final payload = await _cipherService.encryptBytes(
         plaintext: jsonBytes,
@@ -298,7 +300,8 @@ class SyncEngine {
       ),
     );
     try {
-      final jsonMap = jsonDecode(utf8.decode(clearBytes)) as Map<String, dynamic>;
+      final jsonMap =
+          jsonDecode(utf8.decode(clearBytes)) as Map<String, dynamic>;
       return VaultEntry.fromJson(jsonMap);
     } finally {
       SecureMemory.wipeBytes(clearBytes);
@@ -309,7 +312,9 @@ class SyncEngine {
     VaultSession session,
     VaultEntry entry,
   ) async {
-    final jsonBytes = Uint8List.fromList(utf8.encode(jsonEncode(entry.toJson())));
+    final jsonBytes = Uint8List.fromList(
+      utf8.encode(jsonEncode(entry.toJson())),
+    );
     try {
       final payload = await _cipherService.encryptBytes(
         plaintext: jsonBytes,
@@ -325,4 +330,3 @@ class SyncEngine {
     }
   }
 }
-

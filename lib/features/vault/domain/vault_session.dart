@@ -23,8 +23,8 @@ class VaultSession {
     required ManagedSecretKey dek,
     required this.cipherAlgorithm,
     DateTime? unlockedAt,
-  })  : _dek = dek,
-        unlockedAt = (unlockedAt ?? DateTime.now()).toUtc();
+  }) : _dek = dek,
+       unlockedAt = (unlockedAt ?? DateTime.now()).toUtc();
 
   /// Whether the session still holds a live, non-destroyed DEK.
   bool get isActive => !_dek.isDestroyed;

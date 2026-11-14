@@ -48,9 +48,8 @@ class _VaultListScreenState extends State<VaultListScreen> {
   Future<void> _openCreateEntry() async {
     await Navigator.of(context).push<VaultEntry>(
       MaterialPageRoute<VaultEntry>(
-        builder: (BuildContext context) => AddEditEntryScreen(
-          controller: widget.controller,
-        ),
+        builder: (BuildContext context) =>
+            AddEditEntryScreen(controller: widget.controller),
       ),
     );
   }
@@ -74,9 +73,8 @@ class _VaultListScreenState extends State<VaultListScreen> {
     }
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (BuildContext context) => SecuritySettingsScreen(
-          securityController: security,
-        ),
+        builder: (BuildContext context) =>
+            SecuritySettingsScreen(securityController: security),
       ),
     );
   }
@@ -98,9 +96,8 @@ class _VaultListScreenState extends State<VaultListScreen> {
     if (sync == null) return;
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (BuildContext context) => SyncSettingsScreen(
-          syncController: sync,
-        ),
+        builder: (BuildContext context) =>
+            SyncSettingsScreen(syncController: sync),
       ),
     );
   }
@@ -297,9 +294,8 @@ class _VaultEmptyState extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               hasAnyEntries ? 'No matching entries' : 'Your vault is empty',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(context).textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
@@ -307,9 +303,8 @@ class _VaultEmptyState extends StatelessWidget {
                   ? 'Try adjusting your search query or category filter.'
                   : 'Tap + to encrypt and store your first credential locally.',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey,
-                  ),
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: Colors.grey),
             ),
           ],
         ),

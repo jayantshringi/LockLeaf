@@ -25,17 +25,10 @@ void main() {
   setUp(() {
     storage = InMemoryVaultStorage();
     randomService = SecureRandomService();
-    vaultService = VaultService(
-      storage: storage,
-      randomService: randomService,
-    );
+    vaultService = VaultService(storage: storage, randomService: randomService);
     controller = VaultController(
       vaultService: vaultService,
-      kdfParams: KdfParams(
-        memoryKiB: 256,
-        iterations: 1,
-        parallelism: 1,
-      ),
+      kdfParams: KdfParams(memoryKiB: 256, iterations: 1, parallelism: 1),
     );
   });
 
@@ -44,100 +37,106 @@ void main() {
   });
 
   group('VaultController', () {
-    test('initializes to onboarding when uninitialized, then locked after lock',
-        () async {
-      await controller.initialize();
-      expect(controller.stage, equals(AuthFlowStage.onboarding));
+    test(
+      'initializes to onboarding when uninitialized, then locked after lock',
+      () async {
+        await controller.initialize();
+        expect(controller.stage, equals(AuthFlowStage.onboarding));
 
-      final masterPass = randomToken();
-      final created = await controller.createMasterPassword(masterPass);
-      expect(created, isTrue);
-      expect(controller.stage, equals(AuthFlowStage.unlocked));
+        final masterPass = randomToken();
+        final created = await controller.createMasterPassword(masterPass);
+        expect(created, isTrue);
+        expect(controller.stage, equals(AuthFlowStage.unlocked));
 
-      controller.lock();
-      expect(controller.stage, equals(AuthFlowStage.locked));
+        controller.lock();
+        expect(controller.stage, equals(AuthFlowStage.locked));
 
-      final reinitialized = VaultController(
-        vaultService: VaultService(storage: storage),
-        kdfParams: KdfParams(memoryKiB: 256, iterations: 1, parallelism: 1),
-      );
-      addTearDown(reinitialized.dispose);
+        final reinitialized = VaultController(
+          vaultService: VaultService(storage: storage),
+          kdfParams: KdfParams(memoryKiB: 256, iterations: 1, parallelism: 1),
+        );
+        addTearDown(reinitialized.dispose);
 
-      await reinitialized.initialize();
-      expect(reinitialized.stage, equals(AuthFlowStage.locked));
-    });
+        await reinitialized.initialize();
+        expect(reinitialized.stage, equals(AuthFlowStage.locked));
+      },
+    );
 
-    test('sets safe error message on failed unlock and succeeds on valid pass',
-        () async {
-      final masterPass = randomToken();
-      await controller.createMasterPassword(masterPass);
-      controller.lock();
+    test(
+      'sets safe error message on failed unlock and succeeds on valid pass',
+      () async {
+        final masterPass = randomToken();
+        await controller.createMasterPassword(masterPass);
+        controller.lock();
 
-      final badAttempt = await controller.unlock(randomToken());
-      expect(badAttempt, isFalse);
-      expect(controller.stage, equals(AuthFlowStage.locked));
-      expect(controller.errorMessage, isNotNull);
+        final badAttempt = await controller.unlock(randomToken());
+        expect(badAttempt, isFalse);
+        expect(controller.stage, equals(AuthFlowStage.locked));
+        expect(controller.errorMessage, isNotNull);
 
-      final goodAttempt = await controller.unlock(masterPass);
-      expect(goodAttempt, isTrue);
-      expect(controller.stage, equals(AuthFlowStage.unlocked));
-      expect(controller.errorMessage, isNull);
-    });
+        final goodAttempt = await controller.unlock(masterPass);
+        expect(goodAttempt, isTrue);
+        expect(controller.stage, equals(AuthFlowStage.unlocked));
+        expect(controller.errorMessage, isNull);
+      },
+    );
 
-    test('filters entries by title/username/url without matching passwords',
-        () async {
-      await controller.createMasterPassword(randomToken());
-      final secretOne = 'uniquepasswordmarker_${randomToken(length: 8)}';
+    test(
+      'filters entries by title/username/url without matching passwords',
+      () async {
+        await controller.createMasterPassword(randomToken());
+        final secretOne = 'uniquepasswordmarker_${randomToken(length: 8)}';
 
-      final loginEntry = await controller.addEntry(
-        title: 'Alpha Mail',
-        username: 'alpha_user',
-        password: secretOne,
-        url: 'https://mail.example.invalid',
-        category: VaultEntryCategory.login,
-        isFavorite: true,
-      );
-      final noteEntry = await controller.addEntry(
-        title: 'Recovery Memo',
-        username: 'local_only',
-        password: randomToken(),
-        category: VaultEntryCategory.secureNote,
-      );
+        final loginEntry = await controller.addEntry(
+          title: 'Alpha Mail',
+          username: 'alpha_user',
+          password: secretOne,
+          url: 'https://mail.example.invalid',
+          category: VaultEntryCategory.login,
+          isFavorite: true,
+        );
+        final noteEntry = await controller.addEntry(
+          title: 'Recovery Memo',
+          username: 'local_only',
+          password: randomToken(),
+          category: VaultEntryCategory.secureNote,
+        );
 
-      expect(loginEntry, isNotNull);
-      expect(noteEntry, isNotNull);
-      expect(controller.entries, hasLength(2));
+        expect(loginEntry, isNotNull);
+        expect(noteEntry, isNotNull);
+        expect(controller.entries, hasLength(2));
 
-      // Search matches title, username, and URL
-      controller.setSearchQuery('alpha');
-      expect(controller.filteredEntries, hasLength(1));
-      expect(controller.filteredEntries.first.id, equals(loginEntry!.id));
+        // Search matches title, username, and URL
+        controller.setSearchQuery('alpha');
+        expect(controller.filteredEntries, hasLength(1));
+        expect(controller.filteredEntries.first.id, equals(loginEntry!.id));
 
-      controller.setSearchQuery('mail.example.invalid');
-      expect(controller.filteredEntries, hasLength(1));
+        controller.setSearchQuery('mail.example.invalid');
+        expect(controller.filteredEntries, hasLength(1));
 
-      // Search must NOT match password field
-      controller.setSearchQuery('uniquepasswordmarker');
-      expect(controller.filteredEntries, isEmpty);
+        // Search must NOT match password field
+        controller.setSearchQuery('uniquepasswordmarker');
+        expect(controller.filteredEntries, isEmpty);
 
-      // Category and favorite filtering
-      controller.setSearchQuery('');
-      controller.setCategoryFilter(VaultEntryCategory.secureNote);
-      expect(controller.filteredEntries, hasLength(1));
-      expect(controller.filteredEntries.first.id, equals(noteEntry!.id));
+        // Category and favorite filtering
+        controller.setSearchQuery('');
+        controller.setCategoryFilter(VaultEntryCategory.secureNote);
+        expect(controller.filteredEntries, hasLength(1));
+        expect(controller.filteredEntries.first.id, equals(noteEntry!.id));
 
-      controller.setCategoryFilter(null);
-      controller.toggleFavoritesOnly();
-      expect(controller.filteredEntries, hasLength(1));
-      expect(controller.filteredEntries.first.id, equals(loginEntry.id));
+        controller.setCategoryFilter(null);
+        controller.toggleFavoritesOnly();
+        expect(controller.filteredEntries, hasLength(1));
+        expect(controller.filteredEntries.first.id, equals(loginEntry.id));
 
-      // Locking wipes in-memory entries and resets filters
-      controller.lock();
-      expect(controller.entries, isEmpty);
-      expect(controller.searchQuery, isEmpty);
-      expect(controller.selectedCategory, isNull);
-      expect(controller.favoritesOnly, isFalse);
-    });
+        // Locking wipes in-memory entries and resets filters
+        controller.lock();
+        expect(controller.entries, isEmpty);
+        expect(controller.searchQuery, isEmpty);
+        expect(controller.selectedCategory, isNull);
+        expect(controller.favoritesOnly, isFalse);
+      },
+    );
 
     test('toggles between dark and light theme modes', () {
       expect(controller.themeMode, equals(ThemeMode.dark));

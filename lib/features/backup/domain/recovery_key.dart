@@ -35,9 +35,9 @@ class RecoveryKey {
     required Uint8List entropy,
     required int checksum,
     required String formatted,
-  })  : _entropy = entropy,
-        _checksum = checksum,
-        _formatted = formatted;
+  }) : _entropy = entropy,
+       _checksum = checksum,
+       _formatted = formatted;
 
   /// Generates a new cryptographically secure [RecoveryKey] using [randomService].
   factory RecoveryKey.generate({SecureRandomService? randomService}) {
@@ -83,11 +83,14 @@ class RecoveryKey {
 
     final bytes = CrockfordBase32.decode(normalized);
     if (bytes.length < totalByteLength) {
-      throw const ValidationException('Corrupted recovery key binary representation.');
+      throw const ValidationException(
+        'Corrupted recovery key binary representation.',
+      );
     }
 
     final entropy = Uint8List.fromList(bytes.sublist(0, entropyByteLength));
-    final expectedChecksum = (bytes[entropyByteLength] << 8) | bytes[entropyByteLength + 1];
+    final expectedChecksum =
+        (bytes[entropyByteLength] << 8) | bytes[entropyByteLength + 1];
     final actualChecksum = CrockfordBase32.crc16Ccitt(entropy);
 
     if (actualChecksum != expectedChecksum) {
@@ -139,7 +142,9 @@ class RecoveryKey {
 
   void _checkDestroyed() {
     if (_destroyed) {
-      throw const StateError('RecoveryKey has been destroyed and wiped from memory.');
+      throw const StateError(
+        'RecoveryKey has been destroyed and wiped from memory.',
+      );
     }
   }
 
@@ -159,5 +164,6 @@ class RecoveryKey {
   }
 
   @override
-  String toString() => 'RecoveryKey($keyPrefix-****-****-****-****-****-****-****-****)';
+  String toString() =>
+      'RecoveryKey($keyPrefix-****-****-****-****-****-****-****-****)';
 }

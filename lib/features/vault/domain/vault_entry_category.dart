@@ -21,10 +21,7 @@ enum VaultEntryCategory {
   /// Human-readable category label for UI display.
   final String label;
 
-  const VaultEntryCategory({
-    required this.id,
-    required this.label,
-  });
+  const VaultEntryCategory({required this.id, required this.label});
 
   /// Resolves a [VaultEntryCategory] from its serialized [id].
   static VaultEntryCategory fromId(String id) {

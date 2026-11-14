@@ -13,11 +13,9 @@ class VaultDatabaseOpener {
   /// Opens the SQLite database with `PRAGMA secure_delete = ON`.
   Future<Database> open() async {
     try {
-      final path = _customPath ??
-          p.join(
-            await getDatabasesPath(),
-            VaultDatabaseSchema.databaseName,
-          );
+      final path =
+          _customPath ??
+          p.join(await getDatabasesPath(), VaultDatabaseSchema.databaseName);
 
       return await openDatabase(
         path,
@@ -34,8 +32,12 @@ class VaultDatabaseOpener {
         },
         onUpgrade: (Database db, int oldVersion, int newVersion) async {
           if (oldVersion < 2) {
-            await db.execute(VaultDatabaseSchema.upgradeV1ToV2AddRecoverySaltSql);
-            await db.execute(VaultDatabaseSchema.upgradeV1ToV2AddRecoveryDekSql);
+            await db.execute(
+              VaultDatabaseSchema.upgradeV1ToV2AddRecoverySaltSql,
+            );
+            await db.execute(
+              VaultDatabaseSchema.upgradeV1ToV2AddRecoveryDekSql,
+            );
           }
         },
       );

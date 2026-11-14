@@ -36,9 +36,7 @@ class KdfParams extends Equatable {
       );
     }
     if (iterations < 1) {
-      throw const CryptoException(
-        'Argon2id iterations must be at least 1.',
-      );
+      throw const CryptoException('Argon2id iterations must be at least 1.');
     }
     if (memoryKiB < 8 * parallelism) {
       throw const CryptoException(
@@ -60,10 +58,10 @@ class KdfParams extends Equatable {
 
   /// Production OWASP-aligned baseline parameters (64 MiB, 3 iterations, 4 lanes).
   const KdfParams.standard()
-      : memoryKiB = SecurityConstants.argon2MemoryKiB,
-        iterations = SecurityConstants.argon2Iterations,
-        parallelism = SecurityConstants.argon2Parallelism,
-        hashLength = SecurityConstants.derivedKeyLengthBytes;
+    : memoryKiB = SecurityConstants.argon2MemoryKiB,
+      iterations = SecurityConstants.argon2Iterations,
+      parallelism = SecurityConstants.argon2Parallelism,
+      hashLength = SecurityConstants.derivedKeyLengthBytes;
 
   /// Whether these parameters meet LockLeaf's minimum production security policy.
   bool get meetsProductionBaseline =>
@@ -105,10 +103,5 @@ class KdfParams extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-        memoryKiB,
-        iterations,
-        parallelism,
-        hashLength,
-      ];
+  List<Object?> get props => [memoryKiB, iterations, parallelism, hashLength];
 }

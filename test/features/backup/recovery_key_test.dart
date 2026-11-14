@@ -90,11 +90,13 @@ void main() {
 
       expect(
         () => RecoveryKey.fromString(tampered),
-        throwsA(isA<ValidationException>().having(
-          (e) => e.message,
-          'message',
-          contains('checksum'),
-        )),
+        throwsA(
+          isA<ValidationException>().having(
+            (e) => e.message,
+            'message',
+            contains('checksum'),
+          ),
+        ),
       );
     });
 
@@ -117,11 +119,13 @@ void main() {
     test('rejects invalid length keys', () {
       expect(
         () => RecoveryKey.fromString('LL-1234-5678'),
-        throwsA(isA<ValidationException>().having(
-          (e) => e.message,
-          'message',
-          contains('length'),
-        )),
+        throwsA(
+          isA<ValidationException>().having(
+            (e) => e.message,
+            'message',
+            contains('length'),
+          ),
+        ),
       );
     });
 

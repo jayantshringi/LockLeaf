@@ -31,10 +31,7 @@ class _RecoveryKeyDisplayScreenState extends State<RecoveryKeyDisplayScreen> {
   void _copyToClipboard() {
     final text = widget.recoveryKey.formatted;
     if (widget.securityController != null) {
-      widget.securityController!.copySecret(
-        text,
-        label: 'Recovery Key',
-      );
+      widget.securityController!.copySecret(text, label: 'Recovery Key');
     } else {
       Clipboard.setData(ClipboardData(text: text));
     }
@@ -93,7 +90,9 @@ class _RecoveryKeyDisplayScreenState extends State<RecoveryKeyDisplayScreen> {
                             'Save This Key Securely',
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : AppTheme.darkBackground,
+                              color: isDark
+                                  ? Colors.white
+                                  : AppTheme.darkBackground,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -152,7 +151,9 @@ class _RecoveryKeyDisplayScreenState extends State<RecoveryKeyDisplayScreen> {
                             border: Border.all(
                               color: isPrefix
                                   ? AppTheme.primaryGreen
-                                  : (isDark ? Colors.white12 : Colors.grey.shade300),
+                                  : (isDark
+                                        ? Colors.white12
+                                        : Colors.grey.shade300),
                             ),
                           ),
                           child: Text(
@@ -184,7 +185,8 @@ class _RecoveryKeyDisplayScreenState extends State<RecoveryKeyDisplayScreen> {
                 CheckboxListTile(
                   key: const Key('recovery_key_saved_checkbox'),
                   value: _hasSavedKey,
-                  onChanged: (val) => setState(() => _hasSavedKey = val ?? false),
+                  onChanged: (val) =>
+                      setState(() => _hasSavedKey = val ?? false),
                   title: const Text(
                     'I have written down or saved this recovery key in a safe place.',
                     style: TextStyle(fontSize: 14),

@@ -63,10 +63,7 @@ void main() {
   });
 
   Widget wrapWidget(Widget child) {
-    return MaterialApp(
-      theme: AppTheme.darkTheme,
-      home: child,
-    );
+    return MaterialApp(theme: AppTheme.darkTheme, home: child);
   }
 
   group('SyncSettingsScreen widget tests', () {
@@ -86,7 +83,9 @@ void main() {
       expect(find.text('Synchronized'), findsOneWidget);
     });
 
-    testWidgets('shows warning on empty server URL connection test', (tester) async {
+    testWidgets('shows warning on empty server URL connection test', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrapWidget(SyncSettingsScreen(syncController: syncController)),
       );
@@ -100,7 +99,9 @@ void main() {
   });
 
   group('VaultListScreen and ToolsHubScreen sync integration', () {
-    testWidgets('renders sync button on VaultListScreen app bar', (tester) async {
+    testWidgets('renders sync button on VaultListScreen app bar', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrapWidget(
           VaultListScreen(
@@ -118,7 +119,9 @@ void main() {
       expect(find.text('Cloud Synchronization'), findsOneWidget);
     });
 
-    testWidgets('renders Cloud Synchronization tile in ToolsHubScreen', (tester) async {
+    testWidgets('renders Cloud Synchronization tile in ToolsHubScreen', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrapWidget(
           ToolsHubScreen(
@@ -137,4 +140,3 @@ void main() {
     });
   });
 }
-

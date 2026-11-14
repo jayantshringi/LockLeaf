@@ -43,7 +43,9 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
     final raw = _jsonController.text.trim();
     if (raw.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please paste backup JSON content first.')),
+        const SnackBar(
+          content: Text('Please paste backup JSON content first.'),
+        ),
       );
       return;
     }
@@ -95,9 +97,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
     final controller = widget.backupController;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Restore from Backup'),
-      ),
+      appBar: AppBar(title: const Text('Restore from Backup')),
       body: SafeArea(
         child: AnimatedBuilder(
           animation: controller,
@@ -122,7 +122,10 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                       key: const Key('backup_json_input'),
                       controller: _jsonController,
                       maxLines: 4,
-                      style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                      ),
                       decoration: InputDecoration(
                         hintText: '{"magic":"LOCKLEAF_BACKUP", ...}',
                         border: const OutlineInputBorder(),
@@ -175,7 +178,8 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                             Text(
                               'Created: ${header.createdAt.toLocal().toString().split('.').first}',
                             ),
-                            if (header.notes != null) Text('Notes: ${header.notes}'),
+                            if (header.notes != null)
+                              Text('Notes: ${header.notes}'),
                           ],
                         ),
                       ),
@@ -210,7 +214,8 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                               : Icons.visibility_outlined,
                         ),
                         onPressed: () => setState(
-                          () => _obscureBackupPassword = !_obscureBackupPassword,
+                          () =>
+                              _obscureBackupPassword = !_obscureBackupPassword,
                         ),
                       ),
                       validator: (value) {
@@ -236,7 +241,8 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                                 : Icons.visibility_outlined,
                           ),
                           onPressed: () => setState(
-                            () => _obscureMasterPassword = !_obscureMasterPassword,
+                            () => _obscureMasterPassword =
+                                !_obscureMasterPassword,
                           ),
                         ),
                         validator: (value) {
@@ -252,17 +258,23 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                         key: const Key('restore_mode_merge'),
                         value: false,
                         groupValue: _overwrite,
-                        onChanged: (val) => setState(() => _overwrite = val ?? false),
+                        onChanged: (val) =>
+                            setState(() => _overwrite = val ?? false),
                         title: const Text('Merge with existing entries'),
-                        subtitle: const Text('Keeps current entries and updates matching ones'),
+                        subtitle: const Text(
+                          'Keeps current entries and updates matching ones',
+                        ),
                       ),
                       RadioListTile<bool>(
                         key: const Key('restore_mode_overwrite'),
                         value: true,
                         groupValue: _overwrite,
-                        onChanged: (val) => setState(() => _overwrite = val ?? true),
+                        onChanged: (val) =>
+                            setState(() => _overwrite = val ?? true),
                         title: const Text('Overwrite all existing entries'),
-                        subtitle: const Text('Replaces current vault entries with backup'),
+                        subtitle: const Text(
+                          'Replaces current vault entries with backup',
+                        ),
                       ),
                       const SizedBox(height: 20),
                     ],

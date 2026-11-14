@@ -43,15 +43,13 @@ void main() {
   });
 
   Widget wrapWidget(Widget child) {
-    return MaterialApp(
-      theme: AppTheme.darkTheme,
-      home: child,
-    );
+    return MaterialApp(theme: AppTheme.darkTheme, home: child);
   }
 
   group('RecoveryKeyDisplayScreen', () {
-    testWidgets('renders recovery key and enables continue on checkbox click',
-        (tester) async {
+    testWidgets('renders recovery key and enables continue on checkbox click', (
+      tester,
+    ) async {
       final key = RecoveryKey.generate();
       var confirmed = false;
 
@@ -92,8 +90,9 @@ void main() {
   });
 
   group('BackupExportScreen', () {
-    testWidgets('validates matching passwords and generates encrypted backup',
-        (tester) async {
+    testWidgets('validates matching passwords and generates encrypted backup', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrapWidget(
           BackupExportScreen(
@@ -134,8 +133,9 @@ void main() {
   });
 
   group('BackupRestoreScreen', () {
-    testWidgets('inspects backup header and parses entry count',
-        (tester) async {
+    testWidgets('inspects backup header and parses entry count', (
+      tester,
+    ) async {
       // Export a sample backup first
       await vaultService.createEntry(
         title: 'WidgetTestAccount',
@@ -180,9 +180,7 @@ void main() {
       final key = RecoveryKey.generate();
 
       await tester.pumpWidget(
-        wrapWidget(
-          RecoveryKeyResetScreen(vaultController: vaultController),
-        ),
+        wrapWidget(RecoveryKeyResetScreen(vaultController: vaultController)),
       );
       await tester.pumpAndSettle();
 

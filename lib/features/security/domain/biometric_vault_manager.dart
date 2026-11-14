@@ -35,17 +35,17 @@ class BiometricVaultManager {
     required BiometricAuthService biometricAuth,
     CipherService? cipherService,
     SecureRandomService? randomService,
-  })  : _vaultService = vaultService,
-        _secureStorage = secureStorage,
-        _biometricAuth = biometricAuth,
-        _randomService = randomService ?? SecureRandomService(),
-        _cipherService = cipherService ??
-            CipherService(
-              randomService: randomService ?? SecureRandomService(),
-            );
+  }) : _vaultService = vaultService,
+       _secureStorage = secureStorage,
+       _biometricAuth = biometricAuth,
+       _randomService = randomService ?? SecureRandomService(),
+       _cipherService =
+           cipherService ??
+           CipherService(randomService: randomService ?? SecureRandomService());
 
   /// Returns true if biometric hardware and enrolled credentials exist.
-  Future<bool> isBiometricsSupported() => _biometricAuth.isBiometricsAvailable();
+  Future<bool> isBiometricsSupported() =>
+      _biometricAuth.isBiometricsAvailable();
 
   /// Returns true if biometric unlock is configured for the active vault.
   Future<bool> isBiometricUnlockEnabled() async {
@@ -99,10 +99,7 @@ class BiometricVaultManager {
           key: _wrappedDekStorageKey,
           value: wrapped.toBase64(),
         );
-        await _secureStorage.write(
-          key: _vaultIdStorageKey,
-          value: vaultId,
-        );
+        await _secureStorage.write(key: _vaultIdStorageKey, value: vaultId);
       } finally {
         SecureMemory.wipeBytes(kekBytes);
         bioKek.destroy();
