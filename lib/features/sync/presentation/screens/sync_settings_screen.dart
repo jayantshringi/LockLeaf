@@ -20,7 +20,6 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   final _serverUrlController = TextEditingController();
   final _apiTokenController = TextEditingController();
 
-  bool _obscureToken = true;
   bool _testingConnection = false;
   String? _connectionTestResult;
 
@@ -101,7 +100,6 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final controller = widget.syncController;
 
     return Scaffold(
@@ -243,19 +241,8 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
                         SecretTextField(
                           key: const Key('sync_api_token_field'),
                           controller: _apiTokenController,
-                          obscureText: _obscureToken,
                           labelText: 'API Token (Optional)',
                           hintText: 'Bearer token for private server',
-                          prefixIcon: const Icon(Icons.vpn_key_outlined),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscureToken
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                            ),
-                            onPressed: () =>
-                                setState(() => _obscureToken = !_obscureToken),
-                          ),
                         ),
                         if (_connectionTestResult != null) ...[
                           const SizedBox(height: 12),
