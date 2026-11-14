@@ -7,6 +7,8 @@ import 'package:lockleaf/features/backup/presentation/backup_controller.dart';
 import 'package:lockleaf/features/backup/presentation/screens/backup_export_screen.dart';
 import 'package:lockleaf/features/backup/presentation/screens/backup_restore_screen.dart';
 import 'package:lockleaf/features/security/presentation/security_controller.dart';
+import 'package:lockleaf/features/sync/presentation/screens/sync_settings_screen.dart';
+import 'package:lockleaf/features/sync/presentation/sync_controller.dart';
 import 'package:lockleaf/features/tools/presentation/screens/password_generator_screen.dart';
 import 'package:lockleaf/features/tools/presentation/screens/password_health_screen.dart';
 
@@ -18,11 +20,15 @@ class ToolsHubScreen extends StatelessWidget {
   /// Optional device security controller for clipboard auto-clear.
   final SecurityController? securityController;
 
+  /// Optional cloud synchronization controller.
+  final SyncController? syncController;
+
   /// Creates a [ToolsHubScreen].
   const ToolsHubScreen({
     super.key,
     required this.controller,
     this.securityController,
+    this.syncController,
   });
 
   @override
@@ -175,6 +181,40 @@ class ToolsHubScreen extends StatelessWidget {
                 },
               ),
             ),
+            if (syncController != null) ...[
+              const SizedBox(height: 12),
+              Card(
+                child: ListTile(
+                  key: const Key('tools_cloud_sync_tile'),
+                  leading: CircleAvatar(
+                    backgroundColor: AppTheme.primaryGreen.withOpacity(0.14),
+                    child: const Icon(
+                      Icons.cloud_sync_outlined,
+                      color: AppTheme.primaryGreen,
+                    ),
+                  ),
+                  title: const Text(
+                    'Cloud Synchronization',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: const Text(
+                    'End-to-end encrypted multi-device synchronization',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    unawaited(
+                      Navigator.of(context).push<void>(
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) => SyncSettingsScreen(
+                            syncController: syncController!,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ],
         ),
       ),

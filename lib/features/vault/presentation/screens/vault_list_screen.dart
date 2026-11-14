@@ -3,6 +3,9 @@ import 'package:lockleaf/core/theme/app_theme.dart';
 import 'package:lockleaf/features/auth/presentation/vault_controller.dart';
 import 'package:lockleaf/features/security/presentation/screens/security_settings_screen.dart';
 import 'package:lockleaf/features/security/presentation/security_controller.dart';
+import 'package:lockleaf/features/sync/domain/sync_status.dart';
+import 'package:lockleaf/features/sync/presentation/screens/sync_settings_screen.dart';
+import 'package:lockleaf/features/sync/presentation/sync_controller.dart';
 import 'package:lockleaf/features/tools/presentation/screens/tools_hub_screen.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry_category.dart';
@@ -18,11 +21,15 @@ class VaultListScreen extends StatefulWidget {
   /// Optional controller managing device security policies.
   final SecurityController? securityController;
 
+  /// Optional controller managing cloud synchronization.
+  final SyncController? syncController;
+
   /// Creates a [VaultListScreen].
   const VaultListScreen({
     super.key,
     required this.controller,
     this.securityController,
+    this.syncController,
   });
 
   @override
@@ -80,9 +87,40 @@ class _VaultListScreenState extends State<VaultListScreen> {
         builder: (BuildContext context) => ToolsHubScreen(
           controller: widget.controller,
           securityController: widget.securityController,
+          syncController: widget.syncController,
         ),
       ),
     );
+  }
+
+  Future<void> _openSyncSettings() async {
+    final sync = widget.syncController;
+    if (sync == null) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => SyncSettingsScreen(
+          syncController: sync,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSyncIcon(SyncState state) {
+    switch (state) {
+      case SyncState.syncing:
+        return const SizedBox(
+          width: 18,
+          height: 18,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        );
+      case SyncState.error:
+        return const Icon(Icons.sync_problem_rounded, color: AppTheme.errorRed);
+      case SyncState.offline:
+        return const Icon(Icons.cloud_off_rounded, color: Colors.grey);
+      case SyncState.success:
+      case SyncState.idle:
+        return const Icon(Icons.cloud_done_outlined);
+    }
   }
 
   @override
@@ -99,6 +137,16 @@ class _VaultListScreenState extends State<VaultListScreen> {
           appBar: AppBar(
             title: const Text('LockLeaf Vault'),
             actions: [
+              if (widget.syncController != null)
+                ListenableBuilder(
+                  listenable: widget.syncController!,
+                  builder: (context, _) => IconButton(
+                    key: const Key('vault_sync_button'),
+                    tooltip: 'Cloud synchronization',
+                    icon: _buildSyncIcon(widget.syncController!.state),
+                    onPressed: _openSyncSettings,
+                  ),
+                ),
               IconButton(
                 key: const Key('vault_tools_button'),
                 tooltip: 'Security tools',

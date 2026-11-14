@@ -11,6 +11,7 @@ import 'package:lockleaf/features/security/data/secure_key_storage.dart';
 import 'package:lockleaf/features/security/domain/biometric_vault_manager.dart';
 import 'package:lockleaf/features/security/presentation/security_controller.dart';
 import 'package:lockleaf/features/security/presentation/widgets/privacy_shield_overlay.dart';
+import 'package:lockleaf/features/sync/presentation/sync_controller.dart';
 import 'package:lockleaf/features/vault/data/sqlite_vault_storage.dart';
 import 'package:lockleaf/features/vault/domain/vault_service.dart';
 import 'package:lockleaf/features/vault/presentation/screens/vault_list_screen.dart';
@@ -23,11 +24,15 @@ class LockLeafApp extends StatefulWidget {
   /// Optional injected [SecurityController] for device security policies.
   final SecurityController? securityController;
 
+  /// Optional injected [SyncController] for cloud sync.
+  final SyncController? syncController;
+
   /// Creates the root [LockLeafApp].
   const LockLeafApp({
     super.key,
     this.controller,
     this.securityController,
+    this.syncController,
   });
 
   @override
@@ -145,6 +150,7 @@ class _LockLeafAppState extends State<LockLeafApp> with WidgetsBindingObserver {
         return VaultListScreen(
           controller: _controller,
           securityController: _securityController,
+          syncController: widget.syncController,
         );
     }
   }
