@@ -25,7 +25,7 @@ Only the latest active release and current development branch receive security u
 We take the security of LockLeaf very seriously. If you believe you have discovered a security vulnerability or cryptographic weakness:
 
 1. **Do NOT open a public GitHub issue.**
-2. Send a detailed report via encrypted email to `security@lockleaf.local` (or file a private GitHub Advisory on the repository).
+2. Send a detailed report via encrypted email to `localeaf.support@gmail.com` (or file a private GitHub Advisory on the repository).
 3. Include the following details:
    - Type of issue (e.g., KDF implementation flaw, AEAD nonce reuse, memory leak, side-channel vulnerability).
    - Detailed proof of concept or reproduction steps.
