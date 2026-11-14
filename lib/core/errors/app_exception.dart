@@ -38,3 +38,13 @@ class StorageException extends AppException {
 class ValidationException extends AppException {
   const ValidationException(super.message);
 }
+
+/// Thrown on network failure during sync or remote transport operations.
+class NetworkException extends AppException {
+  const NetworkException(super.message, [super.technicalDetails]);
+}
+
+/// Thrown on synchronization errors, conflicts, or protocol mismatch.
+class SyncException extends AppException {
+  const SyncException(super.message, [super.technicalDetails]);
+}
