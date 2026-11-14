@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: write
+
 jobs:
   analyze_and_test:
     name: Lint, Analyze & Test
@@ -15,6 +18,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Flutter SDK
         uses: subosito/flutter-action@v2
@@ -25,16 +30,14 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Verify code formatting
+      - name: Format code
         run: |
-          set +e
-          OUTPUT=$(dart format --output=none --set-exit-if-changed . 2>&1)
-          EXIT_CODE=$?
-          echo "$OUTPUT"
-          if [ $EXIT_CODE -ne 0 ]; then
-            ESCAPED="${OUTPUT//$'\n'/'%0A'}"
-            echo "::error title=Dart Format Needed::$ESCAPED"
-            exit $EXIT_CODE
+          dart format .
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -am "Format code with Flutter stable dart format"
+            git push origin ${{ github.ref_name }}
           fi
 
       - name: Run static analysis
