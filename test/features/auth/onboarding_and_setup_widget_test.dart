@@ -105,6 +105,9 @@ void main() {
           .isNotEmpty) {
         await tester.tap(find.byKey(const Key('recovery_key_saved_checkbox')));
         await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const Key('recovery_key_continue_button')),
+        );
         await tester.tap(find.byKey(const Key('recovery_key_continue_button')));
         await tester.pumpAndSettle();
       }
