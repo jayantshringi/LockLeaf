@@ -71,7 +71,7 @@ class EncryptedBackupPayload extends Equatable {
   final Uint8List _salt;
   final EncryptedPayload _encryptedPayload;
 
-  EncryptedBackupPayload._({
+  const EncryptedBackupPayload._({
     required EncryptedBackupHeader header,
     required Uint8List salt,
     required EncryptedPayload encryptedPayload,
@@ -205,7 +205,7 @@ class EncryptedBackupPayload extends Equatable {
     }
 
     final version = map['version'];
-    if (version != EncryptedBackupHeader.currentVersion) {
+    if (version is! int || version != EncryptedBackupHeader.currentVersion) {
       throw ValidationException('Unsupported backup format version: $version');
     }
 
