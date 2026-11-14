@@ -8,7 +8,7 @@ import 'package:lockleaf/features/backup/domain/recovery_key.dart';
 void main() {
   group('CrockfordBase32', () {
     test('normalizes spaces, hyphens, and ambiguous characters', () {
-      final input = ' ll-o1il-9a ';
+      const input = ' ll-o1il-9a ';
       final normalized = CrockfordBase32.normalize(input);
       // 'll' -> '11', 'o' -> '0', '1' -> '1', 'i' -> '1', 'l' -> '1', '-' stripped
       expect(normalized, equals('1101119A'));
