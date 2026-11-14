@@ -29,8 +29,6 @@ class _BackupExportScreenState extends State<BackupExportScreen> {
   final _confirmController = TextEditingController();
   final _notesController = TextEditingController();
 
-  bool _obscurePassword = true;
-  bool _obscureConfirm = true;
   bool _copied = false;
 
   @override
@@ -152,20 +150,8 @@ class _BackupExportScreenState extends State<BackupExportScreen> {
                       SecretTextField(
                         key: const Key('backup_password_field'),
                         controller: _passwordController,
-                        obscureText: _obscurePassword,
                         labelText: 'Backup Password',
                         hintText: 'Enter password to protect this backup',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
-                          ),
-                          onPressed: () => setState(
-                            () => _obscurePassword = !_obscurePassword,
-                          ),
-                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter a backup password.';
@@ -180,20 +166,8 @@ class _BackupExportScreenState extends State<BackupExportScreen> {
                       SecretTextField(
                         key: const Key('backup_confirm_password_field'),
                         controller: _confirmController,
-                        obscureText: _obscureConfirm,
                         labelText: 'Confirm Backup Password',
                         hintText: 'Re-enter backup password',
-                        prefixIcon: const Icon(Icons.lock_reset),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureConfirm
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
-                          ),
-                          onPressed: () => setState(
-                            () => _obscureConfirm = !_obscureConfirm,
-                          ),
-                        ),
                         validator: (value) {
                           if (value != _passwordController.text) {
                             return 'Passwords do not match.';
