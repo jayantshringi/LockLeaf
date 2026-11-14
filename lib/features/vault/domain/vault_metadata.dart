@@ -13,7 +13,8 @@ import 'package:lockleaf/core/errors/app_exception.dart';
 /// cipher identifier, and the AEAD-wrapped Data Encryption Key (DEK).
 class VaultMetadata extends Equatable {
   /// Associated data context string bound into the recovery key DEK wrapping AEAD tag.
-  static String recoveryDekWrapAad(String vaultId) => 'lockleaf:rek:v1:$vaultId';
+  static String recoveryDekWrapAad(String vaultId) =>
+      'lockleaf:rek:v1:$vaultId';
 
   /// Current vault metadata schema version.
   static const int currentSchemaVersion = 2;
@@ -58,10 +59,10 @@ class VaultMetadata extends Equatable {
     this.recoveryWrappedDek,
     required DateTime createdAt,
     required DateTime updatedAt,
-  })  : _salt = salt,
-        _recoverySalt = recoverySalt,
-        createdAt = createdAt.toUtc(),
-        updatedAt = updatedAt.toUtc();
+  }) : _salt = salt,
+       _recoverySalt = recoverySalt,
+       createdAt = createdAt.toUtc(),
+       updatedAt = updatedAt.toUtc();
 
   /// Creates and validates [VaultMetadata].
   factory VaultMetadata({
@@ -86,7 +87,9 @@ class VaultMetadata extends Equatable {
       throw const ValidationException('Vault salt must be at least 16 bytes.');
     }
     if (recoverySalt != null && recoverySalt.length < 16) {
-      throw const ValidationException('Recovery salt must be at least 16 bytes.');
+      throw const ValidationException(
+        'Recovery salt must be at least 16 bytes.',
+      );
     }
     return VaultMetadata._(
       vaultId: vaultId.trim(),
@@ -95,7 +98,9 @@ class VaultMetadata extends Equatable {
       kdfParams: kdfParams,
       cipherAlgorithm: cipherAlgorithm,
       wrappedDek: wrappedDek,
-      recoverySalt: recoverySalt == null ? null : Uint8List.fromList(recoverySalt),
+      recoverySalt: recoverySalt == null
+          ? null
+          : Uint8List.fromList(recoverySalt),
       recoveryWrappedDek: recoveryWrappedDek,
       createdAt: createdAt,
       updatedAt: updatedAt,
@@ -110,7 +115,8 @@ class VaultMetadata extends Equatable {
       _recoverySalt == null ? null : Uint8List.fromList(_recoverySalt!);
 
   /// Whether a recovery key has been configured for this vault.
-  bool get hasRecoveryKey => recoveryWrappedDek != null && _recoverySalt != null;
+  bool get hasRecoveryKey =>
+      recoveryWrappedDek != null && _recoverySalt != null;
 
   /// Creates an updated copy (e.g., when rotating master password or KDF cost).
   VaultMetadata copyWith({
@@ -131,8 +137,9 @@ class VaultMetadata extends Equatable {
       cipherAlgorithm: cipherAlgorithm ?? this.cipherAlgorithm,
       wrappedDek: wrappedDek ?? this.wrappedDek,
       recoverySalt: clearRecoveryKey ? null : (recoverySalt ?? _recoverySalt),
-      recoveryWrappedDek:
-          clearRecoveryKey ? null : (recoveryWrappedDek ?? this.recoveryWrappedDek),
+      recoveryWrappedDek: clearRecoveryKey
+          ? null
+          : (recoveryWrappedDek ?? this.recoveryWrappedDek),
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -216,16 +223,15 @@ class VaultMetadata extends Equatable {
 
   @override
   List<Object?> get props => [
-        vaultId,
-        schemaVersion,
-        base64Url.encode(_salt),
-        kdfParams,
-        cipherAlgorithm,
-        wrappedDek.toBase64(),
-        _recoverySalt == null ? null : base64Url.encode(_recoverySalt!),
-        recoveryWrappedDek?.toBase64(),
-        createdAt,
-        updatedAt,
-      ];
-}
+    vaultId,
+    schemaVersion,
+    base64Url.encode(_salt),
+    kdfParams,
+    cipherAlgorithm,
+    wrappedDek.toBase64(),
+    _recoverySalt == null ? null : base64Url.encode(_recoverySalt!),
+    recoveryWrappedDek?.toBase64(),
+    createdAt,
+    updatedAt,
+  ];
 }
