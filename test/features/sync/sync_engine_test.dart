@@ -75,30 +75,6 @@ void main() {
     sessionBeta.lock();
   });
 
-  EncryptedEntryRecord encryptToRecord(VaultSession session, VaultEntry entry) {
-    final cipher = CipherService();
-    final jsonBytes = Uint8List.fromList(
-      utf8.encode(jsonEncode(entry.toJson())),
-    );
-    final payloadFuture = cipher.encryptBytes(
-      plaintext: jsonBytes,
-      key: session.activeKey,
-      algorithm: session.cipherAlgorithm,
-      associatedData: utf8.encode(session.entryAad(entry.id)),
-    );
-    // Use synchronous await via test helper
-    EncryptedEntryRecord? record;
-    payloadFuture.then((p) {
-      record = EncryptedEntryRecord(
-        id: entry.id,
-        encryptedBlob: p.toBytes(),
-        createdAt: entry.createdAt,
-        updatedAt: entry.updatedAt,
-      );
-    });
-    return record!;
-  }
-
   group('SyncEngine multi-device convergence', () {
     test('syncs new entry from Device Alpha to Device Beta', () async {
       final now = DateTime.utc(2026, 11, 14, 10, 0, 0);
