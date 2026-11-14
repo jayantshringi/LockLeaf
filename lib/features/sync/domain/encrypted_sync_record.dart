@@ -138,3 +138,4 @@ class EncryptedSyncRecord extends Equatable {
         base64.encode(_encryptedBlob),
       ];
 }
+

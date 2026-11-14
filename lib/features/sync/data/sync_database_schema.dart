@@ -34,3 +34,4 @@ CREATE INDEX IF NOT EXISTS idx_sync_queue_vault_queued
 ON $queueTable (vault_id, queued_at ASC);
 ''';
 }
+

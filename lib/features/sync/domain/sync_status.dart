@@ -160,3 +160,4 @@ class SyncMetadata extends Equatable {
         lastError,
       ];
 }
+

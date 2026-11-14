@@ -223,3 +223,4 @@ class InMemorySyncStorageRepository implements SyncStorageRepository {
     return _queueMap.values.where((item) => item.vaultId == vaultId).length;
   }
 }
+

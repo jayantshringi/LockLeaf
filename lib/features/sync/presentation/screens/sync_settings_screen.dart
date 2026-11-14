@@ -325,3 +325,4 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
     }
   }
 }
+

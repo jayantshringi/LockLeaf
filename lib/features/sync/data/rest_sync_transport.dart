@@ -186,3 +186,4 @@ class RestSyncTransport implements CloudSyncTransport {
     request.headers.set(HttpHeaders.userAgentHeader, 'LockLeaf-Client/1.0');
   }
 }
+
