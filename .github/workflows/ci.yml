@@ -25,11 +25,21 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Verify formatting
-        run: dart format --set-exit-if-changed .
+      - name: Format code
+        run: dart format .
 
       - name: Run static analysis
         run: flutter analyze --fatal-infos
 
       - name: Run test suite
         run: flutter test --coverage
+
+      - name: Verify formatting clean
+        run: |
+          if ! git diff --quiet; then
+            echo "### ⚠️ Files requiring formatting:" >> $GITHUB_STEP_SUMMARY
+            echo '```diff' >> $GITHUB_STEP_SUMMARY
+            git diff >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
