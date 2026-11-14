@@ -91,6 +91,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      await tester.ensureVisible(
+        find.byKey(const Key('test_connection_button')),
+      );
       await tester.tap(find.byKey(const Key('test_connection_button')));
       await tester.pumpAndSettle();
 
