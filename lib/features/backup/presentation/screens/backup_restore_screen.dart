@@ -90,6 +90,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final controller = widget.backupController;
 
     return Scaffold(
