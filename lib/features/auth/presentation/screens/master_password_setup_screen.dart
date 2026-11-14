@@ -70,7 +70,7 @@ class _MasterPasswordSetupScreenState extends State<MasterPasswordSetupScreen> {
       final recoveryKey = widget.controller.lastGeneratedRecoveryKey;
       if (recoveryKey != null) {
         await Navigator.of(context).push(
-          MaterialPageRoute(
+          MaterialPageRoute<void>(
             builder: (context) => RecoveryKeyDisplayScreen(
               recoveryKey: recoveryKey,
               isInitialSetup: true,

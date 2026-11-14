@@ -193,7 +193,7 @@ class _UnlockScreenState extends State<UnlockScreen> {
                             ? null
                             : () {
                                 Navigator.of(context).push(
-                                  MaterialPageRoute(
+                                  MaterialPageRoute<void>(
                                     builder: (context) =>
                                         RecoveryKeyResetScreen(
                                           vaultController: widget.controller,

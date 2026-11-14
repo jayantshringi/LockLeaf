@@ -99,7 +99,7 @@ class _RecoveryKeyResetScreenState extends State<RecoveryKeyResetScreen> {
       if (newKey != null) {
         // Show the newly rotated recovery key
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
+          MaterialPageRoute<void>(
             builder: (context) => RecoveryKeyDisplayScreen(
               recoveryKey: newKey,
               isInitialSetup: true,
