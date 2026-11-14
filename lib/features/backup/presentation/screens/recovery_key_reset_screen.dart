@@ -24,8 +24,6 @@ class _RecoveryKeyResetScreenState extends State<RecoveryKeyResetScreen> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
 
-  bool _obscurePassword = true;
-  bool _obscureConfirm = true;
   PasswordStrength _strength = PasswordStrength.empty;
   String? _keyFormatValidationMessage;
   bool _isKeyChecksumValid = false;
@@ -240,20 +238,8 @@ class _RecoveryKeyResetScreenState extends State<RecoveryKeyResetScreen> {
                     SecretTextField(
                       key: const Key('reset_new_password_field'),
                       controller: _passwordController,
-                      obscureText: _obscurePassword,
                       labelText: 'New Master Password',
                       hintText: 'At least 12 characters recommended',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                        ),
-                        onPressed: () => setState(
-                          () => _obscurePassword = !_obscurePassword,
-                        ),
-                      ),
                       validator: (value) {
                         if (value == null || value.length < 12) {
                           return 'Password must be at least 12 characters.';
@@ -267,19 +253,8 @@ class _RecoveryKeyResetScreenState extends State<RecoveryKeyResetScreen> {
                     SecretTextField(
                       key: const Key('reset_confirm_password_field'),
                       controller: _confirmController,
-                      obscureText: _obscureConfirm,
                       labelText: 'Confirm New Master Password',
                       hintText: 'Re-enter your new password',
-                      prefixIcon: const Icon(Icons.lock_reset),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirm
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                        ),
-                        onPressed: () =>
-                            setState(() => _obscureConfirm = !_obscureConfirm),
-                      ),
                       validator: (value) {
                         if (value != _passwordController.text) {
                           return 'Passwords do not match.';
