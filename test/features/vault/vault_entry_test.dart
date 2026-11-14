@@ -121,7 +121,7 @@ void main() {
 
     test('rejects invalid JSON structures', () {
       expect(
-        () => VaultEntry.fromJson(<String, dynamic>{'id': 'only-id'}),
+        () => VaultEntry.fromJson(const <String, dynamic>{'id': 'only-id'}),
         throwsA(isA<ValidationException>()),
       );
     });

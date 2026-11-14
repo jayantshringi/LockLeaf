@@ -120,7 +120,9 @@ void main() {
 
     test('rejects corrupt database row maps', () {
       expect(
-        () => VaultMetadata.fromMap(<String, Object?>{'vault_id': 'only-id'}),
+        () => VaultMetadata.fromMap(const <String, Object?>{
+          'vault_id': 'only-id',
+        }),
         throwsA(isA<StorageException>()),
       );
 

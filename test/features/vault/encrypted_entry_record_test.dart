@@ -69,7 +69,9 @@ void main() {
 
     test('throws StorageException on corrupt row map', () {
       expect(
-        () => EncryptedEntryRecord.fromMap(<String, Object?>{'id': 'entry-1'}),
+        () => EncryptedEntryRecord.fromMap(const <String, Object?>{
+          'id': 'entry-1',
+        }),
         throwsA(isA<StorageException>()),
       );
     });
