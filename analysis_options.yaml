@@ -9,6 +9,7 @@ analyzer:
     avoid_print: error
     missing_required_param: error
     missing_return: error
+    deprecated_member_use: ignore
 
 linter:
   rules:
@@ -26,4 +27,3 @@ linter:
     - always_declare_return_types
     - prefer_final_locals
     - prefer_final_in_for_each
-    - unreferenced_package_entry_points
