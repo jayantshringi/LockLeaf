@@ -142,9 +142,7 @@ class RecoveryKey {
 
   void _checkDestroyed() {
     if (_destroyed) {
-      throw const StateError(
-        'RecoveryKey has been destroyed and wiped from memory.',
-      );
+      throw StateError('RecoveryKey has been destroyed and wiped from memory.');
     }
   }
 
