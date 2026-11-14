@@ -29,10 +29,28 @@ jobs:
         run: dart format .
 
       - name: Run static analysis
-        run: flutter analyze --fatal-infos
+        run: |
+          set +e
+          OUTPUT=$(flutter analyze --fatal-infos 2>&1)
+          EXIT_CODE=$?
+          echo "$OUTPUT"
+          if [ $EXIT_CODE -ne 0 ]; then
+            ESCAPED="${OUTPUT//$'\n'/'%0A'}"
+            echo "::error title=Flutter Analyze Errors::$ESCAPED"
+            exit $EXIT_CODE
+          fi
 
       - name: Run test suite
-        run: flutter test --coverage
+        run: |
+          set +e
+          OUTPUT=$(flutter test --coverage 2>&1)
+          EXIT_CODE=$?
+          echo "$OUTPUT"
+          if [ $EXIT_CODE -ne 0 ]; then
+            ESCAPED="${OUTPUT//$'\n'/'%0A'}"
+            echo "::error title=Flutter Test Failures::$ESCAPED"
+            exit $EXIT_CODE
+          fi
 
       - name: Verify formatting clean
         run: |
