@@ -19,7 +19,8 @@ void main() {
       expect(config.period, equals(30));
     });
 
-    test('parses URI with URL-encoded parameters and explicit SHA256/8-digits', () {
+    test('parses URI with URL-encoded parameters and explicit SHA256/8-digits',
+        () {
       const uri =
           'otpauth://totp/Acme%20Corp:bob%40example.com?secret=JBSWY3DPEHPK3PXP&issuer=Acme%20Corp&algorithm=SHA256&digits=8&period=60';
       final config = OtpauthUriParser.parse(uri);
@@ -69,13 +70,15 @@ void main() {
     });
 
     test('throws ValidationException on invalid input', () {
-      expect(() => OtpauthUriParser.parse(''), throwsA(isA<ValidationException>()));
+      expect(() => OtpauthUriParser.parse(''),
+          throwsA(isA<ValidationException>()));
       expect(
         () => OtpauthUriParser.parse('https://example.com/totp?secret=ABC'),
         throwsA(isA<ValidationException>()),
       );
       expect(
-        () => OtpauthUriParser.parse('otpauth://hotp/alice?secret=ABC&counter=1'),
+        () =>
+            OtpauthUriParser.parse('otpauth://hotp/alice?secret=ABC&counter=1'),
         throwsA(isA<ValidationException>()),
       );
       expect(

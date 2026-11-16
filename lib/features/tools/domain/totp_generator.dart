@@ -23,7 +23,8 @@ abstract class TotpGenerator {
     int digits = SecurityConstants.totpDefaultDigits,
     TotpAlgorithm algorithm = TotpAlgorithm.sha1,
   }) async {
-    final nowSeconds = timestampSeconds ?? (DateTime.now().millisecondsSinceEpoch ~/ 1000);
+    final nowSeconds =
+        timestampSeconds ?? (DateTime.now().millisecondsSinceEpoch ~/ 1000);
     final counter = nowSeconds ~/ period;
 
     final secretBytes = Base32.decode(secret);
@@ -89,7 +90,8 @@ abstract class TotpGenerator {
     }
 
     final candidateBytes = utf8.encode(cleanCandidate);
-    final nowSeconds = timestampSeconds ?? (DateTime.now().millisecondsSinceEpoch ~/ 1000);
+    final nowSeconds =
+        timestampSeconds ?? (DateTime.now().millisecondsSinceEpoch ~/ 1000);
 
     var matched = false;
     for (var step = -driftSteps; step <= driftSteps; step++) {
@@ -115,7 +117,8 @@ abstract class TotpGenerator {
     int? timestampSeconds,
     int period = SecurityConstants.totpDefaultPeriodSeconds,
   }) {
-    final nowSeconds = timestampSeconds ?? (DateTime.now().millisecondsSinceEpoch ~/ 1000);
+    final nowSeconds =
+        timestampSeconds ?? (DateTime.now().millisecondsSinceEpoch ~/ 1000);
     final elapsed = nowSeconds % period;
     final remaining = period - elapsed;
     return remaining == 0 ? period : remaining;

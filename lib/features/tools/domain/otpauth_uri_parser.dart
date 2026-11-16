@@ -67,7 +67,9 @@ abstract class OtpauthUriParser {
     final queryIssuer = query['issuer']?.trim();
     final issuer = (queryIssuer != null && queryIssuer.isNotEmpty)
         ? queryIssuer
-        : (parsedIssuer != null && parsedIssuer.isNotEmpty ? parsedIssuer : null);
+        : (parsedIssuer != null && parsedIssuer.isNotEmpty
+            ? parsedIssuer
+            : null);
 
     final algoParam = query['algorithm'];
     final algorithm = TotpAlgorithm.fromName(algoParam);
@@ -79,7 +81,8 @@ abstract class OtpauthUriParser {
 
     final periodParam = query['period'];
     final period = periodParam != null
-        ? int.tryParse(periodParam) ?? SecurityConstants.totpDefaultPeriodSeconds
+        ? int.tryParse(periodParam) ??
+            SecurityConstants.totpDefaultPeriodSeconds
         : SecurityConstants.totpDefaultPeriodSeconds;
 
     return TotpConfig(

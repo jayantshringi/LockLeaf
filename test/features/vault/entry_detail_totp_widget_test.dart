@@ -51,7 +51,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify TOTP card and elements are displayed
-      expect(find.byKey(const Key('detail_totp_card_entry-totp-1')), findsOneWidget);
+      expect(find.byKey(const Key('detail_totp_card_entry-totp-1')),
+          findsOneWidget);
       expect(find.byKey(const Key('detail_totp_code')), findsOneWidget);
       expect(find.byKey(const Key('detail_totp_countdown')), findsOneWidget);
       expect(find.byKey(const Key('detail_copy_totp_button')), findsOneWidget);

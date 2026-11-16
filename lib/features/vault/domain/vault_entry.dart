@@ -93,7 +93,8 @@ class VaultEntry extends Equatable {
       password: password,
       url: url?.trim().isEmpty == true ? null : url?.trim(),
       notes: notes?.isEmpty == true ? null : notes,
-      totpSecret: totpSecret?.trim().isEmpty == true ? null : totpSecret?.trim(),
+      totpSecret:
+          totpSecret?.trim().isEmpty == true ? null : totpSecret?.trim(),
       category: category,
       isFavorite: isFavorite,
       createdAt: createdAt,

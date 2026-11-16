@@ -9,7 +9,8 @@ import 'package:lockleaf/features/vault/domain/vault_entry_category.dart';
 
 void main() {
   group('Security Hardening & Zeroization Audit', () {
-    test('SecureMemory.wipeBytes zeroes out sensitive byte buffers in-place', () {
+    test('SecureMemory.wipeBytes zeroes out sensitive byte buffers in-place',
+        () {
       final buffer = Uint8List.fromList([1, 2, 3, 4, 5, 255, 128, 42]);
       SecureMemory.wipeBytes(buffer);
 
@@ -23,7 +24,8 @@ void main() {
       expect(() => SecureMemory.wipeBytes(emptyBuffer), returnsNormally);
     });
 
-    test('SecureMemory.constantTimeEquals compares buffers in constant time', () {
+    test('SecureMemory.constantTimeEquals compares buffers in constant time',
+        () {
       final a = [10, 20, 30, 40, 50];
       final b = [10, 20, 30, 40, 50];
       final c = [10, 20, 30, 40, 51];
@@ -34,7 +36,8 @@ void main() {
       expect(SecureMemory.constantTimeEquals(a, d), isFalse);
     });
 
-    test('Zero Plaintext Leakage: VaultEntry.toString() redacts all secrets', () {
+    test('Zero Plaintext Leakage: VaultEntry.toString() redacts all secrets',
+        () {
       const plaintextPassword = 'SuperSecretPlaintextPassword!99#';
       const totpSecret = 'JBSWY3DPEHPK3PXP';
       const privateNote = 'Highly classified sensitive note';
@@ -65,7 +68,8 @@ void main() {
       expect(representation, contains('hasTotp: true'));
     });
 
-    test('Zero Plaintext Leakage: TotpConfig.toString() redacts secret key', () {
+    test('Zero Plaintext Leakage: TotpConfig.toString() redacts secret key',
+        () {
       const secret = 'JBSWY3DPEHPK3PXP';
       final config = TotpConfig(
         secret: secret,

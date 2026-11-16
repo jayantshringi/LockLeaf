@@ -73,8 +73,7 @@ class TotpConfig extends Equatable {
       digits: digits ?? this.digits,
       period: period ?? this.period,
       issuer: clearIssuer ? null : (issuer ?? this.issuer),
-      accountName:
-          clearAccountName ? null : (accountName ?? this.accountName),
+      accountName: clearAccountName ? null : (accountName ?? this.accountName),
     );
   }
 
@@ -90,8 +89,7 @@ class TotpConfig extends Equatable {
       'secret': secret,
       if (effectiveIssuer != null && effectiveIssuer.isNotEmpty)
         'issuer': effectiveIssuer,
-      if (algorithm != TotpAlgorithm.sha1)
-        'algorithm': algorithm.standardName,
+      if (algorithm != TotpAlgorithm.sha1) 'algorithm': algorithm.standardName,
       if (digits != SecurityConstants.totpDefaultDigits)
         'digits': digits.toString(),
       if (period != SecurityConstants.totpDefaultPeriodSeconds)
@@ -108,8 +106,7 @@ class TotpConfig extends Equatable {
 
   /// Redacted string representation preventing accidental key logging.
   @override
-  String toString() =>
-      'TotpConfig(issuer: $issuer, accountName: $accountName, '
+  String toString() => 'TotpConfig(issuer: $issuer, accountName: $accountName, '
       'digits: $digits, period: ${period}s, algorithm: ${algorithm.standardName}, '
       'secret: [REDACTED])';
 

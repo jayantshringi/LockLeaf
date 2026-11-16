@@ -381,8 +381,7 @@ class _TotpDetailCardState extends State<_TotpDetailCard> {
         _code = code;
         _remainingSeconds =
             TotpGenerator.remainingSeconds(period: _config.period);
-        _fraction =
-            TotpGenerator.progressFraction(period: _config.period);
+        _fraction = TotpGenerator.progressFraction(period: _config.period);
       });
     });
   }

@@ -24,7 +24,8 @@ void main() {
       expect(Base32.encode(utf8.encode('fo'), pad: true), equals('MZXQ===='));
       expect(Base32.encode(utf8.encode('foo'), pad: true), equals('MZXW6==='));
       expect(Base32.encode(utf8.encode('foob'), pad: true), equals('MZXW6YQ='));
-      expect(Base32.encode(utf8.encode('fooba'), pad: true), equals('MZXW6YTB'));
+      expect(
+          Base32.encode(utf8.encode('fooba'), pad: true), equals('MZXW6YTB'));
       expect(
         Base32.encode(utf8.encode('foobar'), pad: true),
         equals('MZXW6YTBOI======'),
@@ -50,7 +51,8 @@ void main() {
     });
 
     test('throws ValidationException on invalid Base32 characters', () {
-      expect(() => Base32.decode('INVALID!'), throwsA(isA<ValidationException>()));
+      expect(
+          () => Base32.decode('INVALID!'), throwsA(isA<ValidationException>()));
       // '1', '8', '9', '0' are not in standard RFC 4648 Base32 alphabet
       expect(() => Base32.decode('MZXW1'), throwsA(isA<ValidationException>()));
       expect(() => Base32.decode('MZXW8'), throwsA(isA<ValidationException>()));

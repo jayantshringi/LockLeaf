@@ -38,7 +38,8 @@ void main() {
           period: 30,
           algorithm: TotpAlgorithm.sha1,
         );
-        expect(code, equals(entry.value), reason: 'Failed at time ${entry.key}');
+        expect(code, equals(entry.value),
+            reason: 'Failed at time ${entry.key}');
       }
     });
 
@@ -60,7 +61,8 @@ void main() {
           period: 30,
           algorithm: TotpAlgorithm.sha256,
         );
-        expect(code, equals(entry.value), reason: 'Failed at time ${entry.key}');
+        expect(code, equals(entry.value),
+            reason: 'Failed at time ${entry.key}');
       }
     });
 
@@ -82,7 +84,8 @@ void main() {
           period: 30,
           algorithm: TotpAlgorithm.sha512,
         );
-        expect(code, equals(entry.value), reason: 'Failed at time ${entry.key}');
+        expect(code, equals(entry.value),
+            reason: 'Failed at time ${entry.key}');
       }
     });
 
@@ -169,14 +172,16 @@ void main() {
 
     test('calculates countdown remaining seconds and progress', () {
       // 59 seconds: 59 % 30 = 29 elapsed, 1 remaining
-      expect(TotpGenerator.remainingSeconds(timestampSeconds: 59, period: 30), equals(1));
+      expect(TotpGenerator.remainingSeconds(timestampSeconds: 59, period: 30),
+          equals(1));
       expect(
         TotpGenerator.progressFraction(timestampSeconds: 59, period: 30),
         closeTo(1 / 30, 0.001),
       );
 
       // 60 seconds: 60 % 30 = 0 elapsed, 30 remaining
-      expect(TotpGenerator.remainingSeconds(timestampSeconds: 60, period: 30), equals(30));
+      expect(TotpGenerator.remainingSeconds(timestampSeconds: 60, period: 30),
+          equals(30));
       expect(
         TotpGenerator.progressFraction(timestampSeconds: 60, period: 30),
         closeTo(1.0, 0.001),
