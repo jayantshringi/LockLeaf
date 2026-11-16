@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockleaf/core/constants/security_constants.dart';
 import 'package:lockleaf/core/errors/app_exception.dart';
 import 'package:lockleaf/features/security/domain/login_rate_limiter.dart';
 

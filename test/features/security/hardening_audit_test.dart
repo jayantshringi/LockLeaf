@@ -64,7 +64,7 @@ void main() {
       expect(representation, isNot(contains(privateNote)));
       expect(representation, isNot(contains(privateUrl)));
       expect(representation, isNot(contains('alice_admin')));
-      expect(representation, contains('Banking Portal') ? isFalse : isTrue);
+      expect(representation, isNot(contains('Banking Portal')));
       expect(representation, contains('hasTotp: true'));
     });
 
@@ -85,7 +85,7 @@ void main() {
     test('Exceptions do not inadvertently leak credentials', () {
       const rateLimitEx = RateLimitException(
         'Too many failed attempts. Locked out for 60 seconds.',
-        lockoutSeconds: 60,
+        remainingCooldown: Duration(seconds: 60),
       );
       expect(rateLimitEx.toString(), isNot(contains('password')));
       expect(rateLimitEx.lockoutSeconds, equals(60));

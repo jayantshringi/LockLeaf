@@ -55,8 +55,11 @@ class RateLimitException extends AppException {
   final Duration remainingCooldown;
 
   const RateLimitException(
-    super.message, {
+    String message, {
     this.remainingCooldown = Duration.zero,
     String? technicalDetails,
-  }) : super(technicalDetails);
+  }) : super(message, technicalDetails);
+
+  /// Convenient getter for the remaining lockout cooldown in seconds.
+  int get lockoutSeconds => remainingCooldown.inSeconds;
 }
