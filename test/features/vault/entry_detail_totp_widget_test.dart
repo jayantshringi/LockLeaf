@@ -60,6 +60,7 @@ void main() {
       // Tap copy 2FA button and verify SnackBar
       await tester.tap(find.byKey(const Key('detail_copy_totp_button')));
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
       expect(find.byType(SnackBar), findsOneWidget);
     },
   );
