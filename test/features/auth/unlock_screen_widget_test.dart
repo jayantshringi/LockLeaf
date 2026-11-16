@@ -4,6 +4,7 @@ import 'package:lockleaf/app.dart';
 import 'package:lockleaf/core/crypto/kdf_params.dart';
 import 'package:lockleaf/core/crypto/secure_random_service.dart';
 import 'package:lockleaf/features/auth/presentation/vault_controller.dart';
+import 'package:lockleaf/features/security/domain/login_rate_limiter.dart';
 import 'package:lockleaf/features/vault/domain/vault_service.dart';
 
 import '../vault/in_memory_vault_storage.dart';
@@ -95,4 +96,65 @@ void main() {
     expect(controller.stage, equals(AuthFlowStage.unlocked));
     expect(find.text('LockLeaf Vault'), findsOneWidget);
   });
+
+  testWidgets(
+    'unlock screen enforces lockout banner and disables buttons after max attempts',
+    (WidgetTester tester) async {
+      final masterPass = randomToken();
+      final storage = InMemoryVaultStorage();
+      final fastParams = KdfParams(
+        memoryKiB: 256,
+        iterations: 1,
+        parallelism: 1,
+      );
+      final vaultService = VaultService(
+        storage: storage,
+        randomService: randomService,
+      );
+      await vaultService.createVault(
+        masterPassword: masterPass,
+        kdfParams: fastParams,
+      );
+      vaultService.lockVault();
+
+      final rateLimiter = LoginRateLimiter(
+        maxFailedAttempts: 2,
+        initialCooldownSeconds: 30,
+      );
+      final controller = VaultController(
+        vaultService: vaultService,
+        kdfParams: fastParams,
+        rateLimiter: rateLimiter,
+      );
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(LockLeafApp(controller: controller));
+      await tester.pumpAndSettle();
+
+      // 1st failed attempt
+      await tester.enterText(
+        find.byKey(const Key('unlock_password_field')),
+        'WrongPass1',
+      );
+      await tester.tap(find.byKey(const Key('unlock_submit_button')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('unlock_lockout_banner')), findsNothing);
+
+      // 2nd failed attempt triggers lockout
+      await tester.enterText(
+        find.byKey(const Key('unlock_password_field')),
+        'WrongPass2',
+      );
+      await tester.tap(find.byKey(const Key('unlock_submit_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('unlock_lockout_banner')), findsOneWidget);
+      expect(find.textContaining('Too many failed attempts'), findsOneWidget);
+
+      final submitButton = tester.widget<FilledButton>(
+        find.byKey(const Key('unlock_submit_button')),
+      );
+      expect(submitButton.onPressed, isNull);
+    },
+  );
 }

@@ -42,6 +42,19 @@ abstract class SecurityConstants {
   /// Rate limiting: maximum login attempts before cooldown lockout.
   static const int maxFailedLoginAttempts = 5;
 
-  /// Lockout cooldown duration in seconds.
+  /// Initial lockout cooldown duration in seconds.
   static const int failedAttemptLockoutSeconds = 60;
+
+  /// Maximum ceiling for exponential lockout cooldown (15 minutes).
+  static const int maxLockoutSeconds = 900;
+
+  // --- Two-Factor Authentication (RFC 6238 / RFC 4226) ---
+  /// Default TOTP time-step period in seconds.
+  static const int totpDefaultPeriodSeconds = 30;
+
+  /// Default TOTP token digit count.
+  static const int totpDefaultDigits = 6;
+
+  /// Allowed verification drift steps (±1 step = 30 seconds).
+  static const int totpAllowedDriftSteps = 1;
 }

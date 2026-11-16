@@ -48,3 +48,15 @@ class NetworkException extends AppException {
 class SyncException extends AppException {
   const SyncException(super.message, [super.technicalDetails]);
 }
+
+/// Thrown when an operation exceeds allowed rate limits or lockout policies.
+class RateLimitException extends AppException {
+  /// Remaining cooldown time before another attempt is permitted.
+  final Duration remainingCooldown;
+
+  const RateLimitException(
+    super.message, {
+    this.remainingCooldown = Duration.zero,
+    String? technicalDetails,
+  }) : super(technicalDetails);
+}

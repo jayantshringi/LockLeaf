@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lockleaf/core/crypto/kdf_params.dart';
 import 'package:lockleaf/core/errors/app_exception.dart';
 import 'package:lockleaf/features/backup/domain/recovery_key.dart';
+import 'package:lockleaf/features/security/domain/login_rate_limiter.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry_category.dart';
 import 'package:lockleaf/features/vault/domain/vault_service.dart';
@@ -25,6 +26,7 @@ enum AuthFlowStage {
 class VaultController extends ChangeNotifier {
   final VaultService _vaultService;
   final KdfParams _kdfParams;
+  final LoginRateLimiter _rateLimiter;
 
   AuthFlowStage _stage = AuthFlowStage.loading;
   ThemeMode _themeMode;
@@ -42,12 +44,23 @@ class VaultController extends ChangeNotifier {
     required VaultService vaultService,
     KdfParams kdfParams = const KdfParams.standard(),
     ThemeMode initialThemeMode = ThemeMode.dark,
-  })  : _vaultService = vaultService,
-        _kdfParams = kdfParams,
-        _themeMode = initialThemeMode;
+    LoginRateLimiter? rateLimiter,
+  }) : _vaultService = vaultService,
+       _kdfParams = kdfParams,
+       _themeMode = initialThemeMode,
+       _rateLimiter = rateLimiter ?? LoginRateLimiter();
 
   /// Underlying zero-knowledge vault service.
   VaultService get vaultService => _vaultService;
+
+  /// Anti-brute-force rate limiter protecting authentication endpoints.
+  LoginRateLimiter get rateLimiter => _rateLimiter;
+
+  /// Whether authentication is actively locked out due to rate limiting.
+  bool get isLockedOut => _rateLimiter.isLockedOut;
+
+  /// Remaining seconds until rate-limit lockout expires.
+  int get remainingCooldownSeconds => _rateLimiter.remainingCooldownSeconds;
 
   /// The most recently generated recovery key (e.g. at vault creation or reset).
   RecoveryKey? get lastGeneratedRecoveryKey => _lastGeneratedRecoveryKey;
@@ -102,11 +115,11 @@ class VaultController extends ChangeNotifier {
           return true;
         }
         final matchesTitle = entry.title.toLowerCase().contains(
-              normalizedQuery,
-            );
+          normalizedQuery,
+        );
         final matchesUser = entry.username.toLowerCase().contains(
-              normalizedQuery,
-            );
+          normalizedQuery,
+        );
         final matchesUrl =
             entry.url?.toLowerCase().contains(normalizedQuery) ?? false;
         return matchesTitle || matchesUser || matchesUrl;
@@ -157,12 +170,12 @@ class VaultController extends ChangeNotifier {
     required String newMasterPassword,
   }) async {
     return _runBusyAction(() async {
-      _lastGeneratedRecoveryKey =
-          await _vaultService.resetMasterPasswordWithRecoveryKey(
-        recoveryKey: recoveryKey,
-        newPassword: newMasterPassword,
-        newKdfParams: _kdfParams,
-      );
+      _lastGeneratedRecoveryKey = await _vaultService
+          .resetMasterPasswordWithRecoveryKey(
+            recoveryKey: recoveryKey,
+            newPassword: newMasterPassword,
+            newKdfParams: _kdfParams,
+          );
       _entries = await _vaultService.getAllEntries();
       _stage = AuthFlowStage.unlocked;
     });
@@ -171,18 +184,28 @@ class VaultController extends ChangeNotifier {
   /// Attempts to unlock the existing vault with [masterPassword].
   Future<bool> unlock(String masterPassword) async {
     return _runBusyAction(() async {
-      await _vaultService.unlockVault(masterPassword);
-      _entries = await _vaultService.getAllEntries();
-      _stage = AuthFlowStage.unlocked;
+      _rateLimiter.checkLockout();
+      try {
+        await _vaultService.unlockVault(masterPassword);
+        _rateLimiter.recordAttempt(success: true);
+        _entries = await _vaultService.getAllEntries();
+        _stage = AuthFlowStage.unlocked;
+      } catch (e) {
+        _rateLimiter.recordAttempt(success: false);
+        rethrow;
+      }
     });
   }
 
   /// Finalizes UI state after an external unlock (e.g. biometrics or recovery).
   Future<bool> completeExternalUnlock() async {
     return _runBusyAction(() async {
+      _rateLimiter.checkLockout();
       if (!_vaultService.isUnlocked) {
+        _rateLimiter.recordAttempt(success: false);
         throw const AuthenticationException('Vault unlock did not complete.');
       }
+      _rateLimiter.recordAttempt(success: true);
       _entries = await _vaultService.getAllEntries();
       _stage = AuthFlowStage.unlocked;
     });
@@ -289,8 +312,9 @@ class VaultController extends ChangeNotifier {
 
   /// Toggles between dark and light theme modes.
   void toggleDarkMode() {
-    _themeMode =
-        _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    _themeMode = _themeMode == ThemeMode.dark
+        ? ThemeMode.light
+        : ThemeMode.dark;
     notifyListeners();
   }
 

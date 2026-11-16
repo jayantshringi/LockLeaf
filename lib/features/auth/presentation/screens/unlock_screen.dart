@@ -29,15 +29,42 @@ class UnlockScreen extends StatefulWidget {
 class _UnlockScreenState extends State<UnlockScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _passwordController = TextEditingController();
+  Timer? _lockoutTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controller.isLockedOut) {
+      _startLockoutTimer();
+    }
+  }
+
+  void _startLockoutTimer() {
+    _lockoutTimer?.cancel();
+    _lockoutTimer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+      if (!widget.controller.isLockedOut) {
+        timer.cancel();
+      }
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
 
   @override
   void dispose() {
+    _lockoutTimer?.cancel();
     _passwordController.clear();
     _passwordController.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
+    if (widget.controller.isLockedOut) {
+      _startLockoutTimer();
+      return;
+    }
+
     final formState = _formKey.currentState;
     if (formState == null || !formState.validate()) {
       return;
@@ -49,6 +76,8 @@ class _UnlockScreenState extends State<UnlockScreen> {
     }
     if (success) {
       _passwordController.clear();
+    } else if (widget.controller.isLockedOut) {
+      _startLockoutTimer();
     }
   }
 
@@ -77,6 +106,8 @@ class _UnlockScreenState extends State<UnlockScreen> {
       listenable: listenable,
       builder: (BuildContext context, Widget? child) {
         final isBusy = widget.controller.isBusy;
+        final isLockedOut = widget.controller.isLockedOut;
+        final remainingSeconds = widget.controller.remainingCooldownSeconds;
         final errorMessage = widget.controller.errorMessage;
         final showBiometrics = security?.biometricEnabled ?? false;
 
@@ -115,18 +146,14 @@ class _UnlockScreenState extends State<UnlockScreen> {
                       Text(
                         'Vault Locked',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall
+                        style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Enter your master password to decrypt your local vault.',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
+                        style: Theme.of(context).textTheme.bodyMedium
                             ?.copyWith(color: Colors.grey),
                       ),
                       const SizedBox(height: 32),
@@ -134,7 +161,7 @@ class _UnlockScreenState extends State<UnlockScreen> {
                         key: const Key('unlock_password_field'),
                         controller: _passwordController,
                         labelText: 'Master Password',
-                        enabled: !isBusy,
+                        enabled: !isBusy && !isLockedOut,
                         onChanged: (_) => widget.controller.clearError(),
                         onFieldSubmitted: (_) => _submit(),
                         validator: (String? value) {
@@ -144,7 +171,39 @@ class _UnlockScreenState extends State<UnlockScreen> {
                           return null;
                         },
                       ),
-                      if (errorMessage != null) ...[
+                      if (isLockedOut) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          key: const Key('unlock_lockout_banner'),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.warning.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: AppTheme.warning.withOpacity(0.4),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.timer_outlined,
+                                color: AppTheme.warning,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Too many failed attempts. Try again in ${remainingSeconds}s.',
+                                  style: const TextStyle(
+                                    color: AppTheme.warning,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ] else if (errorMessage != null) ...[
                         const SizedBox(height: 12),
                         Container(
                           key: const Key('unlock_error_banner'),
@@ -164,7 +223,7 @@ class _UnlockScreenState extends State<UnlockScreen> {
                         height: 52,
                         child: FilledButton(
                           key: const Key('unlock_submit_button'),
-                          onPressed: isBusy ? null : _submit,
+                          onPressed: (isBusy || isLockedOut) ? null : _submit,
                           child: isBusy
                               ? const SizedBox(
                                   width: 22,
@@ -173,7 +232,11 @@ class _UnlockScreenState extends State<UnlockScreen> {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Text('Unlock Vault'),
+                              : Text(
+                                  isLockedOut
+                                      ? 'Locked Out (${remainingSeconds}s)'
+                                      : 'Unlock Vault',
+                                ),
                         ),
                       ),
                       if (showBiometrics) ...[
@@ -182,7 +245,7 @@ class _UnlockScreenState extends State<UnlockScreen> {
                           height: 52,
                           child: OutlinedButton.icon(
                             key: const Key('unlock_biometric_button'),
-                            onPressed: isBusy
+                            onPressed: (isBusy || isLockedOut)
                                 ? null
                                 : () => unawaited(_unlockBiometrics()),
                             icon: const Icon(Icons.fingerprint),
@@ -200,8 +263,8 @@ class _UnlockScreenState extends State<UnlockScreen> {
                                   MaterialPageRoute<void>(
                                     builder: (context) =>
                                         RecoveryKeyResetScreen(
-                                      vaultController: widget.controller,
-                                    ),
+                                          vaultController: widget.controller,
+                                        ),
                                   ),
                                 );
                               },
