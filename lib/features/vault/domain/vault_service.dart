@@ -422,6 +422,7 @@ class VaultService {
     required String password,
     String? url,
     String? notes,
+    String? totpSecret,
     VaultEntryCategory category = VaultEntryCategory.login,
     bool isFavorite = false,
   }) async {
@@ -434,6 +435,7 @@ class VaultService {
       password: password,
       url: url,
       notes: notes,
+      totpSecret: totpSecret,
       category: category,
       isFavorite: isFavorite,
       createdAt: now,

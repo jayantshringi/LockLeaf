@@ -4,7 +4,7 @@ import 'package:lockleaf/features/auth/domain/password_strength.dart';
 import 'package:lockleaf/features/auth/presentation/vault_controller.dart';
 import 'package:lockleaf/features/auth/presentation/widgets/password_strength_meter.dart';
 import 'package:lockleaf/features/auth/presentation/widgets/secret_text_field.dart';
-import 'package:lockleaf/features/tools/presentation/screens/password_generator_screen.dart';
+import 'package:lockleaf/features/tools/tools.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry_category.dart';
 
@@ -32,6 +32,7 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
   late final TextEditingController _titleController;
   late final TextEditingController _usernameController;
   late final TextEditingController _passwordController;
+  late final TextEditingController _totpController;
   late final TextEditingController _urlController;
   late final TextEditingController _notesController;
 
@@ -48,6 +49,7 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
     _titleController = TextEditingController(text: existing?.title ?? '');
     _usernameController = TextEditingController(text: existing?.username ?? '');
     _passwordController = TextEditingController(text: existing?.password ?? '');
+    _totpController = TextEditingController(text: existing?.totpSecret ?? '');
     _urlController = TextEditingController(text: existing?.url ?? '');
     _notesController = TextEditingController(text: existing?.notes ?? '');
 
@@ -59,9 +61,11 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
   @override
   void dispose() {
     _passwordController.clear();
+    _totpController.clear();
     _titleController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
+    _totpController.dispose();
     _urlController.dispose();
     _notesController.dispose();
     super.dispose();
@@ -75,6 +79,15 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
 
     final urlText = _urlController.text.trim();
     final notesText = _notesController.text;
+    final totpInput = _totpController.text.trim();
+    String? cleanTotpSecret;
+    if (totpInput.isNotEmpty) {
+      try {
+        cleanTotpSecret = OtpauthUriParser.parse(totpInput).secret;
+      } catch (_) {
+        cleanTotpSecret = totpInput;
+      }
+    }
 
     final VaultEntry? saved;
     final existing = widget.existingEntry;
@@ -84,6 +97,8 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
           title: _titleController.text.trim(),
           username: _usernameController.text.trim(),
           password: _passwordController.text,
+          totpSecret: cleanTotpSecret,
+          clearTotpSecret: cleanTotpSecret == null,
           url: urlText.isEmpty ? null : urlText,
           clearUrl: urlText.isEmpty,
           notes: notesText.isEmpty ? null : notesText,
@@ -97,6 +112,7 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
         title: _titleController.text.trim(),
         username: _usernameController.text.trim(),
         password: _passwordController.text,
+        totpSecret: cleanTotpSecret,
         url: urlText.isEmpty ? null : urlText,
         notes: notesText.isEmpty ? null : notesText,
         category: _category,
@@ -252,6 +268,30 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
                     ),
                     const SizedBox(height: 6),
                     PasswordStrengthMeter(result: _strength),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      key: const Key('entry_totp_field'),
+                      controller: _totpController,
+                      enabled: !isBusy,
+                      autocorrect: false,
+                      textInputAction: TextInputAction.next,
+                      decoration: const InputDecoration(
+                        labelText: 'Authenticator Key / 2FA (optional)',
+                        hintText: 'Base32 secret key or otpauth:// URI',
+                        prefixIcon: Icon(Icons.pin_outlined),
+                      ),
+                      validator: (String? value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return null;
+                        }
+                        try {
+                          OtpauthUriParser.parse(value.trim());
+                          return null;
+                        } catch (_) {
+                          return 'Invalid Base32 secret or otpauth:// URI';
+                        }
+                      },
+                    ),
                     const SizedBox(height: 16),
                     TextFormField(
                       key: const Key('entry_url_field'),

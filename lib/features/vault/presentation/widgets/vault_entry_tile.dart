@@ -61,6 +61,27 @@ class VaultEntryTile extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (entry.hasTotp)
+              Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: Container(
+                  key: Key('vault_entry_2fa_badge_${entry.id}'),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryGreen.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text(
+                    '2FA',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryGreen,
+                    ),
+                  ),
+                ),
+              ),
             if (entry.isFavorite)
               const Padding(
                 padding: EdgeInsets.only(right: 8),

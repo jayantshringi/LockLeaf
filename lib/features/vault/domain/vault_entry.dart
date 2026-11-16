@@ -22,11 +22,17 @@ class VaultEntry extends Equatable {
   /// Optional freeform notes stored encrypted with the entry.
   final String? notes;
 
+  /// Optional Base32 TOTP shared secret key or otpauth:// URI for 2FA.
+  final String? totpSecret;
+
   /// Logical entry category.
   final VaultEntryCategory category;
 
   /// Whether the user starred this entry for quick access.
   final bool isFavorite;
+
+  /// Whether this entry has an active two-factor authentication TOTP secret.
+  bool get hasTotp => totpSecret != null && totpSecret!.trim().isNotEmpty;
 
   /// UTC timestamp when the entry was first created.
   final DateTime createdAt;
@@ -44,6 +50,7 @@ class VaultEntry extends Equatable {
     required this.password,
     required this.url,
     required this.notes,
+    this.totpSecret,
     required this.category,
     required this.isFavorite,
     required DateTime createdAt,
@@ -66,6 +73,7 @@ class VaultEntry extends Equatable {
     required String password,
     String? url,
     String? notes,
+    String? totpSecret,
     VaultEntryCategory category = VaultEntryCategory.login,
     bool isFavorite = false,
     required DateTime createdAt,
@@ -85,6 +93,7 @@ class VaultEntry extends Equatable {
       password: password,
       url: url?.trim().isEmpty == true ? null : url?.trim(),
       notes: notes?.isEmpty == true ? null : notes,
+      totpSecret: totpSecret?.trim().isEmpty == true ? null : totpSecret?.trim(),
       category: category,
       isFavorite: isFavorite,
       createdAt: createdAt,
@@ -102,6 +111,8 @@ class VaultEntry extends Equatable {
     bool clearUrl = false,
     String? notes,
     bool clearNotes = false,
+    String? totpSecret,
+    bool clearTotpSecret = false,
     VaultEntryCategory? category,
     bool? isFavorite,
     DateTime? updatedAt,
@@ -114,6 +125,7 @@ class VaultEntry extends Equatable {
       password: password ?? this.password,
       url: clearUrl ? null : (url ?? this.url),
       notes: clearNotes ? null : (notes ?? this.notes),
+      totpSecret: clearTotpSecret ? null : (totpSecret ?? this.totpSecret),
       category: category ?? this.category,
       isFavorite: isFavorite ?? this.isFavorite,
       createdAt: createdAt,
@@ -131,6 +143,7 @@ class VaultEntry extends Equatable {
       'password': password,
       'url': url,
       'notes': notes,
+      'totpSecret': totpSecret,
       'category': category.id,
       'isFavorite': isFavorite,
       'createdAt': createdAt.millisecondsSinceEpoch,
@@ -147,6 +160,7 @@ class VaultEntry extends Equatable {
     final password = json['password'];
     final url = json['url'];
     final notes = json['notes'];
+    final totpSecret = json['totpSecret'] as String?;
     final categoryId = json['category'];
     final isFavorite = json['isFavorite'];
     final createdAtMillis = json['createdAt'];
@@ -175,6 +189,7 @@ class VaultEntry extends Equatable {
       password: password,
       url: url,
       notes: notes,
+      totpSecret: totpSecret,
       category: VaultEntryCategory.fromId(categoryId),
       isFavorite: isFavorite,
       createdAt: DateTime.fromMillisecondsSinceEpoch(
@@ -192,7 +207,7 @@ class VaultEntry extends Equatable {
   /// Redacted string representation preventing accidental credential logging.
   @override
   String toString() =>
-      'VaultEntry(id: $id, category: ${category.id}, isFavorite: $isFavorite)';
+      'VaultEntry(id: $id, category: ${category.id}, isFavorite: $isFavorite, hasTotp: $hasTotp)';
 
   @override
   List<Object?> get props => [
@@ -202,6 +217,7 @@ class VaultEntry extends Equatable {
         password,
         url,
         notes,
+        totpSecret,
         category,
         isFavorite,
         createdAt,

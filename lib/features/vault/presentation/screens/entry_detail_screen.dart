@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lockleaf/core/constants/security_constants.dart';
 import 'package:lockleaf/core/theme/app_theme.dart';
 import 'package:lockleaf/features/auth/presentation/vault_controller.dart';
 import 'package:lockleaf/features/security/presentation/security_controller.dart';
+import 'package:lockleaf/features/tools/tools.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry.dart';
 import 'package:lockleaf/features/vault/presentation/screens/add_edit_entry_screen.dart';
 import 'package:lockleaf/features/vault/presentation/widgets/vault_entry_tile.dart';
@@ -217,6 +220,14 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                 ],
               ),
             ),
+            if (_entry.hasTotp) ...[
+              const SizedBox(height: 12),
+              _TotpDetailCard(
+                key: Key('detail_totp_card_${_entry.id}'),
+                totpSecret: _entry.totpSecret!,
+                onCopy: _copyToClipboard,
+              ),
+            ],
             if (url != null) ...[
               const SizedBox(height: 12),
               _DetailFieldCard(
@@ -294,6 +305,167 @@ class _DetailFieldCard extends StatelessWidget {
               ),
             ),
             if (trailing != null) trailing!,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TotpDetailCard extends StatefulWidget {
+  final String totpSecret;
+  final Future<void> Function(String label, String value, {bool isSensitive})
+      onCopy;
+
+  const _TotpDetailCard({
+    super.key,
+    required this.totpSecret,
+    required this.onCopy,
+  });
+
+  @override
+  State<_TotpDetailCard> createState() => _TotpDetailCardState();
+}
+
+class _TotpDetailCardState extends State<_TotpDetailCard> {
+  Timer? _timer;
+  String _code = '------';
+  int _remainingSeconds = SecurityConstants.totpDefaultPeriodSeconds;
+  double _fraction = 1.0;
+  late final TotpConfig _config;
+  bool _validConfig = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initTotp();
+  }
+
+  void _initTotp() {
+    try {
+      _config = OtpauthUriParser.parse(widget.totpSecret);
+      _validConfig = true;
+    } catch (_) {
+      _validConfig = false;
+    }
+    if (_validConfig) {
+      _refresh();
+      _timer?.cancel();
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) => _refresh());
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _TotpDetailCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.totpSecret != widget.totpSecret) {
+      _initTotp();
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _refresh() {
+    if (!mounted || !_validConfig) {
+      return;
+    }
+    TotpGenerator.generate(_config).then((code) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _code = code;
+        _remainingSeconds =
+            TotpGenerator.remainingSeconds(period: _config.period);
+        _fraction =
+            TotpGenerator.progressFraction(period: _config.period);
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_validConfig) {
+      return const SizedBox.shrink();
+    }
+
+    final formatted = TotpGenerator.formatCode(_code);
+    return Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: AppTheme.primaryGreen.withOpacity(0.35)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                CircularProgressIndicator(
+                  key: const Key('detail_totp_countdown'),
+                  value: _fraction,
+                  strokeWidth: 3,
+                  backgroundColor: Colors.grey.withOpacity(0.2),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    _remainingSeconds <= 5
+                        ? AppTheme.danger
+                        : AppTheme.primaryGreen,
+                  ),
+                ),
+                Text(
+                  '${_remainingSeconds}s',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '2FA TOTP Code',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.color
+                              ?.withOpacity(0.7),
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    formatted,
+                    key: const Key('detail_totp_code'),
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              key: const Key('detail_copy_totp_button'),
+              tooltip: 'Copy 2FA code',
+              icon: const Icon(Icons.copy_outlined),
+              onPressed: () => widget.onCopy(
+                '2FA code',
+                _code.replaceAll(' ', ''),
+                isSensitive: true,
+              ),
+            ),
           ],
         ),
       ),
