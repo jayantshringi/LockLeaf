@@ -37,7 +37,7 @@ void main() {
         vaultController: controller,
         biometricManager: BiometricVaultManager(
           vaultService: vaultService,
-          secureStorage: FakeSecureKeyStorage(),
+          secureStorage: InMemorySecureKeyStorage(),
           biometricAuth: FakeBiometricAuthService(),
           randomService: randomService,
         ),
