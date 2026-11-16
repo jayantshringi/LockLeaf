@@ -3,11 +3,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lockleaf/core/crypto/kdf_params.dart';
 import 'package:lockleaf/core/crypto/secure_random_service.dart';
 import 'package:lockleaf/features/auth/presentation/vault_controller.dart';
+import 'package:lockleaf/features/security/domain/biometric_vault_manager.dart';
+import 'package:lockleaf/features/security/domain/secure_clipboard_service.dart';
+import 'package:lockleaf/features/security/presentation/security_controller.dart';
 import 'package:lockleaf/features/vault/domain/vault_entry.dart';
 import 'package:lockleaf/features/vault/domain/vault_service.dart';
 import 'package:lockleaf/features/vault/presentation/screens/entry_detail_screen.dart';
 import 'package:lockleaf/features/vault/presentation/widgets/vault_entry_tile.dart';
 
+import '../security/security_test_doubles.dart';
 import 'in_memory_vault_storage.dart';
 
 void main() {
@@ -19,15 +23,32 @@ void main() {
         iterations: 1,
         parallelism: 1,
       );
+      final randomService = SecureRandomService();
       final vaultService = VaultService(
         storage: InMemoryVaultStorage(),
-        randomService: SecureRandomService(),
+        randomService: randomService,
       );
       final controller = VaultController(
         vaultService: vaultService,
         kdfParams: fastParams,
       );
-      addTearDown(controller.dispose);
+      final clipboardAdapter = InMemoryClipboardAdapter();
+      final securityController = SecurityController(
+        vaultController: controller,
+        biometricManager: BiometricVaultManager(
+          vaultService: vaultService,
+          secureStorage: FakeSecureKeyStorage(),
+          biometricAuth: FakeBiometricAuthService(),
+          randomService: randomService,
+        ),
+        clipboard: SecureClipboardService(adapter: clipboardAdapter),
+        screenshotProtection: FakeScreenshotProtectionService(),
+      );
+
+      addTearDown(() {
+        securityController.dispose();
+        controller.dispose();
+      });
 
       final now = DateTime.utc(2026, 11, 16, 12, 0, 0);
       final entry = VaultEntry(
@@ -45,23 +66,26 @@ void main() {
           home: EntryDetailScreen(
             controller: controller,
             entry: entry,
+            securityController: securityController,
           ),
         ),
       );
       await tester.pumpAndSettle();
 
       // Verify TOTP card and elements are displayed
-      expect(find.byKey(const Key('detail_totp_card_entry-totp-1')),
-          findsOneWidget);
+      expect(
+        find.byKey(const Key('detail_totp_card_entry-totp-1')),
+        findsOneWidget,
+      );
       expect(find.byKey(const Key('detail_totp_code')), findsOneWidget);
       expect(find.byKey(const Key('detail_totp_countdown')), findsOneWidget);
       expect(find.byKey(const Key('detail_copy_totp_button')), findsOneWidget);
 
-      // Tap copy 2FA button and verify SnackBar
+      // Tap copy 2FA button and verify clipboard was set with 6-digit code
       await tester.tap(find.byKey(const Key('detail_copy_totp_button')));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-      expect(find.byType(SnackBar), findsOneWidget);
+      expect(clipboardAdapter.currentText, isNotNull);
+      expect(clipboardAdapter.currentText!.length, equals(6));
     },
   );
 
