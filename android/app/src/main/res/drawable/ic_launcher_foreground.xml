@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Outer Security Shield -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M54,20 L78,28 C78,52 68,72 54,84 C40,72 30,52 30,28 Z"/>
+    <!-- Inner Leaf / Keyhole Accent -->
+    <path
+        android:fillColor="#0D1117"
+        android:pathData="M54,34 C58.4,34 62,37.6 62,42 C62,45.2 60.1,47.9 57.3,49.2 L59,62 L49,62 L50.7,49.2 C47.9,47.9 46,45.2 46,42 C46,37.6 49.6,34 54,34 Z"/>
+</vector>
