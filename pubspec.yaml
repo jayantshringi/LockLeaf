@@ -1,7 +1,10 @@
 name: lockleaf
 description: "A zero-knowledge password manager engineered for privacy, security, and simplicity."
+homepage: "https://github.com/jayantshringi/LockLeaf"
+repository: "https://github.com/jayantshringi/LockLeaf"
+issue_tracker: "https://github.com/jayantshringi/LockLeaf/issues"
 publish_to: "none"
-version: 0.1.0+1
+version: 1.0.0+1
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
