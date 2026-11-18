@@ -75,9 +75,11 @@ jobs:
           mkdir -p /tmp/lockleaf_android_bak
           cp android/app/build.gradle /tmp/lockleaf_android_bak/build.gradle
           cp android/app/src/main/AndroidManifest.xml /tmp/lockleaf_android_bak/AndroidManifest.xml
+          cp android/settings.gradle /tmp/lockleaf_android_bak/settings.gradle
           flutter create --platforms=android .
           cp /tmp/lockleaf_android_bak/build.gradle android/app/build.gradle
           cp /tmp/lockleaf_android_bak/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+          cp /tmp/lockleaf_android_bak/settings.gradle android/settings.gradle
 
       - name: Build Android Release APK
         shell: bash
