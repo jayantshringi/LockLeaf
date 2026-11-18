@@ -70,7 +70,13 @@ jobs:
           fi
 
       - name: Build Android Release APK
-        run: flutter build apk --release
+        shell: bash
+        run: |
+          set +e
+          OUTPUT=$(flutter build apk --release 2>&1)
+          EXIT_CODE=$?
+          echo "$OUTPUT"
+          exit $EXIT_CODE
 
       - name: Upload Android Release APK
         uses: actions/upload-artifact@v4
