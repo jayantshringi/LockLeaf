@@ -5,21 +5,28 @@ on:
     branches: [ main, 'phase-*' ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   analyze_and_test:
-    name: Lint, Analyze & Test
+    name: Lint, Analyze, Test & Build Android APK
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Set up Flutter SDK
         uses: subosito/flutter-action@v2
@@ -61,3 +68,13 @@ jobs:
           if [ $EXIT_CODE -ne 0 ]; then
             python3 .github/scripts/report_test_failures.py test_output.log $EXIT_CODE
           fi
+
+      - name: Build Android Release APK
+        run: flutter build apk --release
+
+      - name: Upload Android Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: LockLeaf-Android-Release-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error

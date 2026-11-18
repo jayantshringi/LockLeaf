@@ -1,0 +1,71 @@
+name: LockLeaf GitHub Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name to release (e.g. v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build_and_release:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run test suite
+        run: flutter test
+
+      - name: Build Android Release APK
+        run: flutter build apk --release
+
+      - name: Prepare Release Artifacts
+        id: prep
+        run: |
+          TAG="${{ github.event.inputs.tag_name || github.ref_name }}"
+          echo "RELEASE_TAG=$TAG" >> $GITHUB_ENV
+          mkdir -p release_assets
+          cp build/app/outputs/flutter-apk/app-release.apk release_assets/LockLeaf-$TAG.apk
+          cd release_assets
+          sha256sum LockLeaf-$TAG.apk > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: LockLeaf ${{ env.RELEASE_TAG }} Production Release
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            release_assets/LockLeaf-${{ env.RELEASE_TAG }}.apk
+            release_assets/SHA256SUMS.txt
