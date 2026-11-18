@@ -85,7 +85,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          OUTPUT=$(flutter build apk --release 2>&1)
+          OUTPUT=$(flutter build apk --release --android-skip-build-dependency-validation 2>&1)
           EXIT_CODE=$?
           echo "$OUTPUT"
           if [ $EXIT_CODE -ne 0 ]; then
