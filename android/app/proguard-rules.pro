@@ -27,3 +27,7 @@
 
 # General attributes preservation for type-safe reflection
 -keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
+
+# Flutter deferred components & Play Core warnings
+-dontwarn com.google.android.play.core.**
+-dontwarn io.flutter.embedding.engine.deferredcomponents.**
