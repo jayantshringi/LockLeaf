@@ -69,6 +69,16 @@ jobs:
             python3 .github/scripts/report_test_failures.py test_output.log $EXIT_CODE
           fi
 
+      - name: Ensure Android platform files
+        shell: bash
+        run: |
+          mkdir -p /tmp/lockleaf_android_bak
+          cp android/app/build.gradle /tmp/lockleaf_android_bak/build.gradle
+          cp android/app/src/main/AndroidManifest.xml /tmp/lockleaf_android_bak/AndroidManifest.xml
+          flutter create --platforms=android .
+          cp /tmp/lockleaf_android_bak/build.gradle android/app/build.gradle
+          cp /tmp/lockleaf_android_bak/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+
       - name: Build Android Release APK
         shell: bash
         run: |
@@ -76,7 +86,11 @@ jobs:
           OUTPUT=$(flutter build apk --release 2>&1)
           EXIT_CODE=$?
           echo "$OUTPUT"
-          exit $EXIT_CODE
+          if [ $EXIT_CODE -ne 0 ]; then
+            CLEAN_OUTPUT=$(echo "$OUTPUT" | tail -n 25 | tr '\r\n' '  ')
+            echo "::error title=Android Build Failure::$CLEAN_OUTPUT"
+            exit $EXIT_CODE
+          fi
 
       - name: Upload Android Release APK
         uses: actions/upload-artifact@v4
