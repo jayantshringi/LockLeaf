@@ -25,7 +25,7 @@ dependencies:
   path: ^1.9.0
 
   # Biometric authentication
-  local_auth: ^2.2.0
+  local_auth: ^3.0.2
 
   # Cryptographically unique entity IDs
   uuid: ^4.3.3
