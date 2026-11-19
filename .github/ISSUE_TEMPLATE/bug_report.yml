@@ -1,0 +1,45 @@
+name: Bug Report
+description: Report a reproducible software defect or crash in LockLeaf.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug. If you are reporting a security vulnerability or potential data leak, please use [Private Vulnerability Reporting](https://github.com/jayantshringi/LockLeaf/security/advisories/new) instead.
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Detailed steps to reproduce the issue.
+      placeholder: |
+        1. Open LockLeaf
+        2. Tap on ...
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Device & Environment
+      description: Android version, device model, LockLeaf version, and APK architecture (e.g., Pixel 7, Android 14, LockLeaf v1.0.0 arm64-v8a).
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs or Screenshots
+      description: Do NOT paste any master passwords, recovery keys, or secret tokens.
