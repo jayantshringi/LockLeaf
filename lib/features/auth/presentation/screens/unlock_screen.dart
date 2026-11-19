@@ -137,10 +137,13 @@ class _UnlockScreenState extends State<UnlockScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Icon(
-                        Icons.lock_outline,
-                        size: 72,
-                        color: AppTheme.primaryGreen,
+                      Center(
+                        child: Image.asset(
+                          'assets/lockleaf-icon.png',
+                          width: 72,
+                          height: 72,
+                          semanticLabel: 'LockLeaf logo',
+                        ),
                       ),
                       const SizedBox(height: 16),
                       Text(

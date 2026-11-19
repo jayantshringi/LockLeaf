@@ -104,6 +104,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           padding: const EdgeInsets.all(24.0),
           child: Column(
             children: [
+              Center(
+                child: Image.asset(
+                  'assets/lockleaf-icon.png',
+                  width: 64,
+                  height: 64,
+                  semanticLabel: 'LockLeaf logo',
+                ),
+              ),
+              const SizedBox(height: 16),
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,
