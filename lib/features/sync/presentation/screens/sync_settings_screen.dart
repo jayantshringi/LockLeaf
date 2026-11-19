@@ -255,7 +255,9 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
                               return null;
                             }
                             try {
-                              RestSyncTransport.validateAndParseServerUrl(value);
+                              RestSyncTransport.validateAndParseServerUrl(
+                                value,
+                              );
                               return null;
                             } on ValidationException catch (e) {
                               return e.message;
