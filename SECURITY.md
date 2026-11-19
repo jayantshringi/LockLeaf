@@ -2,16 +2,16 @@
 
 ## 🔒 Zero-Knowledge Guarantee
 
-LockLeaf is designed from the ground up under a strict **Zero-Knowledge Architecture**:
+LockLeaf is designed under a strict **Zero-Knowledge Architecture**:
 - All cryptographic key derivation and data encryption/decryption happen exclusively on the user's client device.
-- The master password is never transmitted, stored in plaintext, or saved into memory dumps.
-- Server backends and synchronization endpoints receive exclusively authenticated ciphertext blobs.
+- The master password is never transmitted across the network, never stored in plaintext, and never logged.
+- Server backends and synchronization endpoints receive and store only authenticated ciphertext envelopes and encrypted sync records.
 
 ---
 
 ## 🛡️ Supported Versions
 
-Only the latest active release and current development branch receive security updates:
+Only the latest active release receives security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -22,17 +22,17 @@ Only the latest active release and current development branch receive security u
 
 ## 🚨 Reporting a Vulnerability
 
-We take the security of LockLeaf very seriously. If you believe you have discovered a security vulnerability or cryptographic weakness:
+We take the security and integrity of LockLeaf very seriously. If you believe you have discovered a security vulnerability, cryptographic weakness, or unintended exposure:
 
-1. **Do NOT open a public GitHub issue.**
-2. Send a detailed report via encrypted email to `localeaf.support@gmail.com` (or file a private GitHub Advisory on the repository).
-3. Include the following details:
-   - Type of issue (e.g., KDF implementation flaw, AEAD nonce reuse, memory leak, side-channel vulnerability).
-   - Detailed proof of concept or reproduction steps.
-   - Any proposed mitigations or code patches.
+1. **Do NOT open a public GitHub issue.** Public issues disclose potential vulnerabilities before a fix is available to users.
+2. **Submit a Private Report via GitHub:**
+   Please use [GitHub Private Vulnerability Reporting](https://github.com/jayantshringi/LockLeaf/security/advisories/new) to submit your advisory directly and confidentially to the maintainer.
+3. Include the following information in your report:
+   - Type of issue (e.g., KDF configuration flaw, AEAD nonce reuse, memory zeroization failure, side-channel leak, authentication bypass).
+   - Detailed proof of concept, reproduction steps, or affected code references.
+   - Any proposed mitigations or patch suggestions if available.
 
-### Response Timelines
-- **Initial acknowledgment**: Within 24 hours.
-- **Triage and severity assessment**: Within 72 hours.
-- **Remediation release**: We strive to ship security patches within 7 business days depending on complexity.
-- **Coordinated Disclosure**: We request a 90-day embargo period prior to public disclosure to allow users time to update their applications.
+### Responsible Disclosure & Response Targets
+- **Initial Acknowledgment:** Within **3 business days**.
+- **Triage & Severity Assessment:** Within **10 business days**.
+- **Coordinated Disclosure:** We request a coordinated disclosure embargo of up to **90 days** from initial report to allow adequate time to validate the fix, issue an update on GitHub Releases, and give sideloading users time to update their installations.
