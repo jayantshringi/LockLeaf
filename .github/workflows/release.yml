@@ -32,13 +32,13 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Java JDK
-        uses: actions/setup-java@3a4f6e1af504cf6f318cfebc8ce0c98d7903b573 # v4.6.0
+        uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4.7.0
         with:
           distribution: 'temurin'
           java-version: '17'
 
       - name: Set up Flutter SDK
-        uses: subosito/flutter-action@f0d5f206b0d1eef81f280e227ea4958de2af6f14 # v2.18.0
+        uses: subosito/flutter-action@f2c4f6686ca8e8d6e6d0f28410eeef506ed66aff # v2.18.0
         with:
           channel: 'stable'
           cache: true
@@ -134,7 +134,7 @@ jobs:
           fi
 
       - name: Upload Debug Symbols (Private Workflow Artifact)
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf88e # v4.4.3
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with:
           name: lockleaf-release-symbols
           path: build/symbols
@@ -211,7 +211,7 @@ jobs:
           sha256sum -c SHA256SUMS.txt
 
       - name: Generate Build Provenance Attestation
-        uses: actions/attest-build-provenance@1187425b0981977759d57a911a37c353a2a704a4 # v1.4.3
+        uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c # v1.4.3
         with:
           subject-path: |
             release_assets/LockLeaf-${{ env.RELEASE_TAG }}-arm64-v8a.apk
@@ -261,7 +261,7 @@ jobs:
           EOF
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@c95fe148c306fe63fda57f495f8a0fc4309c0f99 # v2.2.1
+        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           name: LockLeaf ${{ env.RELEASE_TAG }}
