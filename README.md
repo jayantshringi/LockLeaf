@@ -1,6 +1,6 @@
 # LockLeaf 🍃
 
-LockLeaf is a modern, production-grade, zero-knowledge password manager engineered for uncompromising security, high usability, and complete privacy across Android, iOS, and desktop platforms.
+LockLeaf is a modern, production-grade, zero-knowledge password manager engineered for uncompromising security, high usability, and complete privacy for Android.
 
 ---
 
@@ -24,7 +24,7 @@ LockLeaf operates under a strict **Zero-Knowledge Architecture**:
 |                               |                                     |             |
 |                               v                                     v             |
 |                  [ Database & Sync Subkeys ]               [ Hardware Keystore ]  |
-|                               |                            (Android / iOS Biometrics)
+|                               |                            (Android Biometrics)   |
 |                               v                                                   |
 |             [ Authenticated Encryption (AEAD) ]                                   |
 |                (XChaCha20-Poly1305 / AES-256-GCM)                                 |
@@ -46,7 +46,7 @@ LockLeaf operates under a strict **Zero-Knowledge Architecture**:
 1. **Master Password Never Leaves the Device**: The master password is never stored on disk, never logged, and never transmitted over the network.
 2. **Memory-Hard Key Derivation**: Master keys are derived on-device using **Argon2id** (64 MiB memory, 3 iterations, 4 lanes), offering high resistance against GPU, ASIC, and distributed brute-force attacks.
 3. **Authenticated Encryption with Associated Data (AEAD)**: Every item payload is protected using authenticated encryption (**XChaCha20-Poly1305** or **AES-256-GCM**) with unique 192-bit / 96-bit cryptographic nonces.
-4. **Hardware-Backed Biometric Vault**: On supported devices, biometrics (Face ID, Touch ID, Fingerprint) gate a hardware-backed AES-256 Data Encryption Key (DEK) secured within Android Keystore or iOS Keychain.
+4. **Hardware-Backed Biometric Vault**: On supported devices, biometrics (Fingerprint, Face Unlock) gate a hardware-backed AES-256 Data Encryption Key (DEK) secured within the Android Keystore.
 5. **Anti-Brute-Force Protection**: Built-in exponential backoff rate limiting locks out authentication attempts after 5 consecutive failures (60s to 15m).
 6. **In-Memory Zeroization**: Plaintext credentials and intermediate cryptographic keys are scrubbed immediately from RAM upon completion.
 
@@ -72,11 +72,12 @@ LockLeaf operates under a strict **Zero-Knowledge Architecture**:
 
 ## 📱 Technology Stack
 
+- **Target Platform**: Android (API 23+ / Android 6.0 through Android 15)
 - **Framework**: Flutter 3.19+ / Dart 3.3+
 - **Cryptographic Primitives**: `package:cryptography` (Argon2id, XChaCha20-Poly1305, AES-256-GCM, HKDF, HMAC)
-- **Secure Key Storage**: `package:flutter_secure_storage` (Android Keystore / iOS Keychain)
+- **Secure Key Storage**: `package:flutter_secure_storage` (Android Keystore)
 - **Local Persistence**: `package:sqflite`
-- **Biometric Integration**: `package:local_auth` (AndroidX Biometrics / LocalAuthentication)
+- **Biometric Integration**: `package:local_auth` (AndroidX Biometrics)
 
 ---
 
@@ -86,7 +87,7 @@ LockLeaf operates under a strict **Zero-Knowledge Architecture**:
 
 - Flutter SDK `^3.19.0`
 - Dart SDK `^3.3.0`
-- Android Studio / Android SDK (API 34) or Xcode 15+
+- Android Studio / Android SDK (API 34+)
 
 ### Installation & Execution
 
@@ -111,14 +112,11 @@ flutter run
 ### Production Release Builds
 
 ```bash
-# Android App Bundle (AAB) for Google Play
-flutter build appbundle --release
-
-# Android APK for direct distribution
+# Android APK for direct GitHub distribution
 flutter build apk --release
 
-# iOS Release Archive
-flutter build ipa --release
+# Android App Bundle (AAB) for Google Play Store
+flutter build appbundle --release
 ```
 
 ---

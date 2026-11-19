@@ -94,9 +94,15 @@ jobs:
             exit $EXIT_CODE
           fi
 
+      - name: Prepare Android Release APK
+        shell: bash
+        run: |
+          mkdir -p build/app/outputs/flutter-apk/release-dist
+          cp "build/app/outputs/flutter-apk/app-release.apk" "build/app/outputs/flutter-apk/release-dist/Lock Leaf.apk"
+
       - name: Upload Android Release APK
         uses: actions/upload-artifact@v4
         with:
           name: LockLeaf-Android-Release-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/release-dist/Lock Leaf.apk
           if-no-files-found: error
