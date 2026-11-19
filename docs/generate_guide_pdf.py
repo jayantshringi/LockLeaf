@@ -69,7 +69,11 @@ class NumberedCanvas(canvas.Canvas):
             self.drawRightString(572, 30, page_text)
             self.restoreState()
 
-def build_pdf(filename='LockLeaf_Production_And_Publishing_Guide.pdf'):
+DOCS_DIR = os.path.dirname(os.path.abspath(__file__))
+
+def build_pdf(filename=None):
+    if filename is None:
+        filename = os.path.join(DOCS_DIR, 'LockLeaf_Production_And_Publishing_Guide.pdf')
     pdf_path = os.path.abspath(filename)
     
     # 0.75 inch (54 pt) margins on 612 x 792 pt Letter page. Printable width = 504 pt.
