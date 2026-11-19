@@ -40,7 +40,15 @@ jobs:
         run: flutter pub get
 
       - name: Verify code formatting
-        run: dart format --output=none --set-exit-if-changed .
+        run: |
+          set +e
+          OUTPUT=$(dart format --output=none --set-exit-if-changed . 2>&1)
+          EXIT_CODE=$?
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error title=Code Formatting Needed::The following files require formatting:"
+            dart format --output=none --show=all .
+            exit $EXIT_CODE
+          fi
 
       - name: Run static analysis
         run: flutter analyze --fatal-warnings
