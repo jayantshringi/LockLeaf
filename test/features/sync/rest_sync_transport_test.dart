@@ -13,15 +13,18 @@ void main() {
         expect(uri.host, 'sync.lockleaf.org');
       });
 
-      test('accepts valid https URLs with path, port, and trailing slashes', () {
-        final uri = RestSyncTransport.validateAndParseServerUrl(
-          'https://api.example.com:8443/vault/sync///',
-        );
-        expect(uri.scheme, 'https');
-        expect(uri.host, 'api.example.com');
-        expect(uri.port, 8443);
-        expect(uri.path, '/vault/sync');
-      });
+      test(
+        'accepts valid https URLs with path, port, and trailing slashes',
+        () {
+          final uri = RestSyncTransport.validateAndParseServerUrl(
+            'https://api.example.com:8443/vault/sync///',
+          );
+          expect(uri.scheme, 'https');
+          expect(uri.host, 'api.example.com');
+          expect(uri.port, 8443);
+          expect(uri.path, '/vault/sync');
+        },
+      );
 
       test('constructs RestSyncTransport with valid https URL', () {
         final transport = RestSyncTransport(
@@ -74,7 +77,10 @@ void main() {
             isA<ValidationException>().having(
               (e) => e.message,
               'message',
-              contains('Cleartext HTTP is only permitted on local addresses in debug mode'),
+              contains(
+                'Cleartext HTTP is only permitted on local '
+                'addresses in debug mode',
+              ),
             ),
           ),
         );
@@ -88,7 +94,10 @@ void main() {
             isA<ValidationException>().having(
               (e) => e.message,
               'message',
-              contains('Cleartext HTTP is only permitted on local addresses in debug mode'),
+              contains(
+                'Cleartext HTTP is only permitted on local '
+                'addresses in debug mode',
+              ),
             ),
           ),
         );
@@ -102,7 +111,10 @@ void main() {
             isA<ValidationException>().having(
               (e) => e.message,
               'message',
-              contains('Cleartext HTTP is only permitted on local addresses in debug mode'),
+              contains(
+                'Cleartext HTTP is only permitted on local '
+                'addresses in debug mode',
+              ),
             ),
           ),
         );
@@ -166,7 +178,9 @@ void main() {
 
       test('rejects non-HTTP schemes like ftp or ws', () {
         expect(
-          () => RestSyncTransport.validateAndParseServerUrl('ftp://example.com/file'),
+          () => RestSyncTransport.validateAndParseServerUrl(
+            'ftp://example.com/file',
+          ),
           throwsA(
             isA<ValidationException>().having(
               (e) => e.message,
@@ -176,7 +190,9 @@ void main() {
           ),
         );
         expect(
-          () => RestSyncTransport.validateAndParseServerUrl('ws://example.com/socket'),
+          () => RestSyncTransport.validateAndParseServerUrl(
+            'ws://example.com/socket',
+          ),
           throwsA(isA<ValidationException>()),
         );
       });

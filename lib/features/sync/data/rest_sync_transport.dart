@@ -27,7 +27,10 @@ class RestSyncTransport implements CloudSyncTransport {
     String? apiToken,
     HttpClient Function()? clientFactory,
     bool isDebugMode = kDebugMode,
-  })  : _baseUri = validateAndParseServerUrl(serverUrl, isDebugMode: isDebugMode),
+  })  : _baseUri = validateAndParseServerUrl(
+          serverUrl,
+          isDebugMode: isDebugMode,
+        ),
         _apiToken = apiToken?.trim().isEmpty ?? true ? null : apiToken!.trim(),
         _clientFactory = clientFactory ?? (() => HttpClient());
 
