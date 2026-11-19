@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lockleaf/core/errors/app_exception.dart';
 import 'package:lockleaf/core/theme/app_theme.dart';
 import 'package:lockleaf/features/auth/presentation/widgets/secret_text_field.dart';
 import 'package:lockleaf/features/sync/data/rest_sync_transport.dart';
@@ -53,21 +54,37 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
       _connectionTestResult = null;
     });
 
-    final testTransport = RestSyncTransport(
-      serverUrl: url,
-      apiToken: _apiTokenController.text.trim().isEmpty
-          ? null
-          : _apiTokenController.text.trim(),
-    );
+    try {
+      final testTransport = RestSyncTransport(
+        serverUrl: url,
+        apiToken: _apiTokenController.text.trim().isEmpty
+            ? null
+            : _apiTokenController.text.trim(),
+      );
 
-    final ok = await testTransport.checkHealth();
-    if (mounted) {
-      setState(() {
-        _testingConnection = false;
-        _connectionTestResult = ok
-            ? 'Connected successfully to sync server.'
-            : 'Unable to reach sync server. Check URL and connection.';
-      });
+      final ok = await testTransport.checkHealth();
+      if (mounted) {
+        setState(() {
+          _testingConnection = false;
+          _connectionTestResult = ok
+              ? 'Connected successfully to sync server.'
+              : 'Unable to reach sync server. Check URL and connection.';
+        });
+      }
+    } on ValidationException catch (e) {
+      if (mounted) {
+        setState(() {
+          _testingConnection = false;
+          _connectionTestResult = e.message;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _testingConnection = false;
+          _connectionTestResult = 'Connection failed: $e';
+        });
+      }
     }
   }
 
@@ -231,6 +248,21 @@ class _SyncSettingsScreenState extends State<SyncSettingsScreen> {
                         TextFormField(
                           key: const Key('sync_server_url_field'),
                           controller: _serverUrlController,
+                          keyboardType: TextInputType.url,
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return null;
+                            }
+                            try {
+                              RestSyncTransport.validateAndParseServerUrl(value);
+                              return null;
+                            } on ValidationException catch (e) {
+                              return e.message;
+                            } catch (_) {
+                              return 'Invalid server URL format.';
+                            }
+                          },
                           decoration: const InputDecoration(
                             labelText: 'Server URL',
                             hintText: 'https://sync.example.com',

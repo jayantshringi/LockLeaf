@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:lockleaf/core/errors/app_exception.dart';
 import 'package:lockleaf/features/sync/data/cloud_sync_transport.dart';
 import 'package:lockleaf/features/sync/domain/encrypted_sync_record.dart';
@@ -11,6 +12,12 @@ class RestSyncTransport implements CloudSyncTransport {
   @override
   final String name = 'LockLeaf REST Server';
 
+  static const Set<String> _allowedLocalHttpHosts = {
+    'localhost',
+    '127.0.0.1',
+    '10.0.2.2',
+  };
+
   final Uri _baseUri;
   final String? _apiToken;
   final HttpClient Function() _clientFactory;
@@ -19,9 +26,64 @@ class RestSyncTransport implements CloudSyncTransport {
     required String serverUrl,
     String? apiToken,
     HttpClient Function()? clientFactory,
-  })  : _baseUri = Uri.parse(serverUrl.trim().replaceAll(RegExp(r'/+$'), '')),
+    bool isDebugMode = kDebugMode,
+  })  : _baseUri = validateAndParseServerUrl(serverUrl, isDebugMode: isDebugMode),
         _apiToken = apiToken?.trim().isEmpty ?? true ? null : apiToken!.trim(),
         _clientFactory = clientFactory ?? (() => HttpClient());
+
+  /// Validates and parses a sync server URL according to strict security rules:
+  ///
+  /// - Enforce HTTPS for all remote sync connections.
+  /// - Allow cleartext HTTP exclusively for `localhost`, `127.0.0.1`, and `10.0.2.2`
+  ///   and ONLY when in debug mode.
+  /// - Reject embedded credentials (`userInfo`).
+  /// - Reject malformed URLs.
+  static Uri validateAndParseServerUrl(
+    String serverUrl, {
+    bool isDebugMode = kDebugMode,
+  }) {
+    final trimmed = serverUrl.trim().replaceAll(RegExp(r'/+$'), '');
+    if (trimmed.isEmpty) {
+      throw const ValidationException('Server URL cannot be empty.');
+    }
+
+    final uri = Uri.tryParse(trimmed);
+    if (uri == null || !uri.hasScheme || uri.host.isEmpty) {
+      throw const ValidationException('Invalid sync server URL format.');
+    }
+
+    if (uri.userInfo.isNotEmpty) {
+      throw const ValidationException(
+        'Sync server URL must not contain embedded user credentials.',
+      );
+    }
+
+    final scheme = uri.scheme.toLowerCase();
+    final host = uri.host.toLowerCase();
+
+    if (scheme == 'https') {
+      return uri;
+    }
+
+    if (scheme == 'http') {
+      final isLocal = _allowedLocalHttpHosts.contains(host);
+      if (isDebugMode && isLocal) {
+        return uri;
+      }
+      if (isLocal) {
+        throw const ValidationException(
+          'Cleartext HTTP is only permitted on local addresses in debug mode.',
+        );
+      }
+      throw const ValidationException(
+        'Insecure HTTP is forbidden. Sync server URL must use HTTPS.',
+      );
+    }
+
+    throw const ValidationException(
+      'Sync server URL scheme must be HTTPS.',
+    );
+  }
 
   @override
   Future<bool> checkHealth() async {
