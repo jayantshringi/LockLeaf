@@ -31,7 +31,7 @@ dependencies:
   uuid: ^4.3.3
 
   # Value equality
-  equatable: ^2.0.5
+  equatable: ^3.0.0
 
 dev_dependencies:
   flutter_test:
