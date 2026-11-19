@@ -1,6 +1,11 @@
 # LockLeaf 🍃
 
-LockLeaf is a modern, production-grade, zero-knowledge password manager engineered for uncompromising security, high usability, and complete privacy for Android.
+[![LockLeaf CI](https://github.com/jayantshringi/LockLeaf/actions/workflows/ci.yml/badge.svg)](https://github.com/jayantshringi/LockLeaf/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Flutter](https://img.shields.io/badge/Flutter-3.19+-02569B.svg?logo=flutter)](https://flutter.dev)
+[![Platform](https://img.shields.io/badge/Platform-Android%207.0%2B%20(API%2024%2B)-brightgreen.svg)](android)
+
+LockLeaf is a modern, zero-knowledge password manager engineered for privacy, security, and simplicity on Android.
 
 ---
 
@@ -58,7 +63,7 @@ LockLeaf operates under a strict **Zero-Knowledge Architecture**:
 - ⚡ **Biometric Fast Unlock**: Hardware-backed biometric authentication with auto-fallback to master password.
 - 🕒 **RFC 6238 / RFC 4226 2FA Authenticator**: Integrated two-factor authentication (TOTP) engine supporting HMAC-SHA-1, HMAC-SHA-256, HMAC-SHA-512, rolling 30s codes, and `otpauth://` URI parsing.
 - 🛡️ **Rate-Limiting & Lockout**: Exponential cooldown backoff protection against automated brute-force attacks.
-- 🔄 **Ciphertext-Only Cloud Sync**: Multi-device synchronization over REST with deterministic Last-Write-Wins (LWW) conflict resolution and cryptographic deletion tombstones.
+- 🔄 **Ciphertext-Only Cloud Sync**: Multi-device synchronization over HTTPS REST with deterministic Last-Write-Wins (LWW) conflict resolution and cryptographic deletion tombstones.
 - 💾 **Encrypted Portable Backups**: Export and restore password-protected authenticated `.llbak` archives.
 - 🔑 **Crockford Base32 Recovery Keys**: Modulo-37 checksummed offline emergency master password reset keys.
 - 🎲 **Security Tools**:
@@ -72,7 +77,7 @@ LockLeaf operates under a strict **Zero-Knowledge Architecture**:
 
 ## 📱 Technology Stack
 
-- **Target Platform**: Android (API 23+ / Android 6.0 through Android 15)
+- **Target Platform**: Android (API 24+ / Android 7.0 through Android 15)
 - **Framework**: Flutter 3.19+ / Dart 3.3+
 - **Cryptographic Primitives**: `package:cryptography` (Argon2id, XChaCha20-Poly1305, AES-256-GCM, HKDF, HMAC)
 - **Secure Key Storage**: `package:flutter_secure_storage` (Android Keystore)
@@ -81,15 +86,64 @@ LockLeaf operates under a strict **Zero-Knowledge Architecture**:
 
 ---
 
-## 🚀 Getting Started
+## 📦 Install & Verify
+
+LockLeaf is distributed exclusively through [GitHub Releases](https://github.com/jayantshringi/LockLeaf/releases). It is not distributed via Google Play Store. Because you are sideloading the application, verifying release integrity is strongly recommended.
+
+### 1. Select the Right APK for Your Device
+- **`LockLeaf-<TAG>-arm64-v8a.apk`**: Recommended for almost all modern Android phones and tablets (64-bit ARM).
+- **`LockLeaf-<TAG>-armeabi-v7a.apk`**: For older 32-bit Android phones.
+- **`LockLeaf-<TAG>-x86_64.apk`**: For Android emulators and x86_64 devices.
+
+### 2. Verify SHA-256 Checksums
+Download the APK and the matching `SHA256SUMS.txt` from the release page, then run:
+
+```bash
+sha256sum -c SHA256SUMS.txt
+```
+
+Ensure the output confirms `OK` for your chosen APK.
+
+### 3. Verify Signing Certificate
+All official LockLeaf release APKs are signed with the maintainer's production release key. You can inspect the signing certificate using Android's `apksigner` tool:
+
+```bash
+apksigner verify --print-certs LockLeaf-<TAG>-arm64-v8a.apk
+```
+
+**Expected Certificate SHA-256 Fingerprint:**
+```
+<PASTE FINGERPRINT AFTER FIRST RELEASE>
+```
+*(Verify that the printed SHA-256 digest matches the fingerprint published above and in the release notes).*
+
+### 4. Sideloading Notes
+- **"Install unknown apps" Prompt:** Android will ask for permission when installing an APK downloaded through your browser or a file manager. Open **Settings > Apps > Special app access > Install unknown apps** and enable permission for the app initiating the install.
+- **Google Play Protect Notice:** Because LockLeaf is distributed outside Google Play and signs releases with an independent developer key, Play Protect may present an "Unrecognized app" dialog on initial install. Tap **More details** and select **Install anyway**.
+
+### 5. Automatic Updates via Obtainium
+To receive automatic update notifications and install releases seamlessly, you can use [Obtainium](https://github.com/ImranR98/Obtainium):
+1. Install Obtainium on your Android device.
+2. Select **Add App** and enter the repository URL: `https://github.com/jayantshringi/LockLeaf`.
+3. Obtainium will track new GitHub releases, verify release assets, and prompt you whenever a new version is available.
+
+---
+
+## ⚠️ Limitations & Threat Model Assumptions
+
+- **Not Independently Audited:** LockLeaf employs vetted cryptographic standards (Argon2id, XChaCha20-Poly1305, AES-256-GCM) implemented by vetted libraries, but this software has **not been independently audited by a third-party security firm**. Review the code or use at your own discretion.
+- **Compromised Host Security:** If your host Android device is rooted, infected with kernel/OS-level malware, or actively compromised by an adversary with root or hardware debugging access, client-side encryption and memory zeroization cannot provide absolute security guarantees.
+- **Irrecoverability by Design:** LockLeaf has no backdoors and stores no keys on remote servers. If you lose your master password AND misplace your emergency recovery key, your vault data is permanently and mathematically unrecoverable.
+
+---
+
+## 🛠️ Building From Source
 
 ### Prerequisites
-
 - Flutter SDK `^3.19.0`
 - Dart SDK `^3.3.0`
 - Android Studio / Android SDK (API 34+)
-
-### Installation & Execution
+- JDK 17
 
 ```bash
 # Clone the repository
@@ -99,37 +153,23 @@ cd LockLeaf
 # Install dependencies
 flutter pub get
 
-# Run the test suite
+# Run test suite
 flutter test
 
 # Run static analysis
 flutter analyze
 
-# Launch in debug mode
-flutter run
+# Build release APKs (split per ABI)
+flutter build apk --release --split-per-abi
 ```
 
-### Production Release Builds
-
-```bash
-# Android APK for direct GitHub distribution
-flutter build apk --release
-
-# Android App Bundle (AAB) for Google Play Store
-flutter build appbundle --release
-```
+For release procedures and signing configurations, refer to [docs/RELEASING.md](docs/RELEASING.md).
 
 ---
 
-## 🛡️ Security Audit & Verification
+## 🤝 Contributing
 
-LockLeaf features a comprehensive test suite covering cryptographic primitives, state machines, conflict resolution, rate limiters, widget interactions, and memory zeroization.
-
-```bash
-flutter test --coverage
-```
-
-See [SECURITY.md](SECURITY.md) for our coordinated disclosure policy and vulnerability reporting instructions.
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on code style, cryptographic rules, and pull request guidelines.
 
 ---
 
