@@ -12,31 +12,80 @@ on:
         default: 'v1.0.0'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build_and_release:
-    name: Build & Publish Release
+    name: Build, Sign, Verify & Publish Release
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
+
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
 
       - name: Set up Java JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@3a4f6e1af504cf6f318cfebc8ce0c98d7903b573 # v4.6.0
         with:
           distribution: 'temurin'
           java-version: '17'
 
       - name: Set up Flutter SDK
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@f0d5f206b0d1eef81f280e227ea4958de2af6f14 # v2.18.0
         with:
           channel: 'stable'
           cache: true
+
+      - name: Resolve Release Tag
+        env:
+          INPUT_TAG: ${{ github.event.inputs.tag_name }}
+        run: |
+          if [ -n "$INPUT_TAG" ]; then
+            TAG="$INPUT_TAG"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "RELEASE_TAG=$TAG" >> "$GITHUB_ENV"
+          if [[ "$TAG" == *"-"* ]]; then
+            echo "IS_PRERELEASE=true" >> "$GITHUB_ENV"
+          else
+            echo "IS_PRERELEASE=false" >> "$GITHUB_ENV"
+          fi
+
+      - name: Configure Android Signing Credentials
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          MISSING=""
+          [ -z "$KEYSTORE_BASE64" ] && MISSING="$MISSING ANDROID_KEYSTORE_BASE64"
+          [ -z "$KEYSTORE_PASSWORD" ] && MISSING="$MISSING ANDROID_KEYSTORE_PASSWORD"
+          [ -z "$KEY_ALIAS" ] && MISSING="$MISSING ANDROID_KEY_ALIAS"
+          [ -z "$KEY_PASSWORD" ] && MISSING="$MISSING ANDROID_KEY_PASSWORD"
+
+          if [ -n "$MISSING" ]; then
+            echo "::error::Missing required signing secrets:$MISSING. Releases must be signed with a production keystore."
+            exit 1
+          fi
+
+          mkdir -p android/app
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/release-keystore.jks
+
+          cat <<EOF > android/key.properties
+          storeFile=release-keystore.jks
+          keyAlias=$KEY_ALIAS
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          EOF
 
       - name: Install dependencies
         run: flutter pub get
@@ -47,47 +96,180 @@ jobs:
       - name: Ensure Android platform files
         shell: bash
         run: |
+          # Preserve critical build and signing configurations
           mkdir -p /tmp/lockleaf_android_bak
           cp android/app/build.gradle /tmp/lockleaf_android_bak/build.gradle
           cp android/app/src/main/AndroidManifest.xml /tmp/lockleaf_android_bak/AndroidManifest.xml
           cp android/settings.gradle /tmp/lockleaf_android_bak/settings.gradle
+          if [ -f android/key.properties ]; then
+            cp android/key.properties /tmp/lockleaf_android_bak/key.properties
+          fi
+          if [ -f android/app/release-keystore.jks ]; then
+            cp android/app/release-keystore.jks /tmp/lockleaf_android_bak/release-keystore.jks
+          fi
+
           flutter create --platforms=android .
+
           cp /tmp/lockleaf_android_bak/build.gradle android/app/build.gradle
           cp /tmp/lockleaf_android_bak/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
           cp /tmp/lockleaf_android_bak/settings.gradle android/settings.gradle
+          if [ -f /tmp/lockleaf_android_bak/key.properties ]; then
+            cp /tmp/lockleaf_android_bak/key.properties android/key.properties
+          fi
+          if [ -f /tmp/lockleaf_android_bak/release-keystore.jks ]; then
+            cp /tmp/lockleaf_android_bak/release-keystore.jks android/app/release-keystore.jks
+          fi
 
-      - name: Build Android Release APK
+      - name: Build Android Release APKs (Split per ABI)
         shell: bash
         run: |
           set +e
-          OUTPUT=$(flutter build apk --release --android-skip-build-dependency-validation 2>&1)
+          OUTPUT=$(flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols --android-skip-build-dependency-validation 2>&1)
           EXIT_CODE=$?
           echo "$OUTPUT"
           if [ $EXIT_CODE -ne 0 ]; then
             CLEAN_OUTPUT=$(echo "$OUTPUT" | tail -n 25 | tr '\r\n' '  ')
-            echo "::error title=Android Build Failure::$CLEAN_OUTPUT"
+            echo "::error title=Android Release Build Failure::$CLEAN_OUTPUT"
             exit $EXIT_CODE
           fi
 
-      - name: Prepare Release Artifacts
-        id: prep
+      - name: Upload Debug Symbols (Private Workflow Artifact)
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf88e # v4.4.3
+        with:
+          name: lockleaf-release-symbols
+          path: build/symbols
+          retention-days: 30
+
+      - name: Verify APK Signatures & Extract Fingerprint
+        shell: bash
         run: |
-          TAG="${{ github.event.inputs.tag_name || github.ref_name }}"
-          echo "RELEASE_TAG=$TAG" >> $GITHUB_ENV
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)
+          if [ -z "$APKSIGNER" ] || [ ! -x "$APKSIGNER" ]; then
+            if command -v apksigner >/dev/null 2>&1; then
+              APKSIGNER="apksigner"
+            else
+              echo "::error::apksigner not found in ANDROID_HOME or PATH."
+              exit 1
+            fi
+          fi
+          echo "Using apksigner: $APKSIGNER"
+
+          APK_DIR="build/app/outputs/flutter-apk"
+          EXPECTED_ABIS=("arm64-v8a" "armeabi-v7a" "x86_64")
+          CAPTURED_FINGERPRINT=""
+
+          for abi in "${EXPECTED_ABIS[@]}"; do
+            apk_file="$APK_DIR/app-$abi-release.apk"
+            if [ ! -f "$apk_file" ]; then
+              echo "::error::Expected APK not found: $apk_file"
+              exit 1
+            fi
+
+            echo "Verifying signature for $apk_file..."
+            CERT_OUTPUT=$("$APKSIGNER" verify --print-certs "$apk_file")
+            echo "$CERT_OUTPUT"
+
+            if echo "$CERT_OUTPUT" | grep -qi "Android Debug"; then
+              echo "::error::APK $apk_file was signed with a debug certificate! Must be signed with the release keystore."
+              exit 1
+            fi
+
+            # Extract SHA-256 digest from certificate output
+            FP=$(echo "$CERT_OUTPUT" | grep -i "certificate SHA-256 digest:" | head -n 1 | awk '{print $NF}')
+            if [ -z "$FP" ]; then
+              echo "::error::Could not extract SHA-256 certificate digest from $apk_file"
+              exit 1
+            fi
+
+            if [ -z "$CAPTURED_FINGERPRINT" ]; then
+              CAPTURED_FINGERPRINT="$FP"
+            elif [ "$CAPTURED_FINGERPRINT" != "$FP" ]; then
+              echo "::error::Fingerprint mismatch across split APKs!"
+              exit 1
+            fi
+          done
+
+          echo "SIGNING_CERT_SHA256=$CAPTURED_FINGERPRINT" >> "$GITHUB_ENV"
+          echo "Verified release signature SHA-256: $CAPTURED_FINGERPRINT"
+
+      - name: Prepare Release Artifacts & Checksums
+        shell: bash
+        run: |
           mkdir -p release_assets
-          cp "build/app/outputs/flutter-apk/app-release.apk" "release_assets/Lock Leaf.apk"
+          APK_DIR="build/app/outputs/flutter-apk"
+
+          cp "$APK_DIR/app-arm64-v8a-release.apk" "release_assets/LockLeaf-${RELEASE_TAG}-arm64-v8a.apk"
+          cp "$APK_DIR/app-armeabi-v7a-release.apk" "release_assets/LockLeaf-${RELEASE_TAG}-armeabi-v7a.apk"
+          cp "$APK_DIR/app-x86_64-release.apk" "release_assets/LockLeaf-${RELEASE_TAG}-x86_64.apk"
+
           cd release_assets
-          sha256sum "Lock Leaf.apk" > SHA256SUMS.txt
+          sha256sum LockLeaf-*.apk > SHA256SUMS.txt
+          echo "Generated SHA256SUMS.txt:"
           cat SHA256SUMS.txt
 
+          echo "Validating SHA256SUMS.txt against final asset names..."
+          sha256sum -c SHA256SUMS.txt
+
+      - name: Generate Build Provenance Attestation
+        uses: actions/attest-build-provenance@1187425b0981977759d57a911a37c353a2a704a4 # v1.4.3
+        with:
+          subject-path: |
+            release_assets/LockLeaf-${{ env.RELEASE_TAG }}-arm64-v8a.apk
+            release_assets/LockLeaf-${{ env.RELEASE_TAG }}-armeabi-v7a.apk
+            release_assets/LockLeaf-${{ env.RELEASE_TAG }}-x86_64.apk
+            release_assets/SHA256SUMS.txt
+
+      - name: Format Release Notes
+        shell: bash
+        run: |
+          cat <<EOF > release_assets/RELEASE_NOTES.md
+          # LockLeaf ${RELEASE_TAG}
+
+          A zero-knowledge, local-first password manager engineered for privacy and security on Android.
+
+          ## Which APK should I install?
+          - **\`LockLeaf-${RELEASE_TAG}-arm64-v8a.apk\`**: For almost all modern Android phones and tablets (64-bit ARM, recommended).
+          - **\`LockLeaf-${RELEASE_TAG}-armeabi-v7a.apk\`**: For older 32-bit Android phones.
+          - **\`LockLeaf-${RELEASE_TAG}-x86_64.apk\`**: For Android emulators and x86_64 devices.
+
+          ## Verification & Integrity
+
+          ### 1. Verify File Checksums
+          Download \`SHA256SUMS.txt\` and run:
+          \`\`\`bash
+          sha256sum -c SHA256SUMS.txt
+          \`\`\`
+
+          ### 2. Verify APK Signing Certificate
+          Inspect the signing certificate on your downloaded APK:
+          \`\`\`bash
+          apksigner verify --print-certs LockLeaf-${RELEASE_TAG}-arm64-v8a.apk
+          \`\`\`
+          **Expected Signing Certificate SHA-256 Fingerprint:**
+          \`\`\`
+          ${SIGNING_CERT_SHA256}
+          \`\`\`
+
+          ### 3. GitHub Build Provenance (SLSA)
+          This build includes tamper-evident cryptographic provenance attestations generated by GitHub Actions. You can verify it with the GitHub CLI:
+          \`\`\`bash
+          gh attestation verify LockLeaf-${RELEASE_TAG}-arm64-v8a.apk --owner jayantshringi
+          \`\`\`
+
+          ---
+          > **Security Notice**: LockLeaf implements standard, vetted cryptographic primitives (Argon2id, XChaCha20-Poly1305, AES-256-GCM), but this software has **not been independently audited by a third-party security firm**. Use at your own discretion.
+          EOF
+
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@c95fe148c306fe63fda57f495f8a0fc4309c0f99 # v2.2.1
         with:
           tag_name: ${{ env.RELEASE_TAG }}
-          name: LockLeaf ${{ env.RELEASE_TAG }} Production Release
+          name: LockLeaf ${{ env.RELEASE_TAG }}
+          body_path: release_assets/RELEASE_NOTES.md
           draft: false
-          prerelease: false
-          generate_release_notes: true
+          prerelease: ${{ env.IS_PRERELEASE == 'true' }}
           files: |
-            release_assets/Lock Leaf.apk
+            release_assets/LockLeaf-${{ env.RELEASE_TAG }}-arm64-v8a.apk
+            release_assets/LockLeaf-${{ env.RELEASE_TAG }}-armeabi-v7a.apk
+            release_assets/LockLeaf-${{ env.RELEASE_TAG }}-x86_64.apk
             release_assets/SHA256SUMS.txt

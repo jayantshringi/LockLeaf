@@ -3,8 +3,10 @@ import re
 import subprocess
 from PIL import Image, ImageDraw
 
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
 def render_svg_to_png(chrome_path, html_content, output_png, width=512, height=512):
-    temp_html = os.path.abspath('temp_render.html')
+    temp_html = os.path.join(REPO_ROOT, 'temp_render.html')
     abs_output = os.path.abspath(output_png)
     
     with open(temp_html, 'w', encoding='utf-8') as f:
@@ -36,7 +38,7 @@ def make_round_icon(im):
 
 def main():
     chrome = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
-    svg_path = 'assets/lockleaf-icon.svg'
+    svg_path = os.path.join(REPO_ROOT, 'assets', 'lockleaf-icon.svg')
     
     with open(svg_path, 'r', encoding='utf-8') as f:
         svg_content = f.read()
@@ -79,7 +81,7 @@ def main():
 </body>
 </html>"""
     
-    fg_master_png = 'assets/temp_fg_master.png'
+    fg_master_png = os.path.join(REPO_ROOT, 'assets', 'temp_fg_master.png')
     print("Rendering adaptive foreground from SVG...")
     render_svg_to_png(chrome, html_fg, fg_master_png, 512, 512)
     
@@ -97,7 +99,7 @@ def main():
         'mipmap-xxxhdpi': (192, 432),
     }
     
-    res_base = 'android/app/src/main/res'
+    res_base = os.path.join(REPO_ROOT, 'android', 'app', 'src', 'main', 'res')
     
     for folder, (size, fg_size) in densities.items():
         dir_path = os.path.join(res_base, folder)
